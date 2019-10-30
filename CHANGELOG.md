@@ -1,4 +1,8 @@
-# Version 1.0.27
+# Version 1.0.28
+## 1.0.28 - Oct 30, 2019
+### Fix Issues
+- Fixed issue with missing type of argument in phpdoc. This caused a compilation error.
+
 ## 1.0.27 - Sep 17, 2019
 ### Fix Issues
 - Fixed buh with incorrect category data in product feed, when the active child category 
