@@ -58,8 +58,8 @@ class CronModalDataProvider extends AbstractDataProvider
      * @param AuthorizationInterface $authorization
      * @param RequestInterface $request
      * @param string $name
-     * @param $primaryFieldName
-     * @param $requestFieldName
+     * @param string $primaryFieldName
+     * @param string $requestFieldName
      * @param array $meta
      * @param array $data
      */

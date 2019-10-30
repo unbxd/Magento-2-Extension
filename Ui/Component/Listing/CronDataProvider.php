@@ -30,8 +30,8 @@ class CronDataProvider extends AbstractDataProvider
      * CronDataProvider constructor.
      * @param CollectionFactory $collectionFactory
      * @param string $name
-     * @param $primaryFieldName
-     * @param $requestFieldName
+     * @param string $primaryFieldName
+     * @param string $requestFieldName
      * @param array $meta
      * @param array $data
      */
