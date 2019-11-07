@@ -211,7 +211,7 @@ class CronManager
         $this->indexingQueueCollectionFactory = $indexingQueueCollectionFactory;
         $this->queueHandler = $queueHandler;
         $this->feedViewHandler = $feedViewHandler;
-        $this->cacheManagementFactory = $cacheManagerFactory;
+        $this->cacheManagerFactory = $cacheManagerFactory;
         $this->feedViewCollectionFactory = $feedViewCollectionFactory;
         $this->connectorFactory = $connectorFactory;
         $this->logger = $logger->create(OptionsListConstants::LOGGER_TYPE_INDEXING);

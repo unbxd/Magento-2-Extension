@@ -1,4 +1,8 @@
-# Version 1.0.28
+# Version 1.0.29
+## 1.0.29 - Nov 07, 2019
+### Fix Issues
+- Fixed factory name.
+
 ## 1.0.28 - Oct 30, 2019
 ### Fix Issues
 - Fixed issue with missing type of argument in phpdoc. This caused a compilation error.
