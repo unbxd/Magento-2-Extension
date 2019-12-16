@@ -43,11 +43,11 @@ class Data extends AbstractHelper
     /**
      * API endpoints
      */
-    const XML_PATH_FULL_FEED_API_ENDPOINT = 'unbxd_setup/general/api_endpoint/full';
-    const XML_PATH_INCREMENTAL_FEED_API_ENDPOINT = 'unbxd_setup/general/api_endpoint/incremental';
-    const XML_PATH_FULL_UPLOADED_STATUS = 'unbxd_setup/general/api_endpoint/full_uploaded_status';
-    const XML_PATH_INCREMENTAL_UPLOADED_STATUS = 'unbxd_setup/general/api_endpoint/incremental_uploaded_status';
-    const XML_PATH_UPLOADED_SIZE = 'unbxd_setup/general/api_endpoint/uploaded_size';
+    const XML_PATH_FULL_FEED_API_ENDPOINT = 'unbxd_setup/api_endpoints/full';
+    const XML_PATH_INCREMENTAL_FEED_API_ENDPOINT = 'unbxd_setup/api_endpoints/incremental';
+    const XML_PATH_FULL_UPLOADED_STATUS = 'unbxd_setup/api_endpoints/full_uploaded_status';
+    const XML_PATH_INCREMENTAL_UPLOADED_STATUS = 'unbxd_setup/api_endpoints/incremental_uploaded_status';
+    const XML_PATH_UPLOADED_SIZE = 'unbxd_setup/api_endpoints/uploaded_size';
 
     /**
      * catalog section

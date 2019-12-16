@@ -1,4 +1,8 @@
-# Version 1.0.29
+# Version 1.0.30
+## 1.0.30 - Dec 12, 2019
+### Improvements
+- Added the ability to setup API endpoints from backend.
+
 ## 1.0.29 - Nov 07, 2019
 ### Fix Issues
 - Fixed factory name.
