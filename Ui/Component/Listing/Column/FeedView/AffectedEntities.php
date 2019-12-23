@@ -24,6 +24,11 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 class AffectedEntities extends Column
 {
     /**
+     * Max links size for column
+     */
+    const MAX_LINKS = 30;
+
+    /**
      * @var UrlInterface
      */
     protected $urlBuilder;
@@ -70,7 +75,7 @@ class AffectedEntities extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as &$item) {
-                $item['affected_entities'] = $this->decorateCell($item['affected_entities']);
+                $item['affected_entities'] = $this->decorateCell($item['affected_entities'], $item['feed_id']);
             }
         }
 
@@ -81,7 +86,7 @@ class AffectedEntities extends Column
      * @param $value
      * @return string
      */
-    private function decorateCell($value)
+    private function decorateCell($value, $rowId)
     {
         // link on full catalog (by default)
         $cell = '<a href="' . $this->getUrl('catalog/product/index') .'" target="_blank">' . $value .'</a>';
@@ -98,7 +103,28 @@ class AffectedEntities extends Column
             }
 
             $cell = implode(', ', $links);
+            if (count($links) > self::MAX_LINKS) {
+                $cell = $this->formatCell($links, $rowId);
+            }
         }
+
+        return $cell;
+    }
+
+    /**
+     * @param $links
+     * @param $rowId
+     * @return string
+     */
+    private function formatCell(array $links, $rowId)
+    {
+        $viewDetailsUrl = $this->getUrl('unbxd_productfeed/feed_view/viewDetails', ['id' => $rowId]);
+
+        $links = array_slice($links, 0, self::MAX_LINKS);
+        $cell = implode(', ', $links);
+
+        $cell .= '...<br/>';
+        $cell .= '<a href="' . $viewDetailsUrl .'" target="_blank">' . __('See Entities Details') . '</a>';
 
         return $cell;
     }

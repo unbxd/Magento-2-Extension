@@ -13,6 +13,7 @@ namespace Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider;
 
 use Unbxd\ProductFeed\Model\Eav\Indexer\Full\DataSourceProvider\AbstractAttribute;
 use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
  * Data source used to append attributes data to product during indexing.
@@ -55,7 +56,7 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
             $childrenIndexData = $this->addAttributeData($storeId, $allChildrenIds);
 
             foreach ($childrenIndexData as $childrenId => $childrenData) {
-                $enabled = isset($childrenData['status']) && current($childrenData['status']) == 1;
+                $enabled = isset($childrenData['status']) && current($childrenData['status']) == Status::STATUS_ENABLED;
                 if ($enabled === false) {
                     unset($childrenIndexData[$childrenId]);
                 }
@@ -85,20 +86,19 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
     }
 
     /**
+     * Add fields for schema
+     *
      * @param $indexData
      * @return mixed
      */
     private function addIndexedFields($indexData)
     {
-        // add fields for schema
-        $allAttributeFields = $this->getFields();
-        $indexedAttributeFields = $this->getIndexedFields();
+        $allAttributeFields = $this->getFields(); // prepared attribute data for schema fields
+        $indexedAttributeFields = $this->getIndexedFields(); // indexed attribute codes as keys
         if (!empty($allAttributeFields) && !empty($indexedAttributeFields)) {
-            $fields = array_key_exists('fields', $indexData) ? $indexData['fields'] : [];
-            $indexData['fields'] = array_merge(
-                $fields,
-                array_intersect_key($allAttributeFields, $indexedAttributeFields)
-            );
+            $alreadyExistFields = array_key_exists('fields', $indexData) ? $indexData['fields'] : [];
+            $schemaFields = array_intersect_key($allAttributeFields, $indexedAttributeFields);
+            $indexData['fields'] = array_merge($alreadyExistFields, $allAttributeFields);
         }
 
         return $indexData;
@@ -117,23 +117,22 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
     {
         foreach ($this->attributeIdsByTable as $backendTable => $attributeIds) {
             $attributesData = $this->loadAttributesRawData($storeId, $productIds, $backendTable, $attributeIds);
-            foreach ($attributesData as $row) {
-                $productId = (int) $row['entity_id'];
-                $attribute = $this->attributesById[$row['attribute_id']];
-                $indexValues = $this->attributeHelper->prepareIndexValue($attribute, $storeId, $row['value']);
-                if (!isset($indexData[$productId])) {
-                    $indexData[$productId] = [];
-                }
+            if (!empty($attributesData)) {
+                foreach ($attributesData as $row) {
+                    $productId = (int) $row['entity_id'];
+                    $attribute = $this->attributesById[$row['attribute_id']];
+                    $indexValues = $this->attributeHelper->prepareIndexValue($attribute, $storeId, $row['value']);
+                    if (!isset($indexData[$productId])) {
+                        $indexData[$productId] = [];
+                    }
+                    $indexData[$productId] += $indexValues;
 
-                $indexData[$productId] += $indexValues;
+                    if (!isset($indexData[$productId]['indexed_attributes'])) {
+                        $indexData[$productId]['indexed_attributes'] = [];
+                    }
+                    $indexData[$productId]['indexed_attributes'][] = $attribute->getAttributeCode();
 
-                if (!isset($indexData[$productId]['indexed_attributes'])) {
-                    $indexData[$productId]['indexed_attributes'] = [];
-                }
-                $indexData[$productId]['indexed_attributes'][] = $attribute->getAttributeCode();
-
-                if (!array_key_exists($attribute->getAttributeCode(), $this->indexedFields) && !empty($indexValues)) {
-                    $this->indexedFields[$attribute->getAttributeCode()] = null;
+                    $this->setIndexedField($attribute->getAttributeCode());
                 }
             }
         }

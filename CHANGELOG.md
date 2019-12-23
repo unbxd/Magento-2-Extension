@@ -1,4 +1,10 @@
-# Version 1.0.30
+# Version 1.0.31
+## 1.0.31 - Dec 23, 2019
+### Improvements
+- Format 'Affected Entities' cell in indexing queue/feed view grids to prevent excessive display of information.
+### Fix Issues
+- Fixed issue when product attribute(s) sometimes are not included and not described in schema fields in feed (detected for EE).
+
 ## 1.0.30 - Dec 12, 2019
 ### Improvements
 - Added the ability to setup API endpoints from backend.
@@ -13,7 +19,7 @@
 
 ## 1.0.27 - Sep 17, 2019
 ### Fix Issues
-- Fixed buh with incorrect category data in product feed, when the active child category 
+- Fixed bug with incorrect category data in product feed, when the active child category 
 belongs to an inactive parent category. 
 
 ## 1.0.26 - Sep 17, 2019

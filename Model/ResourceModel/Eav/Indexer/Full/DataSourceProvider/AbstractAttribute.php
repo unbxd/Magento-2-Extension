@@ -90,7 +90,7 @@ class AbstractAttribute extends Indexer
         $joinStoreValuesConditionClauses = [
             "t_default.$linkField = t_store.$linkField",
             't_default.attribute_id = t_store.attribute_id',
-            't_store.store_id= ?',
+            't_store.store_id = ?',
         ];
 
         $joinStoreValuesCondition = $this->connection->quoteInto(
@@ -98,14 +98,17 @@ class AbstractAttribute extends Indexer
             $storeId
         );
 
-        $select->from(['entity' => $this->getEntityMetaData($this->getEntityTypeId())->getEntityTable()], [$entityIdField])
+        $select->from(
+            ['entity' => $this->getEntityMetaData($this->getEntityTypeId())->getEntityTable()],
+            [$entityIdField]
+            )
             ->joinInner(
                 ['t_default' => $tableName],
                 new \Zend_Db_Expr("entity.{$linkField} = t_default.{$linkField}"),
                 ['attribute_id']
             )
             ->joinLeft(['t_store' => $tableName], $joinStoreValuesCondition, [])
-            ->where('t_default.store_id=?', 0)
+            ->where('t_default.store_id = ?', 0)
             ->where('t_default.attribute_id IN (?)', $attributeIds)
             ->where("entity.{$entityIdField} IN (?)", $entityIds)
             ->columns(['value' => new \Zend_Db_Expr('COALESCE(t_store.value, t_default.value)')]);

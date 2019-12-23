@@ -102,7 +102,7 @@ abstract class AbstractAttribute
     /**
      * List of fields generated from the attributes list.
      *
-     * {@inheritdoc}
+     * @return array
      */
     public function getFields()
     {
@@ -110,13 +110,38 @@ abstract class AbstractAttribute
     }
 
     /**
+     * Set field options generated from the attributes list.
+     *
+     * @param $field
+     * @param array $options
+     */
+    public function setField($field, $options = [])
+    {
+        if (!array_key_exists($field, $this->getFields())) {
+            $this->fields[$field] = $options;
+        }
+    }
+
+    /**
      * List of indexed fields generated from the attributes list.
      *
-     * {@inheritdoc}
+     * @return array
      */
     public function getIndexedFields()
     {
         return $this->indexedFields;
+    }
+
+    /**
+     * Set indexed field generated from the attributes list.
+     *
+     * @param $field
+     */
+    public function setIndexedField($field)
+    {
+        if (!array_key_exists($field, $this->getIndexedFields())) {
+            $this->indexedFields[$field] = null;
+        }
     }
 
     /**
@@ -162,21 +187,16 @@ abstract class AbstractAttribute
                     $this->attributesByCode[$attributeCode] = $attribute;
                     // collect attributes fields (use in feed operation)
                     $this->initFields($attribute);
-                }
-                // add default attributes to indexed fields
-                if (!array_key_exists($attributeCode, $this->indexedFields)) {
-                    // collect attributes fields (use in feed operation)
-                    $this->indexedFields[$attributeCode] = null;
+                    // add default attributes to indexed fields (use in feed operation)
+                    $this->setIndexedField($attributeCode);
                 }
             }
             // try detect fields which are not like attribute and collect theirs options
             $diffAttributes = array_diff_key(array_flip($attributesCodes), $this->attributesByCode);
             if (!empty($diffAttributes)) {
                 foreach ($diffAttributes as $fieldName => $value) {
-                    if (!array_key_exists($fieldName, $this->fields)) {
-                        // collect attributes fields (use in feed operation)
-                        $this->fields[$fieldName] = $this->attributeHelper->getSpecificFieldOptions($fieldName);
-                    }
+                    // collect attributes fields (use in feed operation)
+                    $this->setField($fieldName, $this->attributeHelper->getSpecificFieldOptions($fieldName));
                 }
             }
         }
@@ -216,7 +236,12 @@ abstract class AbstractAttribute
         $canIndex = ($attribute->getBackendType() != 'static')
             && ($attribute->getAttributeCode() !== 'price') && (bool) $attribute->getIncludeInUnbxdProductFeed();
         if ($canIndex && $attribute->getBackendModel()) {
-            $canIndex = in_array($attribute->getBackendModel(), $this->indexedBackendModels);
+            foreach ($this->indexedBackendModels as $indexedBackendModel) {
+                $canIndex = is_a($attribute->getBackendModel(), $indexedBackendModel, true);
+                if ($canIndex) {
+                    return $canIndex;
+                }
+            }
         }
 
         return $canIndex;
@@ -231,9 +256,7 @@ abstract class AbstractAttribute
     private function initFields(AttributeInterface $attribute)
     {
         $fieldName = $attribute->getAttributeCode();
-        if (!array_key_exists($fieldName, $this->fields)) {
-            $this->fields[$fieldName] = $this->attributeHelper->getFieldOptions($attribute);
-        }
+        $this->setField($fieldName, $this->attributeHelper->getFieldOptions($attribute));
 
         return $this;
     }

@@ -88,14 +88,13 @@ class Price implements DataSourceProviderInterface
             if (!in_array('price', $indexedFields)) {
                 $indexedFields[] = 'price';
             }
+            if (!in_array('original_price', $indexedFields)) {
+                $indexedFields[] = 'original_price';
+            }
 
             $includeOriginal = (bool) ($price != $originalPrice);
             if ($includeOriginal) {
                 $indexData[$productId]['original_price'] = $originalPrice;
-
-                if (!in_array('original_price', $indexedFields)) {
-                    $indexedFields[] = 'original_price';
-                }
             }
             if (!isset($indexData[$productId]['indexed_attributes'])) {
                 $indexData[$productId]['indexed_attributes'] = ['price'];
