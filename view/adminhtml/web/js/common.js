@@ -32,7 +32,8 @@ define([
             formKey: '',
             triggers: {
                 checkCron: 'unbxd_check_cron',
-                fullSync: 'unbxd_full_sync'
+                fullSync: 'unbxd_full_sync',
+                generateProductFeed: 'unbxd_generate_product_feed'
             },
             params: {
                 'isAjax': true
@@ -48,7 +49,7 @@ define([
             var self = this;
 
             this._super();
-            managerAction.registerCallback(function (data) {
+            actionManager.registerCallback(function (data) {
 
             });
 
@@ -63,6 +64,8 @@ define([
                 .on('click', $.proxy(this._checkCron, this));
             $('#' + this.options.triggers.fullSync)
                 .on('click', $.proxy(this._full, this));
+            $('#' + this.options.triggers.generateProductFeed)
+                .on('click', $.proxy(this._generate, this));
         },
 
         /**
@@ -131,6 +134,38 @@ define([
             });
 
             return false;
+        },
+
+        /**
+         * @param event
+         * @returns {boolean}
+         * @private
+         */
+        _generate: function (event) {
+            var self = this,
+                actionUrl = self.options.config.url.generate,
+                params = {
+                    'form_key': this.formKey
+                };
+
+            confirm({
+                title: $.mage.__('Confirmation'),
+                content: $.mage.__('Are you sure do you want to generate product feed? Generating may take ' +
+                    'some time depending on the catalog size.'),
+                actions: {
+                    /** @inheritdoc */
+                    confirm: function () {
+                        $.extend(params, self.options.params);
+                        actionManager(actionUrl, 'POST', params, true, false);
+                        window.location.reload();
+                    },
+
+                    /** @inheritdoc */
+                    always: function (e) {
+                        e.stopImmediatePropagation();
+                    }
+                }
+            });
         }
     });
 

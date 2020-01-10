@@ -1,4 +1,8 @@
-# Version 1.0.31
+# Version 1.0.32
+## 1.0.32 - Jan 10, 2019
+### Improvements
+- Implemented ability to generate/download product feed via backend.
+
 ## 1.0.31 - Dec 23, 2019
 ### Improvements
 - Format 'Affected Entities' cell in indexing queue/feed view grids to prevent excessive display of information.

@@ -192,6 +192,38 @@
                     </depends>
                 </field>
             </group>
+            <group id="product_feed_actions" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+                <label>Product Feed Generation</label>
+                <fieldset_css>unbxd-fieldset unbxd-fieldset-buttons</fieldset_css>
+                <field id="product_feed_datetime" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product Feed Datetime</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\ProductFeed\Datetime</frontend_model>
+                    <comment><![CDATA[Datetime of last product feed generation.]]></comment>
+                </field>
+                <field id="product_feed_absolute_path" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product Feed Absolute Path</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\ProductFeed\AbsolutePath</frontend_model>
+                    <comment><![CDATA[The absolute path to the product feed file.]]></comment>
+                </field>
+                <field id="generate_product_feed_button" translate="label comment" type="button" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Generate Product Feed</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\Buttons\GenerateProductFeed</frontend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="download_product_feed_button" translate="label comment" type="button" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Download Product Feed</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\Buttons\DownloadProductFeed</frontend_model>
+                    <tooltip><![CDATA[Available only after product feed is generated.]]></tooltip>
+                    <comment><![CDATA[<p class="message unbxd-fieldset-field-note">Generating a product feed may take
+                    some time depending on the catalog size. Once the product feed is generated you will be able
+                    to download it as an archive file in ZIP format.</p>]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
         </section>
     </system>
 </config>

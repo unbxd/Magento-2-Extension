@@ -266,6 +266,21 @@ class FileManager
     }
 
     /**
+     * Retrieve file size
+     *
+     * @return string
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
+    public function getFileMtime()
+    {
+        $this->initFile();
+        $fileStat = $this->dir->stat($this->getFileLocation());
+        $mDate = isset($fileStat['mtime']) ? $fileStat['mtime'] : strtotime(date('Y-m-d-H-i-s'));
+
+        return $mDate;
+    }
+
+    /**
      * Flush file content
      *
      * @return void

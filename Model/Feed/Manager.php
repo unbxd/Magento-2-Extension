@@ -562,7 +562,7 @@ class Manager
      *
      * @return $this|bool
      */
-    private function buildFeed()
+    public function buildFeed()
     {
         $this->logger->info('Build feed content.');
 
@@ -601,7 +601,7 @@ class Manager
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    private function serializeFeed()
+    public function serializeFeed()
     {
         $this->logger->info('Serialize feed content.');
 
@@ -623,7 +623,7 @@ class Manager
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    private function writeFeed()
+    public function writeFeed()
     {
         $this->logger->info('Write feed content to file.');
 
@@ -869,8 +869,7 @@ class Manager
     {
         $this->logger->info('Pre-process execution actions.');
 
-        $isFeedLock = $this->feedHelper->isFullSynchronizationLocked();
-        $isFeedLock = (bool) ($isFeedLock || $this->getFileManager()->isExist());
+        $isFeedLock = (bool) $this->feedHelper->isFullSynchronizationLocked();
         if ($isFeedLock) {
             if (!$this->lockedTime) {
                 $this->lockedTime = microtime(true);
@@ -1565,13 +1564,14 @@ class Manager
     /**
      * Retrieve file manager instance. Init if needed
      *
+     * @param array $data
      * @return FileManager|null
      */
-    private function getFileManager()
+    private function getFileManager($data = [])
     {
         if (null == $this->fileManager) {
             /** @var \Unbxd\ProductFeed\Model\Feed\FileManager */
-            $this->fileManager = $this->fileManagerFactory->create();
+            $this->fileManager = $this->fileManagerFactory->create($data);
         }
 
         return $this->fileManager;
@@ -1580,13 +1580,14 @@ class Manager
     /**
      * Retrieve connector manager instance. Init if needed
      *
+     * @param array $data
      * @return Api\Connector|null
      */
-    private function getConnectorManager()
+    private function getConnectorManager($data = [])
     {
         if (null == $this->connectorManager) {
             /** @var ApiConnector */
-            $this->connectorManager = $this->connectorFactory->create();
+            $this->connectorManager = $this->connectorFactory->create($data);
         }
 
         return $this->connectorManager;

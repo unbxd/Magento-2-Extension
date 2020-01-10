@@ -69,7 +69,8 @@ class Common extends Template
             'url' => [
                 'cronJobs' => $this->getCronJobsActionUrl(),
                 'fullSync' => $this->getFullSyncActionUrl(),
-                'incrementalSync' => $this->getIncrementalSyncActionUrl()
+                'incrementalSync' => $this->getIncrementalSyncActionUrl(),
+                'generate' => $this->getGenerateProductFeedActionUrl()
             ]
         ];
     }
@@ -140,7 +141,6 @@ class Common extends Template
     private function getCronJobsActionUrl()
     {
         return $this->getActionUrl('mui/index/render/namespace/unbxd_productfeed_cron_grid');
-//        return $this->getActionUrl('unbxd_productfeed/cron/modal');
     }
 
     /**
@@ -161,6 +161,16 @@ class Common extends Template
     private function getIncrementalSyncActionUrl()
     {
         return $this->getActionUrl('unbxd_productfeed/feed/incremental');
+    }
+
+    /**
+     * Get url for generate product feed
+     *
+     * @return string
+     */
+    private function getGenerateProductFeedActionUrl()
+    {
+        return $this->getActionUrl('unbxd_productfeed/feed/generate');
     }
 
     /**

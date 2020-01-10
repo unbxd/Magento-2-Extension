@@ -13,6 +13,7 @@ namespace Unbxd\ProductFeed\Controller\Adminhtml;
 
 use Magento\Backend\App\Action;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Backend\Model\View\Result\RedirectFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Ui\Component\MassAction\Filter as MassActionFilter;
 use Unbxd\ProductFeed\Model\CronManager;
@@ -27,6 +28,9 @@ use Unbxd\ProductFeed\Model\FeedView;
 use Unbxd\ProductFeed\Model\FeedViewFactory;
 use Unbxd\ProductFeed\Api\FeedViewRepositoryInterface;
 use Unbxd\ProductFeed\Model\ResourceModel\FeedView\CollectionFactory as FeedViewCollectionFactory;
+use Unbxd\ProductFeed\Model\Indexer\Product\Full\Action\FullFactory as ReindexActionFactory;
+use Unbxd\ProductFeed\Model\Feed\ManagerFactory as FeedManagerFactory;
+use Unbxd\ProductFeed\Model\Feed\FileManagerFactory as FeedFileManagerFactory;
 
 /**
  * Class ActionIndex
@@ -35,9 +39,14 @@ use Unbxd\ProductFeed\Model\ResourceModel\FeedView\CollectionFactory as FeedView
 abstract class ActionIndex extends Action
 {
     /**
-     * @var \Magento\Framework\View\Result\PageFactory
+     * @var PageFactory
      */
     protected $resultPageFactory;
+
+    /**
+     * @var RedirectFactory
+     */
+    protected $resultRedirectFactory;
 
     /**
      * @var MassActionFilter
@@ -115,9 +124,25 @@ abstract class ActionIndex extends Action
     protected $storeManager;
 
     /**
+     * @var ReindexActionFactory
+     */
+    protected $reindexActionFactory;
+
+    /**
+     * @var FeedManagerFactory
+     */
+    protected $feedManagerFactory;
+
+    /**
+     * @var FeedFileManagerFactory
+     */
+    protected $feedFileManagerFactory;
+
+    /**
      * ActionIndex constructor.
      * @param Action\Context $context
      * @param PageFactory $resultPageFactory
+     * @param RedirectFactory $resultRedirectFactory
      * @param MassActionFilter $massActionFilter
      * @param QueueHandler $queueHandler
      * @param IndexingQueueFactory $indexingQueueFactory
@@ -131,10 +156,14 @@ abstract class ActionIndex extends Action
      * @param HelperData $helperData
      * @param ProductHelper $productHelper
      * @param StoreManagerInterface $storeManager
+     * @param ReindexActionFactory $reindexActionFactory
+     * @param FeedManagerFactory $feedManagerFactory
+     * @param FeedFileManagerFactory $feedFileManagerFactory
      */
     public function __construct(
         Action\Context $context,
         PageFactory $resultPageFactory,
+        RedirectFactory $resultRedirectFactory,
         MassActionFilter $massActionFilter,
         QueueHandler $queueHandler,
         IndexingQueueFactory $indexingQueueFactory,
@@ -147,10 +176,14 @@ abstract class ActionIndex extends Action
         \Magento\Framework\App\Response\Http\FileFactory $fileFactory,
         HelperData $helperData,
         ProductHelper $productHelper,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        ReindexActionFactory $reindexActionFactory,
+        FeedManagerFactory $feedManagerFactory,
+        FeedFileManagerFactory $feedFileManagerFactory
     ) {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
+        $this->resultRedirectFactory = $resultRedirectFactory;
         $this->massActionFilter = $massActionFilter;
         $this->queueHandler = $queueHandler;
         $this->indexingQueueFactory = $indexingQueueFactory
@@ -170,6 +203,9 @@ abstract class ActionIndex extends Action
         $this->helperData = $helperData;
         $this->productHelper = $productHelper;
         $this->storeManager = $storeManager;
+        $this->reindexActionFactory = $reindexActionFactory;
+        $this->feedManagerFactory = $feedManagerFactory;
+        $this->feedFileManagerFactory = $feedFileManagerFactory;
     }
 
     /**

@@ -26,18 +26,22 @@ define([
          * Perform asynchronous request to server.
          *
          * @param url
-         * @param data
          * @param type
+         * @param data
+         * @param async
+         * @param showLoader
          * @param redirectUrl
          * @param isGlobal
          * @param contentType
          * @param messageContainer
          * @returns {*}
          */
-        action = function (url, type, data, redirectUrl, isGlobal, contentType, messageContainer) {
+        action = function (url, type, data, async, showLoader, redirectUrl, isGlobal, contentType, messageContainer) {
             url = url || (data.hasOwnProperty('url') ? data.url : '');
             type = type || 'POST';
             data = data || {};
+            async = async === undefined ? false : async;
+            showLoader = showLoader === undefined ? true : showLoader;
             isGlobal = isGlobal === undefined ? true : isGlobal;
             contentType = contentType || 'json';
             messageContainer = messageContainer || {};
@@ -46,9 +50,10 @@ define([
                 url: url,
                 type: type,
                 data: data,
+                async: async,
                 global: isGlobal,
                 dataType: contentType,
-                showLoader: true
+                showLoader: showLoader
             }).done(function (response) {
                 if (response.errors) {
                     alert({
