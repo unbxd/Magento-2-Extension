@@ -145,6 +145,11 @@
             <argument name="batchRowsCount" xsi:type="string">5000</argument>
         </arguments>
     </type>
+    <type name="Unbxd\ProductFeed\Model\ResourceModel\Indexer\Product\Full\Action\Full">
+        <arguments>
+            <argument name="entityType" xsi:type="string">Magento\Catalog\Api\Data\ProductInterface</argument>
+        </arguments>
+    </type>
     <type name="Unbxd\ProductFeed\Model\ResourceModel\Eav\Indexer\Full\DataSourceProvider\AbstractAttribute">
         <arguments>
             <argument name="entityType" xsi:type="string">Magento\Catalog\Api\Data\CategoryInterface</argument>

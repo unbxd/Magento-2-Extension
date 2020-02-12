@@ -20,6 +20,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Indexer\Table\StrategyInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\Catalog\Model\ResourceModel\Config as ResourceModelCatalogConfig;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\FilterAttribute\FilterAttributeInterface;
 use Unbxd\ProductFeed\Model\FilterAttribute\Attributes\Status as FilterAttributeStatus;
@@ -41,9 +42,19 @@ class Full extends Indexer
     private $objectManager;
 
     /**
+     * @var ResourceModelCatalogConfig
+     */
+    private $resourceModelCatalogConfig;
+
+    /**
      * @var HelperData
      */
-    private $helperData = null;
+    private $helperData;
+
+    /**
+     * @var null|string
+     */
+    private $entityType = null;
 
     /**
      * Full constructor.
@@ -52,13 +63,19 @@ class Full extends Indexer
      * @param StoreManagerInterface $storeManager
      * @param MetadataPool $metadataPool
      * @param ObjectManagerInterface $objectManager
+     * @param ResourceModelCatalogConfig $resourceModelCatalogConfig
+     * @param HelperData $helperData
+     * @param null $entityType
      */
     public function __construct(
         ResourceConnection $resource,
         StrategyInterface $tableStrategy,
         StoreManagerInterface $storeManager,
         MetadataPool $metadataPool,
-        ObjectManagerInterface $objectManager
+        ObjectManagerInterface $objectManager,
+        ResourceModelCatalogConfig $resourceModelCatalogConfig,
+        HelperData $helperData,
+        $entityType = null
     ) {
         parent::__construct(
             $resource,
@@ -67,6 +84,19 @@ class Full extends Indexer
             $metadataPool
         );
         $this->objectManager = $objectManager;
+        $this->resourceModelCatalogConfig = $resourceModelCatalogConfig;
+        $this->helperData = $helperData;
+        $this->entityType = $entityType;
+    }
+
+    /**
+     * Get entity type
+     *
+     * @return string
+     */
+    protected function getEntityType()
+    {
+        return $this->entityType;
     }
 
     /**
@@ -77,7 +107,7 @@ class Full extends Indexer
      */
     private function getSupportedProductTypes($storeId = null)
     {
-        return $this->getHelperData()->getAvailableProductTypes($storeId);
+        return $this->helperData->getAvailableProductTypes($storeId);
     }
 
     /**
@@ -86,7 +116,7 @@ class Full extends Indexer
      */
     private function getFilterAttributes($storeId)
     {
-        return $this->getHelperData()->getFilterAttributes($storeId);
+        return $this->helperData->getFilterAttributes($storeId);
     }
 
     /**
@@ -95,8 +125,7 @@ class Full extends Indexer
      */
     private function getEntityTable()
     {
-        $metadata = $this->getEntityMetaData(\Magento\Catalog\Api\Data\ProductInterface::class);
-
+        $metadata = $this->getEntityMetaData($this->getEntityType());
         return $this->getTable($metadata->getEntityTable());
     }
 
@@ -159,7 +188,7 @@ class Full extends Indexer
      */
     public function getRelationsByChild($childrenIds)
     {
-        $metadata = $this->getEntityMetaData(\Magento\Catalog\Api\Data\ProductInterface::class);
+        $metadata = $this->getEntityMetaData($this->getEntityType());
         $entityTable = $this->getEntityTable();
         $relationTable = $this->getTable('catalog_product_relation');
         $joinCondition = sprintf('relation.parent_id = entity.%s', $metadata->getLinkField());
@@ -181,7 +210,7 @@ class Full extends Indexer
      */
     public function getRelationsByParent($parentIds)
     {
-        $metadata = $this->getEntityMetaData(\Magento\Catalog\Api\Data\ProductInterface::class);
+        $metadata = $this->getEntityMetaData($this->getEntityType());
         $entityTable = $this->getEntityTable();
         $relationTable = $this->getTable('catalog_product_relation');
         $joinCondition = sprintf('relation.child_id = entity.%s', $metadata->getLinkField());
@@ -203,7 +232,7 @@ class Full extends Indexer
      */
     public function getRelatedParentProduct($childrenId)
     {
-        $metadata = $this->getEntityMetaData(\Magento\Catalog\Api\Data\ProductInterface::class);
+        $metadata = $this->getEntityMetaData($this->getEntityType());
         $entityTable = $this->getTable($metadata->getEntityTable());
         $relationTable = $this->getTable('catalog_product_relation');
         $joinCondition = sprintf('relation.parent_id = entity.%s', $metadata->getLinkField());
@@ -234,6 +263,7 @@ class Full extends Indexer
         }
 
         foreach ($filterAttributes as $attribute) {
+            /** @var FilterAttributeInterface $attributeCode */
             $attributeCode = $attribute->getAttributeCode();
             $filterValue = $attribute->getValue();
             if ($attributeCode == FilterAttributeStatus::ATTRIBUTE_CODE) {
@@ -257,30 +287,32 @@ class Full extends Indexer
      * @param $filterValue
      * @param $storeId
      * @return $this
+     * @throws \Exception
      */
     private function addStatusFilter($select, $filterValue, $storeId)
     {
-        $relatedTable = $this->getTable('catalog_product_entity_int');
+        $metadata = $this->getEntityMetaData($this->getEntityType());
+        $linkField = $metadata->getLinkField();
+        $entityTypeId = $this->resourceModelCatalogConfig->getEntityTypeId();
 
         $bind = ['status' => 'status'];
         $statusAttributeIdSelect = $this->getConnection()->select()
-            ->from(['attribute' => $this->getTable('eav_attribute')], ['attribute_id'])
-            ->where('attribute.entity_type_id = 4') // 4 - catalog_product
-            ->where('attribute.attribute_code = :status');
+            ->from(['eav' => $this->getTable('eav_attribute')], ['attribute_id'])
+            ->where('eav.entity_type_id = ?', $entityTypeId)
+            ->where('eav.attribute_code = :status');
 
         $statusAttributeId = $this->getConnection()->fetchOne($statusAttributeIdSelect, $bind);
 
-        $entityColumn = 'entity_id';
-        if ($this->getConnection()->tableColumnExists($relatedTable, 'row_id')) {
-            $entityColumn = 'row_id';
-        }
-
-        $conditions = ["status.{$entityColumn} = e.entity_id"];
+        $conditions = ["status.{$linkField} = e.{$linkField}"];
         $conditions[] = $this->getConnection()->quoteInto('status.value != ?', $filterValue);
 
         $statusJoinCond = join(' AND ', $conditions);
         $select->useStraightJoin(true)
-            ->join(['status' => $relatedTable], $statusJoinCond, ['value AS status'])
+            ->join(
+                ['status' => $this->getTable('catalog_product_entity_int')],
+                $statusJoinCond,
+                ['value AS status']
+            )
             ->where('status.attribute_id = ?', (int) $statusAttributeId);
 
         return $this;
@@ -365,18 +397,5 @@ class Full extends Indexer
         }
 
         return $indexTable;
-    }
-
-    /**
-     * @return HelperData
-     */
-    private function getHelperData()
-    {
-        if (null == $this->helperData) {
-            /** @var HelperData productTypesSource */
-            $this->helperData = $this->objectManager->get(HelperData::class);
-        }
-
-        return $this->helperData;
     }
 }

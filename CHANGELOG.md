@@ -1,4 +1,8 @@
-# Version 1.0.32
+# Version 1.0.33
+## 1.0.33 - Feb 12, 2020
+### Fix Issues
+- Fixed issue with incorrect field which responsible for link between product entity table and status attribute value table.
+
 ## 1.0.32 - Jan 10, 2019
 ### Improvements
 - Implemented ability to generate/download product feed via backend.
