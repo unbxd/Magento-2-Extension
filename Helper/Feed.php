@@ -58,6 +58,10 @@ class Feed extends HelperData
      * uploaded feed size
      */
     const FEED_PATH_UPLOADED_SIZE = 'unbxd_catalog/feed/uploaded_size';
+    /**
+     * flag to detect if feed was generated for download
+     */
+    const FEED_PATH_GENERATED_FOR_DOWNLOAD = 'unbxd_catalog/feed/generated_for_download';
 
     /**
      * Default configuration core config data fields
@@ -73,7 +77,8 @@ class Feed extends HelperData
         self::FEED_PATH_LAST_DATETIME => '',
         self::FEED_PATH_LAST_STATUS => '',
         self::FEED_PATH_LAST_UPLOAD_ID => '',
-        self::FEED_PATH_UPLOADED_SIZE => ''
+        self::FEED_PATH_UPLOADED_SIZE => '',
+        self::FEED_PATH_GENERATED_FOR_DOWNLOAD => ''
     ];
 
     /**
@@ -146,6 +151,14 @@ class Feed extends HelperData
     public function getUploadedSize()
     {
         return $this->getConfigValue(self::FEED_PATH_UPLOADED_SIZE);
+    }
+
+    /**
+     * @return string
+     */
+    public function getIsGeneratedForDownload()
+    {
+        return $this->getConfigValue(self::FEED_PATH_GENERATED_FOR_DOWNLOAD);
     }
 
     /**
@@ -243,6 +256,17 @@ class Feed extends HelperData
     public function setUploadedSize($size)
     {
         $this->updateConfigValue(self::FEED_PATH_UPLOADED_SIZE, $size);
+
+        return $this;
+    }
+
+    /**
+     * @param int $status
+     * @return $this
+     */
+    public function setIsGeneratedForDownload($status)
+    {
+        $this->updateConfigValue(self::FEED_PATH_GENERATED_FOR_DOWNLOAD, $status);
 
         return $this;
     }

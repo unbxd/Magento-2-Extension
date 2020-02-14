@@ -1,4 +1,9 @@
-# Version 1.0.33
+# Version 1.0.34
+## 1.0.34 - Feb 14, 2020
+### Improvements
+- Added support all available product types.
+- Added global notification, when product feed generation was initiated for download and was completed.
+
 ## 1.0.33 - Feb 12, 2020
 ### Fix Issues
 - Fixed issue with incorrect field which responsible for link between product entity table and status attribute value table.

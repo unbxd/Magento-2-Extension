@@ -76,6 +76,11 @@ abstract class AbstractAttribute
     ];
 
     /**
+     * @var array
+     */
+    private $attributesDataType = [];
+
+    /**
      * AbstractAttribute constructor.
      * @param ResourceModel $resourceModel
      * @param AttributeHelper $attributeHelper
@@ -189,6 +194,10 @@ abstract class AbstractAttribute
                     $this->initFields($attribute);
                     // add default attributes to indexed fields (use in feed operation)
                     $this->setIndexedField($attributeCode);
+
+                    if (!array_key_exists($attributeCode, $this->attributesDataType)) {
+                        $this->attributesDataType[$attributeCode] = $attribute->getBackendType();
+                    }
                 }
             }
             // try detect fields which are not like attribute and collect theirs options
@@ -219,6 +228,10 @@ abstract class AbstractAttribute
                 $this->attributeIdsByTable[$attribute->getBackendTable()][] = $attributeId;
                 // collect attributes fields (use in feed operation)
                 $this->initFields($attribute);
+            }
+
+            if (!array_key_exists($attribute->getAttributeCode(), $this->attributesDataType)) {
+                $this->attributesDataType[$attribute->getAttributeCode()] = $attribute->getBackendType();
             }
         }
 

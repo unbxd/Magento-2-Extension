@@ -23,6 +23,7 @@
         <arguments>
             <argument name="messages" xsi:type="array">
                 <item name="unbxdProductFeedModuleAvailabilityMessages" xsi:type="string">Unbxd\ProductFeed\Model\Admin\ModuleAvailabilityMessages</item>
+                <item name="unbxdProductFeedGenerated" xsi:type="string">Unbxd\ProductFeed\Model\Admin\ProductFeedGeneratedMessages</item>
             </argument>
         </arguments>
     </type>

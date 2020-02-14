@@ -12,6 +12,7 @@
 namespace Unbxd\ProductFeed\Model\Config\Source;
 
 use Magento\Framework\Option\ArrayInterface;
+use Magento\Catalog\Model\Product\TypeFactory;
 
 /**
  * Class ProductTypes
@@ -46,48 +47,20 @@ class ProductTypes implements ArrayInterface
     private $supportedTypes = [
         \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE,
-        \Magento\GroupedProduct\Model\Product\Type\Grouped::TYPE_CODE
+        \Magento\GroupedProduct\Model\Product\Type\Grouped::TYPE_CODE,
+        \Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL,
+        \Magento\Bundle\Model\Product\Type::TYPE_CODE,
+        \Magento\Downloadable\Model\Product\Type::TYPE_DOWNLOADABLE
     ];
 
     /**
-     * DebugDisplay constructor.
-     * @param \Magento\Catalog\Model\Product\TypeFactory $typeFactory
+     * ProductTypes constructor.
+     * @param TypeFactory $typeFactory
      */
     public function __construct(
-        \Magento\Catalog\Model\Product\TypeFactory $typeFactory
+        TypeFactory $typeFactory
     ) {
         $this->typeFactory = $typeFactory;
-    }
-
-    /**
-     * Retrieve product types
-     *
-     * @return array
-     */
-    protected function getProductTypes()
-    {
-        $result = [];
-        /** @var  $types */
-        $types = $this->typeFactory->create()->getTypes();
-        uasort(
-            $types,
-            function ($elementOne, $elementTwo) {
-                return ($elementOne['sort_order'] < $elementTwo['sort_order']) ? -1 : 1;
-            }
-        );
-
-        // @TODO - temporary solution, need to show all product types, not supported must be disabled
-        foreach ($types as $typeId => $type) {
-            if (in_array($typeId, $this->supportedTypes)) {
-                $result[$typeId] = __($type['label']);
-            }
-        }
-
-        if ($this->addAllTypes && !array_key_exists(self::ALL_KEY, $result)) {
-            $result = [self::ALL_KEY => __('All AVAILABLE TYPES')] + $result;
-        }
-
-        return $result;
     }
 
     /**
@@ -98,6 +71,37 @@ class ProductTypes implements ArrayInterface
     public function getAllSupportedProductTypes()
     {
         return $this->supportedTypes;
+    }
+
+    /**
+     * Retrieve product types
+     *
+     * @return array
+     */
+    protected function getProductTypes()
+    {
+        /** @var \Magento\Catalog\Model\Product\Type $type */
+        $type = $this->typeFactory->create();
+        $types = $type->getTypes();
+        uasort(
+            $types,
+            function ($elementOne, $elementTwo) {
+                return ($elementOne['sort_order'] < $elementTwo['sort_order']) ? -1 : 1;
+            }
+        );
+
+        $result = [];
+        foreach ($types as $typeId => $type) {
+            $result[$typeId] = isset($type['label'])
+                ? $type['label']
+                : sprintf('%s Product', ucfirst($typeId));
+        }
+
+        if ($this->addAllTypes && !array_key_exists(self::ALL_KEY, $result)) {
+            $result = [self::ALL_KEY => __('All AVAILABLE TYPES')] + $result;
+        }
+
+        return $result;
     }
 
     /**

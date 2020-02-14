@@ -18,6 +18,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Ui\Component\MassAction\Filter as MassActionFilter;
 use Unbxd\ProductFeed\Model\CronManager;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
+use Unbxd\ProductFeed\Helper\Feed;
 use Unbxd\ProductFeed\Helper\ProductHelper;
 use Unbxd\ProductFeed\Model\IndexingQueue;
 use Unbxd\ProductFeed\Model\IndexingQueueFactory;
@@ -228,5 +229,16 @@ abstract class ActionIndex extends Action
     protected function getStore($store = '')
     {
         return $this->storeManager->getStore($store);
+    }
+
+    /**
+     * @param int $status
+     * @return $this
+     */
+    protected function setIsGeneratedForDownload($status)
+    {
+        $this->helperData->updateConfigValue(Feed::FEED_PATH_GENERATED_FOR_DOWNLOAD, $status);
+
+        return $this;
     }
 }

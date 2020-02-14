@@ -44,6 +44,9 @@ class Download extends ActionIndex
             $feedFileManager->getFileName()
         );
 
+        // mark as downloaded to prevent display message notification
+        $this->setIsGeneratedForDownload(false);
+
         $fileContent = ['type' => 'filename', 'value' => $feedFileManager->getFileLocation()];
 
         return $this->fileFactory->create(

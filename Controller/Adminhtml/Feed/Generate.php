@@ -28,7 +28,10 @@ class Generate extends ActionIndex
      */
     public function execute()
     {
-        $this->setDefaultParameters();
+        // mark for download to display message notification after the feed is generated
+        // set default parameters for execute process in background mode
+        $this->setIsGeneratedForDownload(true)
+            ->setDefaultParameters();
 
         /** @var \Magento\Framework\Controller\Result\Json $resultJson */
         $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON);

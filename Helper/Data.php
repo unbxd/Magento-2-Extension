@@ -325,14 +325,17 @@ class Data extends AbstractHelper
             $store
         );
 
-        $types = [];
+        $allProductTypes = array_keys($this->productTypes->toArray());
+        array_shift($allProductTypes); // remove 'all' key from types
         if ($value) {
             $types = explode(',', $value);
             if (!empty($types)) {
                 if (in_array(ProductTypes::ALL_KEY, $types)) {
-                    $types = $this->productTypes->getAllSupportedProductTypes();
+                    $types = $allProductTypes;
                 }
             }
+        } else {
+            $types = $allProductTypes;
         }
 
         return $types;
