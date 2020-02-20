@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -478,7 +478,7 @@ class AttributeHelper extends AbstractHelper
         $fieldType = FeedConfig::FIELD_TYPE_TEXT;
         if (($fieldName == 'price') || ($fieldName == 'original_price')) {
             $fieldType = FeedConfig::FIELD_TYPE_DECIMAL;
-        } else if ($fieldName == 'stock_status') {
+        } else if ($fieldName == 'quantity_and_stock_status') {
             $fieldType = FeedConfig::FIELD_TYPE_BOOL;
         }
 

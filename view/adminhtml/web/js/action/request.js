@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -30,13 +30,25 @@ define([
          * @param data
          * @param async
          * @param showLoader
+         * @param loaderContext
          * @param redirectUrl
          * @param isGlobal
          * @param contentType
          * @param messageContainer
          * @returns {*}
          */
-        action = function (url, type, data, async, showLoader, redirectUrl, isGlobal, contentType, messageContainer) {
+        action = function (
+            url,
+            type,
+            data,
+            async,
+            showLoader,
+            loaderContext,
+            redirectUrl,
+            isGlobal,
+            contentType,
+            messageContainer
+        ) {
             url = url || (data.hasOwnProperty('url') ? data.url : '');
             type = type || 'POST';
             data = data || {};

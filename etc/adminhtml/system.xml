@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 -->
 
@@ -109,6 +109,15 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <tooltip>Enabling this option is recommended in production mode or with a large product catalog.</tooltip>
                     <comment><![CDATA[If enabled, all indexing operations will be done asynchronously.]]></comment>
+                </field>
+            </group>
+            <group id="data_fields_mapping" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Data Fields Mapping</label>
+                <field id="mapping_settings" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mapping Settings</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\Form\Field\DataFieldsMapping</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <comment><![CDATA[]]></comment>
                 </field>
             </group>
             <group id="cron" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">

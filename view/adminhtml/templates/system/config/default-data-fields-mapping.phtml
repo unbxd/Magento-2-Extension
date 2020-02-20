@@ -1,0 +1,43 @@
+<?php
+
+// @codingStandardsIgnoreFile
+
+/** @var \Unbxd\ProductFeed\Block\Adminhtml\Form\Field\DataFieldsMapping $block */
+?>
+<?php
+    $defaultDataFieldsMapping = $block->getDefaultDataFieldsMapping();
+?>
+<?php if (count($defaultDataFieldsMapping)): ?>
+    <div class="message unbxd-fieldset-field-note">
+        <p><?= /* @escapeNotVerified */ __('Please use this only for field(s) which required to use custom mapping instead of default.') ?></p>
+        <div class="block"
+             data-mage-init='{"collapsible":{
+                "animate":{
+                    "duration":800,
+                    "easing":"easeOutCubic"
+                },
+                "openedState":"active",
+                "active":false
+                }}'>
+            <strong class="title" data-role="title"><?= /* @escapeNotVerified */ __('Default mapping') ?></strong>
+            <div class="content" data-role="content">
+                <table class="data-grid data-fields-mapping" data-role="grid">
+                    <thead>
+                        <tr class="data-row">
+                            <th class="data-grid-th"><?= /* @escapeNotVerified */ __('Unbxd Field') ?></th>
+                            <th class="data-grid-th"><?= /* @escapeNotVerified */ __('Product Attribute') ?></th>
+                        </tr>
+                    </thead>
+                    <?php $i = 0; ?>
+                    <?php foreach ($defaultDataFieldsMapping as $unbxdField => $productAttribute): ?>
+                        <tr class="data-row<?= $i++ % 2 ? ' _odd-row' : '' ?>">
+                            <td class="data-grid-td"><?= /* @escapeNotVerified */ __($unbxdField) ?></td>
+                            <td class="data-grid-td"><?= /* @escapeNotVerified */ __($productAttribute) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+

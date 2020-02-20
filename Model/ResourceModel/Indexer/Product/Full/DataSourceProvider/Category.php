@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -289,24 +289,29 @@ class Category extends Indexer
 
         $select = $this->connection->select();
 
+        // in cases if some category data (ex. name, url_path) set only for default store
+        $storeExpression = new \Zend_Db_Expr(
+            "CASE WHEN %s.value != NULL THEN {$storeId} ELSE 0 END"
+        );
+
         $conditionsName = [
             "cat.{$linkField} = name.{$linkField}",
             "name.attribute_id = " . (int) $nameAttr->getAttributeId(),
-            "name.store_id = " . (int) $storeId
+            "name.store_id = " . sprintf($storeExpression, 'name')
         ];
         $joinConditionsName = new \Zend_Db_Expr(implode(" AND ", $conditionsName));
 
         $conditionsUrlKey = [
             "cat.{$linkField} = url_key.{$linkField}",
             "url_key.attribute_id = " . (int) $urlKeyAttr->getAttributeId(),
-            "url_key.store_id = " . (int) $storeId
+            "url_key.store_id = " . sprintf($storeExpression, 'url_key')
         ];
         $joinConditionsUrlKey = new \Zend_Db_Expr(implode(" AND ", $conditionsUrlKey));
 
         $conditionsUrlPath = [
             "cat.{$linkField} = url_path.{$linkField}",
             "url_path.attribute_id = " . (int) $urlPathAttr->getAttributeId(),
-            "url_path.store_id = " . (int) $storeId
+            "url_path.store_id = " . sprintf($storeExpression, 'url_path')
         ];
         $joinConditionsUrlPath = new \Zend_Db_Expr(implode(" AND ", $conditionsUrlPath));
 

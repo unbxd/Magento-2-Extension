@@ -1,4 +1,9 @@
-# Version 1.0.34
+# Version 1.0.35
+## 1.0.35 - Feb 20, 2020
+### Improvements
+- Implemented ability to manage data fields mapping between Unbxd and Magento.
+- Code refactoring.
+
 ## 1.0.34 - Feb 14, 2020
 ### Improvements
 - Added support all available product types.

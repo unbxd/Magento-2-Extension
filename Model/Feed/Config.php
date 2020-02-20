@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -10,6 +10,9 @@
  * @team MageCloud
  */
 namespace Unbxd\ProductFeed\Model\Feed;
+
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Framework\Config\DataInterface as ConfigDataInterface;
 
 /**
  * Class Config
@@ -179,8 +182,9 @@ class Config
     const FIELD_KEY_PRODUCT_NAME    = 'name';
     const FIELD_KEY_IMAGE_PATH      = 'image';
     const FIELD_KEY_PRODUCT_URL_KEY = 'url_key';
-    const FIELD_KEY_STOCK_STATUS    = 'stock_status';
+    const FIELD_KEY_STOCK_STATUS    = 'quantity_and_stock_status';
     const FIELD_KEY_CATEGORY_DATA   = 'category';
+    const FIELD_KEY_VISIBILITY      = ProductInterface::VISIBILITY;
 
     /**
      * Specific fields declaration
@@ -193,11 +197,37 @@ class Config
     const SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID   = 'category_path_id';
 
     /**
-     * Mapping fields
+     * @var ConfigDataInterface
+     */
+    private $defaultDataFieldsMappingStorage;
+
+    /**
+     * Config constructor.
+     * @param ConfigDataInterface $defaultDataFieldsMappingStorage
+     */
+    public function __construct(
+        ConfigDataInterface $defaultDataFieldsMappingStorage
+    ) {
+        $this->defaultDataFieldsMappingStorage = $defaultDataFieldsMappingStorage;
+    }
+
+    /**
+     * Get list of default data mapping fields using for product feed
      *
      * @return array
      */
-    public function getMapSpecificFields()
+    public function getDefaultDataFieldsMappingStorage()
+    {
+        return $this->defaultDataFieldsMappingStorage->get('fields', []);
+    }
+
+    /**
+     * Default data fields mapping
+     *
+     * @return array
+     * @deprecated
+     */
+    public function getDefaultDataFieldsMapping()
     {
         return [
             self::FIELD_KEY_ENTITY_ID => self::SPECIFIC_FIELD_KEY_UNIQUE_ID,
@@ -205,7 +235,8 @@ class Config
             self::FIELD_KEY_IMAGE_PATH => self::SPECIFIC_FIELD_KEY_IMAGE_URL,
             self::FIELD_KEY_PRODUCT_URL_KEY => self::SPECIFIC_FIELD_KEY_PRODUCT_URL,
             self::FIELD_KEY_STOCK_STATUS => self::SPECIFIC_FIELD_KEY_AVAILABILITY,
-            self::FIELD_KEY_CATEGORY_DATA => self::SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID
+            self::FIELD_KEY_CATEGORY_DATA => self::SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID,
+            self::FIELD_KEY_VISIBILITY => self::FIELD_KEY_VISIBILITY // use for retrieve label instead of ID
         ];
     }
 

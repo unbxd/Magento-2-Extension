@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 -->
 
@@ -14,7 +14,7 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <type name="Unbxd\ProductFeed\Model\Feed\Manager">
+    <type name="Unbxd\ProductFeed\Model\Feed\DataHandler">
         <arguments>
             <argument name="frontendUrlBuilder" xsi:type="object">Magento\Framework\Url</argument>
         </arguments>
@@ -25,6 +25,16 @@
                 <item name="unbxdProductFeedModuleAvailabilityMessages" xsi:type="string">Unbxd\ProductFeed\Model\Admin\ModuleAvailabilityMessages</item>
                 <item name="unbxdProductFeedGenerated" xsi:type="string">Unbxd\ProductFeed\Model\Admin\ProductFeedGeneratedMessages</item>
             </argument>
+        </arguments>
+    </type>
+    <type name="Unbxd\ProductFeed\Block\Adminhtml\Form\Field\DataFieldsMapping">
+        <arguments>
+            <argument name="defaultDataFieldsMappingTemplate" xsi:type="string">Unbxd_ProductFeed::system/config/default-data-fields-mapping.phtml</argument>
+        </arguments>
+    </type>
+    <type name="Unbxd\ProductFeed\Block\Adminhtml\Form\Field\DataFieldsMapping\CatalogProductAttributes">
+        <arguments>
+            <argument name="entityType" xsi:type="string">Magento\Catalog\Api\Data\ProductInterface</argument>
         </arguments>
     </type>
 </config>

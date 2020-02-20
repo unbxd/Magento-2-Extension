@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -106,7 +106,7 @@ class Full
                 $productIds = array_unique(array_merge($productIds, $relationsByParent));
             }
         }
-		
+
 		$productId = 0;
         do {
             $products = $this->getProducts($storeId, $productIds, $productId);

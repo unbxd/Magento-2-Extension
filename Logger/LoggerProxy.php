@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -96,22 +96,20 @@ class LoggerProxy implements LoggerInterface
      */
     public function create($type = 'default')
     {
-//        if ($this->logger === null) {
-            switch ($this->loggerAlias) {
-                case self::LOGGER_ALIAS_FILE:
-                    $this->logger = $this->fileFactory->create(
-                        [
-                            'logFileName' => $type,
-                            'logAll' => $this->logAll,
-                            'logCallStack' => $this->logCallStack,
-                        ]
-                    );
-                    break;
-                default:
-                    $this->logger = $this->fileFactory->create();
-                    break;
-            }
-//        }
+        switch ($this->loggerAlias) {
+            case self::LOGGER_ALIAS_FILE:
+                $this->logger = $this->fileFactory->create(
+                    [
+                        'logFileName' => $type,
+                        'logAll' => $this->logAll,
+                        'logCallStack' => $this->logCallStack,
+                    ]
+                );
+                break;
+            default:
+                $this->logger = $this->fileFactory->create();
+                break;
+        }
 
         return $this->logger;
     }

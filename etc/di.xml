@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 -->
 
@@ -237,4 +237,33 @@
         <plugin name="unbxd_productfeed_cron_resource_collection" type="Unbxd\ProductFeed\Plugin\Cron\Model\ResourceModel\Schedule\Collection" />
     </type>
     <!-- END: fixed issue with id field name in cron collection -->
+
+    <type name="Unbxd\ProductFeed\Model\Feed\Manager">
+        <arguments>
+            <argument name="loggerType" xsi:type="string">feed</argument>
+        </arguments>
+    </type>
+
+    <!-- START: data fields mapping config -->
+    <type name="Unbxd\ProductFeed\Model\Feed\Config\Mapping\Reader">
+        <arguments>
+            <argument name="fileName" xsi:type="string">mapping.xml</argument>
+            <argument name="converter" xsi:type="object">Unbxd\ProductFeed\Model\Feed\Config\Mapping\Converter</argument>
+            <argument name="schemaLocator" xsi:type="object">Unbxd\ProductFeed\Model\Feed\Config\Mapping\SchemaLocator</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="feedDefaultDataFieldsMappingConfigStorage" type="Magento\Framework\Config\Data">
+        <arguments>
+            <argument name="reader" xsi:type="object">Unbxd\ProductFeed\Model\Feed\Config\Mapping\Reader</argument>
+            <argument name="cacheId" xsi:type="string">feed_data_fields_mapping_config</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Unbxd\ProductFeed\Model\Feed\Config">
+        <arguments>
+            <argument name="defaultDataFieldsMappingStorage" xsi:type="object">feedDefaultDataFieldsMappingConfigStorage</argument>
+        </arguments>
+    </type>
+    <!-- END: data fields mapping config -->
 </config>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -59,8 +59,8 @@ define([
 
             this._super();
             action.registerCallback(function (data, response) {
-                self.isLoading(false);
                 if (!_.isEmpty(response)) {
+                    self.isLoading(false);
                     var content = response.hasOwnProperty('updatedContent')
                         ? response.updatedContent
                         : '';
@@ -151,6 +151,7 @@ define([
                 target = $(event.currentTarget);
 
             this.isLoading(true);
+
             action(url, 'POST', {
                 'form_key': this.formKey
             });
@@ -170,6 +171,7 @@ define([
                 target = $(event.currentTarget);
 
             this.isLoading(true);
+
             action(url, 'POST', {
                 'form_key': this.formKey
             });

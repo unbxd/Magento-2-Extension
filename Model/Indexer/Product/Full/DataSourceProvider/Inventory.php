@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -70,10 +70,10 @@ class Inventory implements DataSourceProviderInterface
             $productId = (int) $inventoryDataRow['product_id'];
             $isInStock = (bool) $inventoryDataRow['stock_status'];
             $qty = (int) $inventoryDataRow['qty'];
-            $indexData[$productId]['availability'] = $isInStock;
+            $indexData[$productId]['quantity_and_stock_status'] = $isInStock;
 
-            if (!in_array('stock_status', $indexedFields)) {
-                $indexedFields[] = 'stock_status';
+            if (!in_array('quantity_and_stock_status', $indexedFields)) {
+                $indexedFields[] = 'quantity_and_stock_status';
             }
         }
 

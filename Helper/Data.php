@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -24,6 +24,8 @@ use Unbxd\ProductFeed\Model\Config\Source\FilterAttribute;
 use Unbxd\ProductFeed\Model\FilterAttribute\FilterAttributeProvider;
 use Unbxd\ProductFeed\Model\FilterAttribute\FilterAttributeInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Magento\Framework\App\ObjectManager;
+use Unbxd\ProductFeed\Model\Serializer;
 
 /**
  * Class Data
@@ -56,6 +58,7 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_EXCLUDE_PRODUCTS_FILTER_ATTRIBUTES = 'unbxd_catalog/general/filter_attributes';
     const XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS = 'unbxd_catalog/general/max_number_of_attempts';
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
+    const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     const XML_PATH_CATALOG_CRON_ENABLED = 'unbxd_catalog/cron/enabled';
     const XML_PATH_CATALOG_CRON_TYPE = 'unbxd_catalog/cron/cron_type';
     const XML_PATH_CATALOG_CRON_TYPE_MANUALLY_SCHEDULE = 'unbxd_catalog/cron/cron_type_manually_schedule';
@@ -104,6 +107,16 @@ class Data extends AbstractHelper
     protected $dateTime;
 
     /**
+     * @var Serializer
+     */
+    private $serializer;
+
+    /**
+     * @var null
+     */
+    private $dataFieldsMapping = null;
+
+    /**
      * Data constructor.
      * @param \Magento\Framework\App\Helper\Context $context
      * @param ConfigInterface $configInterface
@@ -122,7 +135,8 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         ProductTypes $productTypes,
         FilterAttributeProvider $filterAttributeProvider,
-        TimezoneInterface $dateTime
+        TimezoneInterface $dateTime,
+        Serializer $serializer
     ) {
         parent::__construct($context);
         $this->configInterface = $configInterface;
@@ -132,6 +146,7 @@ class Data extends AbstractHelper
         $this->productTypes = $productTypes;
         $this->filterAttributeProvider = $filterAttributeProvider;
         $this->dateTime = $dateTime;
+        $this->serializer = $serializer ?: ObjectManager::getInstance()->get(Serializer::class);
     }
 
     /**
@@ -401,6 +416,43 @@ class Data extends AbstractHelper
             ScopeInterface::SCOPE_STORE,
             $store
         );
+    }
+
+    /**
+     * @param null $store
+     * @return array|null
+     */
+    public function getDataFieldsMapping($store = null)
+    {
+        if (null === $this->dataFieldsMapping) {
+            $mappingSettings = $this->scopeConfig->getValue(
+                self::XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS,
+                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                $store
+            );
+
+            $result = [];
+            if (is_string($mappingSettings) && strlen($mappingSettings) > 0) {
+                $mappingSettings = $this->serializer->unserialize($mappingSettings);
+                if (is_array($mappingSettings) && count($mappingSettings) > 0) {
+                    foreach ($mappingSettings as $data) {
+                        $mapping = new \Magento\Framework\DataObject();
+                        $mapping->setData($data);
+
+                        if (
+                            $mapping->getIsEnabled()
+                            && $mapping->getUnbxdField()
+                            && $mapping->getProductAttribute()
+                        ) {
+                            $result[$mapping->getUnbxdField()] = $mapping->getProductAttribute();
+                        }
+                    }
+                    $this->dataFieldsMapping = $result;
+                }
+            }
+        }
+
+        return $this->dataFieldsMapping;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -91,11 +91,7 @@ class Generate extends ActionIndex
     {
         /** @var \Unbxd\ProductFeed\Model\Feed\Manager $feedManager */
         $feedManager = $this->feedManagerFactory->create();
-
-        $feedManager->prepareData($index);
-        $feedManager->buildFeed();
-        $feedManager->serializeFeed();
-        $feedManager->writeFeed();
+        $feedManager->executeForDownload($index);
 
         return $this;
     }

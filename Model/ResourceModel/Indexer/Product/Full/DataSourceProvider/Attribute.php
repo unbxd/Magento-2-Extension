@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Unbxd Inc.
+ * Copyright (c) 2020 Unbxd Inc.
  */
 
 /**
@@ -99,7 +99,6 @@ class Attribute extends AbstractAttribute
             if ($relation->getTable() && $relation->getParentFieldName() && $relation->getChildFieldName()) {
                 $select = $this->getRelationQuery($relation, $productIds, $storeId);
                 $data = $this->getConnection()->fetchAll($select);
-
                 foreach ($data as $relationRow) {
                     $parentId = (int) $relationRow['parent_id'];
                     $childId = (int) $relationRow['child_id'];

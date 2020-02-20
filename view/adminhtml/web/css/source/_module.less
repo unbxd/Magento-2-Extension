@@ -194,6 +194,75 @@
     }
 }
 
+.unbxd-fieldset-field-note {
+    .block {
+        .title {
+            display: inline-block;
+            cursor: pointer;
+            position: relative;
+
+            &:before {
+                content: '\e616';
+                font-size: 1.8rem;
+                position: absolute;
+                right: -25px;
+                top: 1px;
+                font-family: 'Admin Icons';
+                font-style: normal;
+                font-weight: normal;
+                line-height: 1;
+                speak: none;
+            }
+        }
+
+        &.active {
+            .title {
+                &:before {
+                    content: '\e615';
+                }
+            }
+        }
+
+        .content {
+            margin-top: 10px;
+        }
+    }
+}
+
+.data-grid {
+    &.data-fields-mapping {
+        tr {
+            .data-grid-th {
+                background-color: #e3e3e3;
+                border-color: #adadad;
+                color: #303030;
+                font-size: 1.4rem;
+            }
+
+            .data-grid-td {
+                padding: 1rem !important;
+                background-color: #ffffff;
+                border-left: 0.1rem dashed #d6d6d6;
+                border-right: 0.1rem dashed #d6d6d6;
+                color: #303030;
+                vertical-align: middle;
+            }
+
+            &._odd-row {
+                .data-grid-td {
+                    background-color: #fafafa;
+                }
+            }
+
+            &:last-child {
+                .data-grid-td {
+                    border-bottom-style: dashed;
+                }
+            }
+        }
+    }
+}
+
 .adminhtml-system-config-edit,
 .adminhtml-system_config-edit {
     .modal-popup {
