@@ -1,4 +1,8 @@
-# Version 1.0.35
+# Version 1.0.36
+## 1.0.36 - Feb 22, 2020
+### Fix Issues
+- Fixed an issue with some mapped fields that were not declared in the product feed schema.
+
 ## 1.0.35 - Feb 20, 2020
 ### Improvements
 - Implemented ability to manage data fields mapping between Unbxd and Magento.

@@ -282,7 +282,10 @@ class DataHandler
                 $fieldKey = $dataFieldsMapping[$fieldCode];
                 $fieldData['fieldName'] = $fieldKey;
                 $fields[$fieldKey] = $fieldData;
-                unset($fields[$fieldCode]);
+                // unset mapped field only in case if it is not the same as the original
+                if ($fieldCode != $fieldKey) {
+                    unset($fields[$fieldCode]);
+                }
             }
 
             // convert to needed format
