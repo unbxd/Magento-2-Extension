@@ -16,6 +16,7 @@ use Magento\Framework\Data\Form\FormKey;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Serializer;
 use Magento\Framework\App\ObjectManager;
+use Magento\Store\Model\Store;
 
 /**
  * Class Common
@@ -66,6 +67,7 @@ class Common extends Template
         return [
             'isActionAllow' => $this->isActionAllow(),
             'isCronConfigured' => $this->isCronConfigured(),
+            'store' => $this->_request->getParam(Store::ENTITY, $this->getStore()->getId()),
             'url' => [
                 'cronJobs' => $this->getCronJobsActionUrl(),
                 'fullSync' => $this->getFullSyncActionUrl(),

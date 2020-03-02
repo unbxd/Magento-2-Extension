@@ -81,8 +81,18 @@ class Incremental extends AbstractCommand
     {
         $this->initAreaCode();
 
+        $stores = [$this->getDefaultStoreId()];
+        $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY);
+        if ($storeId) {
+            // in case if store code was passed instead of store id
+            if (!is_numeric($storeId)) {
+                $storeId = $this->getStoreIdByCode($storeId, $stores);
+            }
+            $stores = [$storeId];
+        }
+
         // check authorization credentials
-        if (!$this->feedHelper->isAuthorizationCredentialsSetup()) {
+        if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
             return false;
         }
@@ -100,16 +110,6 @@ class Incremental extends AbstractCommand
         if (!count($productIds)) {
             $output->writeln("<error>Product ID(s) are required. Please provide at least one product ID to perform this operation.</error>");
             return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
-        }
-
-        $stores = [$this->getDefaultStoreId()];
-        $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY);
-        if ($storeId) {
-            // in case if store code was passed instead of store id
-            if (!is_numeric($storeId)) {
-                $storeId = $this->getStoreIdByCode($storeId, $stores);
-            }
-            $stores = [$storeId];
         }
 
         // pre process actions
@@ -138,7 +138,7 @@ class Incremental extends AbstractCommand
 
                 try {
                     $output->writeln("<info>Execute feed...</info>");
-                    $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL);
+                    $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL, $storeId);
                 } catch (\Exception $e) {
                     $output->writeln("<error>Feed execution error: {$e->getMessage()}</error>");
                     $errors[$storeId] = $e->getMessage();

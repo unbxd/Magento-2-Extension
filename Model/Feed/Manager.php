@@ -259,14 +259,15 @@ class Manager
      * Init execute
      *
      * @param array $index
+     * @param null $store
      * @return $this
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function initExecute(array $index)
+    private function initExecute(array $index, $store = null)
     {
         /** @var \Unbxd\ProductFeed\Model\Feed\DataHandler $dataHandler */
         $dataHandler = $this->dataHandlerFactory->create(['loggerType' => $this->loggerType]);
-        $dataHandler->initFeed($index);
+        $dataHandler->initFeed($index, $store);
         $this->setFeed($dataHandler->getFullFeed());
         $dataHandler->reset();
 
@@ -277,13 +278,14 @@ class Manager
      * Performing operations related to build and write feed data to a file
      *
      * @param $index
+     * @param null $store
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function executeForDownload($index)
+    public function executeForDownload($index, $store = null)
     {
-        $this->initExecute($index)
+        $this->initExecute($index, $store)
             ->serializeFeed()
             ->writeFeed();
 
@@ -295,11 +297,12 @@ class Manager
      *
      * @param $index
      * @param string $type
+     * @param null $store
      * @return bool
      * @throws \Magento\Framework\Exception\FileSystemException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function execute($index, $type = FeedConfig::FEED_TYPE_FULL)
+    public function execute($index, $type = FeedConfig::FEED_TYPE_FULL, $store = null)
     {
         if (empty($index)) {
             $this->logger->error('Unable to execute feed. Index data are empty.');
@@ -310,7 +313,7 @@ class Manager
         $this->logger->info('START feed execute.')->startTimer();
 
         $ids = ($type == FeedConfig::FEED_TYPE_FULL) ? [] : array_keys($index);
-        $this->preProcessActions($ids, $type);
+        $this->preProcessActions($ids, $type, $store);
         if ($this->isFeedLock) {
             $this->lockedTime = round(microtime(true) - $this->lockedTime, 2);
             $this->logger->error(
@@ -324,10 +327,10 @@ class Manager
         $this->type = $type;
 
         $this->startProfiler()
-            ->initExecute($index)
+            ->initExecute($index, $store)
             ->serializeFeed()
             ->writeFeed()
-            ->sendFeed()
+            ->sendFeed($store)
             ->postProcessActions()
             ->stopProfiler();
 
@@ -374,7 +377,7 @@ class Manager
             $fileManager = $this->getFileManager();
             // remove old file if exist
             if ($fileManager->isExist()) {
-                $fileManager->deleteFile();
+                $fileManager->deleteSourcePath();
             }
 
             try {
@@ -485,17 +488,17 @@ class Manager
     /**
      * @param ApiConnector $connectorManager
      * @param FeedResponse $response
+     * @param null $store
      * @return $this
-     * @throws \Magento\Framework\Exception\FileSystemException
      */
-    private function retrieveUploadedSize(ApiConnector $connectorManager, FeedResponse $response)
+    private function retrieveUploadedSize(ApiConnector $connectorManager, FeedResponse $response, $store = null)
     {
         $this->logger->info('Retrieve uploaded feed size.');
 
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET);
+                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET, [], [], $store);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
@@ -514,10 +517,10 @@ class Manager
     /**
      * @param ApiConnector $connectorManager
      * @param FeedResponse $response
+     * @param null $store
      * @return $this
-     * @throws \Magento\Framework\Exception\FileSystemException
      */
-    private function checkUploadedFeedStatus(ApiConnector $connectorManager, FeedResponse $response)
+    private function checkUploadedFeedStatus(ApiConnector $connectorManager, FeedResponse $response, $store = null)
     {
         $this->logger->info('Check uploaded feed status.');
 
@@ -533,7 +536,7 @@ class Manager
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute($apiEndpointType, \Zend_Http_Client::GET);
+                ->execute($apiEndpointType, \Zend_Http_Client::GET, [], [], $store);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
@@ -551,10 +554,10 @@ class Manager
     /**
      * Send feed data through Unbxd API
      *
+     * @param null $store
      * @return $this
-     * @throws \Magento\Framework\Exception\FileSystemException
      */
-    private function sendFeed()
+    private function sendFeed($store = null)
     {
         $this->logger->info('Send feed to service.');
 
@@ -573,7 +576,7 @@ class Manager
         /** @var \Unbxd\ProductFeed\Model\Feed\Api\Connector $connectorManager */
         $connectorManager = $this->getConnectorManager();
         try {
-            $connectorManager->execute($this->type,\Zend_Http_Client::POST, [], $params);
+            $connectorManager->execute($this->type,\Zend_Http_Client::POST, [], $params, $store);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
@@ -592,10 +595,10 @@ class Manager
             if (!$response->getIsError()) {
                 // additional API calls
                 if (FeedConfig::VALIDATE_STATUS_FOR_UPLOADED_FEED) {
-                    $this->checkUploadedFeedStatus($connectorManager, $response);
+                    $this->checkUploadedFeedStatus($connectorManager, $response, $store);
                 }
                 if (FeedConfig::RETRIEVE_SIZE_FOR_UPLOADED_FEED) {
-                    $this->retrieveUploadedSize($connectorManager, $response);
+                    $this->retrieveUploadedSize($connectorManager, $response, $store);
                 }
             }
         }
@@ -606,12 +609,13 @@ class Manager
     /**
      * Perform actions before
      *
-     * @param array $ids
-     * @param string $type
+     * @param $ids
+     * @param $type
+     * @param null $store
      * @return $this
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function preProcessActions($ids, $type)
+    public function preProcessActions($ids, $type, $store = null)
     {
         $this->logger->info('Pre-process execution actions.');
 
@@ -639,10 +643,8 @@ class Manager
             }
         );
 
-        // @TODO - need to figure out with stores
-        $storeId = 1;
         // create feed view for current API operation
-        $feedViewId = $this->getFeedViewManager()->add($ids, $type, $storeId);
+        $feedViewId = $this->getFeedViewManager()->add($ids, $type, $store);
         if ($feedViewId) {
             $this->feedViewId = $feedViewId;
         }
@@ -875,6 +877,18 @@ class Manager
     }
 
     /**
+     * Reset file manager instance to initial state
+     *
+     * @return $this
+     */
+    private function resetFileManager()
+    {
+        $this->fileManager = null;
+
+        return $this;
+    }
+
+    /**
      * Retrieve connector manager instance. Init if needed
      *
      * @param array $data
@@ -891,6 +905,18 @@ class Manager
     }
 
     /**
+     * Reset connector manager instance to initial state
+     *
+     * @return $this
+     */
+    private function resetConnectorManager()
+    {
+        $this->connectorManager = null;
+
+        return $this;
+    }
+
+    /**
      * Reset all cache handlers to initial state
      *
      * @return void
@@ -903,5 +929,7 @@ class Manager
         $this->lockedTime = null;
         $this->feedViewId = null;
         $this->uploadedFeedSize = 0;
+        $this->resetFileManager()
+            ->resetConnectorManager();
     }
 }

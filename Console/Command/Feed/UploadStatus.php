@@ -11,6 +11,7 @@
  */
 namespace Unbxd\ProductFeed\Console\Command\Feed;
 
+use Magento\Store\Model\Store;
 use Unbxd\ProductFeed\Console\Command\Feed\AbstractCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -51,6 +52,13 @@ class UploadStatus extends AbstractCommand
     {
         $this->setName('unbxd:product-feed:upload-status')
             ->setDescription('Check upload status for provided upload ID (if empty last upload ID will be used)')
+            ->addOption(
+                self::STORE_INPUT_OPTION_KEY,
+                's',
+                InputOption::VALUE_REQUIRED,
+                'Use the specific Store View',
+                Store::DEFAULT_STORE_ID
+            )
             ->addOption(
                 self::TYPE_INPUT_OPTION_KEY,
                 't',
@@ -97,7 +105,9 @@ class UploadStatus extends AbstractCommand
     {
         $this->initAreaCode();
 
-        if (!$this->feedHelper->isAuthorizationCredentialsSetup()) {
+        $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY) ?: 1;
+
+        if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
             return false;
         }
@@ -120,12 +130,12 @@ class UploadStatus extends AbstractCommand
             $connectorManager->resetHeaders()
                 ->resetParams()
                 ->setExtraParams([FeedViewInterface::UPLOAD_ID => $uploadId])
-                ->execute($type, \Zend_Http_Client::GET);
+                ->execute($type, \Zend_Http_Client::GET, [], [], $storeId);
         } catch (\Exception $e) {
             throw new \Exception(__($e->getMessage()));
         }
 
-        $this->buildResponse($output, $connectorManager, $uploadId);
+        $this->buildResponse($output, $connectorManager, $uploadId, $storeId);
 
         $this->postProcessActions($output);
 

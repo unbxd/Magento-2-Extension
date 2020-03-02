@@ -266,12 +266,13 @@ class Connector
     /**
      * Prepare API authorization params for request
      *
+     * @param null $store
      * @return bool
      */
-    private function prepareAuthorizationParams()
+    private function prepareAuthorizationParams($store = null)
     {
-        $secretKey = $this->helperData->getSecretKey();
-        $siteKey = $this->helperData->getSiteKey();
+        $secretKey = $this->helperData->getSecretKey($store);
+        $siteKey = $this->helperData->getSiteKey($store);
         if (!$secretKey || !$siteKey) {
             return false;
         }
@@ -304,10 +305,11 @@ class Connector
     /**
      * Prepare API url for request
      *
-     * @param string $type
+     * @param $type
+     * @param null $store
      * @return bool
      */
-    private function prepareApiUrl($type)
+    private function prepareApiUrl($type, $store = null)
     {
         if (!$siteKey = $this->getSiteKey()) {
             return false;
@@ -324,27 +326,27 @@ class Connector
         }
 
         if ($type == FeedConfig::FEED_TYPE_FULL) {
-            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint();
+            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store);
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
         } else if ($type == FeedConfig::FEED_TYPE_INCREMENTAL) {
-            $apiEndpoint = $this->helperData->getIncrementalFeedApiEndpoint();
+            $apiEndpoint = $this->helperData->getIncrementalFeedApiEndpoint($store);
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
         } else if ($type == FeedConfig::FEED_TYPE_FULL_UPLOADED_STATUS) {
-            $apiEndpoint = $this->helperData->getFullUploadedStatusApiEndpoint();
+            $apiEndpoint = $this->helperData->getFullUploadedStatusApiEndpoint($store);
             $uploadId = $this->retrieveUploadId();
             if (!$uploadId) {
                 return false;
             }
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey, $uploadId));
         } else if ($type == FeedConfig::FEED_TYPE_INCREMENTAL_UPLOADED_STATUS) {
-            $apiEndpoint = $this->helperData->getIncrementalUploadedStatusApiEndpoint();
+            $apiEndpoint = $this->helperData->getIncrementalUploadedStatusApiEndpoint($store);
             $uploadId = $this->retrieveUploadId();
             if (!$uploadId) {
                 return false;
             }
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey, $uploadId));
         } else if ($type == FeedConfig::FEED_TYPE_UPLOADED_SIZE) {
-            $apiEndpoint = $this->helperData->getUploadedSizeApiEndpoint();
+            $apiEndpoint = $this->helperData->getUploadedSizeApiEndpoint($store);
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
         }
 
@@ -369,6 +371,7 @@ class Connector
      * @param string $method
      * @param array $headers
      * @param array $params
+     * @param null $store
      * @return $this
      * @throws \Exception
      */
@@ -376,9 +379,10 @@ class Connector
         $type = FeedConfig::FEED_TYPE_FULL,
         $method = \Zend_Http_Client::POST,
         $headers = [],
-        $params = []
+        $params = [],
+        $store = null
     ) {
-        $this->buildRequest($type, $method, $headers, $params);
+        $this->buildRequest($type, $method, $headers, $params, $store);
         $this->call();
 
         return $this;
@@ -391,6 +395,7 @@ class Connector
      * @param string $method
      * @param array $headers
      * @param array $params
+     * @param null $store
      * @return $this
      * @throws \Exception
      */
@@ -398,13 +403,14 @@ class Connector
         $type = FeedConfig::FEED_TYPE_FULL,
         $method = \Zend_Http_Client::POST,
         $headers = [],
-        $params = []
+        $params = [],
+        $store = null
     ) {
-        if (!$this->prepareAuthorizationParams()) {
+        if (!$this->prepareAuthorizationParams($store)) {
             $this->doError(__('Please provide API credentials to perform this operation.'));
         }
 
-        if (!$this->prepareApiUrl($type)) {
+        if (!$this->prepareApiUrl($type, $store)) {
             $this->doError(__('API url must be set up before using API calls.'));
         }
 

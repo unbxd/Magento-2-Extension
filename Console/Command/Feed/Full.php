@@ -70,8 +70,18 @@ class Full extends AbstractCommand
     {
         $this->initAreaCode();
 
+        $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY);
+        $stores = [$this->getDefaultStoreId()];
+        if ($storeId) {
+            // in case if store code was passed instead of store id
+            if (!is_numeric($storeId)) {
+                $storeId = $this->getStoreIdByCode($storeId, $stores);
+            }
+            $stores = [$storeId];
+        }
+
         // check authorization credentials
-        if (!$this->feedHelper->isAuthorizationCredentialsSetup()) {
+        if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
             return false;
         }
@@ -89,16 +99,6 @@ class Full extends AbstractCommand
         if (!count($productIds)) {
             $output->writeln("<error>There are no products to perform this operation.</error>");
             return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
-        }
-
-        $stores = [$this->getDefaultStoreId()];
-        $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY);
-        if ($storeId) {
-            // in case if store code was passed instead of store id
-            if (!is_numeric($storeId)) {
-                $storeId = $this->getStoreIdByCode($storeId, $stores);
-            }
-            $stores = [$storeId];
         }
 
         // pre process actions
@@ -127,7 +127,7 @@ class Full extends AbstractCommand
 
                 try {
                     $output->writeln("<info>Execute feed...</info>");
-                    $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_FULL);
+                    $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_FULL, $storeId);
                 } catch (\Exception $e) {
                     $output->writeln("<error>Feed execution error: {$e->getMessage()}</error>");
                     $errors[$storeId] = $e->getMessage();

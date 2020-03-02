@@ -24,6 +24,8 @@ use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Magento\Framework\Indexer\Dimension;
+use Magento\Framework\Indexer\DimensionFactory;
 
 /**
  * Class Product
@@ -87,6 +89,11 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
     private $consoleOutput;
 
     /**
+     * @var DimensionFactory
+     */
+    private $dimensionFactory;
+
+    /**
      * Product constructor.
      * @param IndexerRegistry $indexerRegistry
      * @param FullAction $fullAction
@@ -98,6 +105,7 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
      * @param StoreManagerInterface $storeManager
      * @param ManagerInterface $messageManager
      * @param ConsoleOutput $consoleOutput
+     * @param DimensionFactory $dimensionFactory
      */
     public function __construct(
         IndexerRegistry $indexerRegistry,
@@ -109,7 +117,8 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
         LoggerInterface $logger,
         StoreManagerInterface $storeManager,
         ManagerInterface $messageManager,
-        ConsoleOutput $consoleOutput
+        ConsoleOutput $consoleOutput,
+        DimensionFactory $dimensionFactory
     ) {
         $this->indexerRegistry = $indexerRegistry;
         $this->fullAction = $fullAction;
@@ -121,6 +130,7 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
         $this->storeManager = $storeManager;
         $this->messageManager = $messageManager;
         $this->consoleOutput = $consoleOutput;
+        $this->dimensionFactory = $dimensionFactory;
     }
 
     /**
@@ -147,9 +157,6 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
             return false;
         }
 
-        // @TODO - need to figure out with stores
-        $storeId = 1;
-        $specificStoreId = null;
         // detect reindex action type
         $reindexType = IndexingQueue::TYPE_REINDEX_ROW;
         if (empty($ids)) {
@@ -161,21 +168,14 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
             $reindexType = IndexingQueue::TYPE_REINDEX_LIST;
         }
 
-        if ($reindexType == IndexingQueue::TYPE_REINDEX_ROW) {
-            // try to retrieve store id related to affected product
-            /** @var \Magento\Catalog\Model\Product $affectedProduct */
-            $affectedProduct = $this->productHelper->getProduct($ids);
-            $specificStoreId = $storeId;
-        }
-
-        if ($specificStoreId) {
-            $this->executeAction($ids, $reindexType, $specificStoreId);
+        if ($reindexType == IndexingQueue::TYPE_REINDEX_FULL) {
+            $this->executeAction($ids, $reindexType, 1);
         } else {
-//            $storeIds = array_keys($this->storeManager->getStores());
-//            foreach ($storeIds as $storeId) {
-//                $this->executeAction($storeId, $ids, $reindexType);
-//            }
-            $this->executeAction($ids, $reindexType, $storeId);
+            // for each store only in case if row or list reindex
+            foreach ($this->getDimensions() as $dimension) {
+                /** @var Dimension $dimension */
+                $this->executeAction($ids, $reindexType, $dimension->getValue());
+            }
         }
     }
 
@@ -260,5 +260,26 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
             $id = [$id];
         }
         $this->execute($id);
+    }
+
+    /**
+     * @return array
+     */
+    private function getDimensions()
+    {
+        $dimensions = [];
+        $storeIds = array_keys($this->storeManager->getStores());
+        foreach ($storeIds as $storeId) {
+            if (class_exists(Dimension::class)) {
+                $dimensions[] = $this->dimensionFactory->create('scope', (string) $storeId);
+            } else {
+                $dimension = new \Magento\Framework\DataObject();
+                $dimension->setName('scope');
+                $dimension->setValue($storeId);
+                $dimensions[] = $dimension;
+            }
+        }
+
+        return $dimensions;
     }
 }

@@ -393,7 +393,7 @@ class CronManager
 
         $this->lockProcess = true;
 
-        $indexData = [];
+        $collectedIndexData = [];
         $isFullReindex = false;
         foreach ($jobs as $job) {
             /** @var \Unbxd\ProductFeed\Model\IndexingQueue $job */
@@ -419,10 +419,7 @@ class CronManager
             $isReindexSuccess = false;
             $jobIndexData = [];
             $error = false;
-            // @TODO - need to figure out with stores
-            $storeId = (!$job->getStoreId() || ($job->getStoreId() == Store::DEFAULT_STORE_ID))
-                ? $this->storeManager->getStore()->getId()
-                : $job->getStoreId();
+            $storeId = $job->getStoreId();
 
             try {
                 $jobIndexData = $this->fullReindexAction->rebuildProductStoreIndex($storeId, $jobData);
@@ -465,17 +462,23 @@ class CronManager
             $this->queueHandler->update($jobId, $updateData);
 
             if ($isReindexSuccess && !empty($jobIndexData)) {
-                $indexData += $jobIndexData;
+                if (!array_key_exists($storeId, $collectedIndexData)) {
+                    $collectedIndexData[$storeId] = $jobIndexData;
+                } else {
+                    $collectedIndexData[$storeId] += $jobIndexData;
+                }
             }
         }
 
-        if (empty($indexData)) {
+        if (empty($collectedIndexData)) {
             $this->logger->error('Can\'t execute feed. Empty index data.');
             return;
         }
 
         $type = $isFullReindex ? FeedConfig::FEED_TYPE_FULL : FeedConfig::FEED_TYPE_INCREMENTAL;
-        $this->feedManager->execute($indexData, $type);
+        foreach ($collectedIndexData as $store => $data) {
+            $this->feedManager->execute($data, $type, $store);
+        }
 
         $this->lockProcess = false;
     }
@@ -510,6 +513,7 @@ class CronManager
         foreach ($jobs as $job) {
             /** @var \Unbxd\ProductFeed\Model\FeedView $job */
             $jobId = $job->getId();
+            $storeId = $job->getStoreId();
             $uploadId = trim($job->getUploadId());
             $jobType = trim($job->getOperationTypes());
             if (!$jobId || !$uploadId) {
@@ -526,7 +530,7 @@ class CronManager
                 $connectorManager->resetHeaders()
                     ->resetParams()
                     ->setExtraParams([FeedViewInterface::UPLOAD_ID => $uploadId])
-                    ->execute($apiEndpointType, \Zend_Http_Client::GET);
+                    ->execute($apiEndpointType, \Zend_Http_Client::GET, [], [], $storeId);
             } catch (\Exception $e) {
                 return;
             }
@@ -554,7 +558,7 @@ class CronManager
                                 __(FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_COMPLETE);
 
                             // additional API call to retrieve upload feed size if available
-                            $feedSize = $this->retrieveUploadFeedSize($connectorManager, $response);
+                            $feedSize = $this->retrieveUploadFeedSize($connectorManager, $response, $storeId);
                             if ($feedSize > 0) {
                                 $message = sprintf(FeedConfig::FEED_MESSAGE_UPLOAD_SIZE, $feedSize);
                                 $message = sprintf(
@@ -587,14 +591,15 @@ class CronManager
      *
      * @param ApiConnector $connectorManager
      * @param FeedResponse $response
+     * @param null $store
      * @return int
      */
-    private function retrieveUploadFeedSize(ApiConnector $connectorManager, FeedResponse $response)
+    private function retrieveUploadFeedSize(ApiConnector $connectorManager, FeedResponse $response, $store = null)
     {
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET);
+                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET, [], [], $store);
         } catch (\Exception $e) {
             return 0;
         }

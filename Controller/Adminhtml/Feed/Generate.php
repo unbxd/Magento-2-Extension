@@ -14,24 +14,24 @@ namespace Unbxd\ProductFeed\Controller\Adminhtml\Feed;
 use Unbxd\ProductFeed\Controller\Adminhtml\ActionIndex;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
+use Unbxd\ProductFeed\Model\BackgroundTaskManager;
+use Unbxd\ProductFeed\Console\Command\Feed\Download;
 
 /**
- * Class Generate
+ * Class GenerateTest
  * @package Unbxd\ProductFeed\Controller\Adminhtml\Feed
  */
 class Generate extends ActionIndex
 {
     /**
      * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\Result\Json|\Magento\Framework\Controller\ResultInterface
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute()
     {
         // mark for download to display message notification after the feed is generated
-        // set default parameters for execute process in background mode
-        $this->setIsGeneratedForDownload(true)
-            ->setDefaultParameters();
+        $this->setIsGeneratedForDownload(true);
 
         /** @var \Magento\Framework\Controller\Result\Json $resultJson */
         $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON);
@@ -44,55 +44,22 @@ class Generate extends ActionIndex
             return $resultJson;
         }
 
-        $this->messageManager->addSuccessMessage(__('Product feed generation was started. Generating may take
-            some time depending on the catalog size. Once the product feed is generated you will be able
-            to download it as an archive file in ZIP format.')
+        $storeId = $this->getCurrentStoreId();
+        $storeName = $this->getStore($storeId)->getName();
+        try {
+            /** @var BackgroundTaskManager $backgroundTaskManager */
+            $backgroundTaskManager = $this->backgroundTaskManagerFactory->create();
+            $backgroundTaskManager->execute([Download::COMMAND], $storeId);
+        } catch (\Exception $e) {
+            $this->messageManager->addErrorMessage(__('Unable to generate product feed. Error %1', $e->getMessage()));
+            return $resultJson;
+        }
+
+        $this->messageManager->addSuccessMessage(__('Product feed generation for store with ID %1 (%2) was started.
+            Generating may take some time depending on the catalog size. Once the product feed is generated
+            you will be able to download it as an archive file in ZIP format.', $storeId, $storeName)
         );
 
-        /** @var \Unbxd\ProductFeed\Model\Indexer\Product\Full\Action\Full $reindexAction */
-        $reindexAction = $this->reindexActionFactory->create();
-        try {
-            $index = $reindexAction->rebuildProductStoreIndex($this->getStore()->getId(), []);
-        } catch (\Exception $e) {
-            $this->messageManager->addErrorMessage(__('Unable to build product store index.'));
-            return $resultJson;
-        }
-
-        if (empty($index)) {
-            $this->messageManager->addErrorMessage(__('Product store index is empty.'));
-            return $resultJson;
-        }
-
-        $this->generateProductFeed($index);
-
         return $resultJson;
-    }
-
-    /**
-     * Ignore user aborts and allow the script to run forever
-     *
-     * @return $this
-     */
-    private function setDefaultParameters()
-    {
-        ignore_user_abort(true);
-        set_time_limit(0);
-
-        return $this;
-    }
-
-    /**
-     * @param array $index
-     * @return $this
-     * @throws \Magento\Framework\Exception\FileSystemException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    private function generateProductFeed(array $index)
-    {
-        /** @var \Unbxd\ProductFeed\Model\Feed\Manager $feedManager */
-        $feedManager = $this->feedManagerFactory->create();
-        $feedManager->executeForDownload($index);
-
-        return $this;
     }
 }

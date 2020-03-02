@@ -13,6 +13,7 @@ namespace Unbxd\ProductFeed\Controller\Adminhtml;
 
 use Magento\Backend\App\Action;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Unbxd\ProductFeed\Helper\Feed as FeedHelper;
 use Unbxd\ProductFeed\Helper\ProductHelper;
@@ -104,5 +105,15 @@ abstract class FeedActionIndex extends Action
     protected function getStore($store = '')
     {
         return $this->storeManager->getStore($store);
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    protected function getCurrentStoreId($store = null)
+    {
+        return $this->_request->getParam(Store::ENTITY, $this->getStore($store)->getId());
     }
 }

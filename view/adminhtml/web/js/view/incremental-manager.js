@@ -166,7 +166,8 @@ define([
         synchronize: function (event) {
             var self = this,
                 isActionAllow = self.jsonConfig.isActionAllow,
-                url = self.jsonConfig.url.incrementalSync;
+                url = self.jsonConfig.url.incrementalSync,
+                store = self.jsonConfig.store;
 
             event.stopPropagation();
 
@@ -189,10 +190,10 @@ define([
                     /** @inheritdoc */
                     confirm: function () {
                         self.isLoading(true);
-                        console.log('confirm');
                         actionManager(url, 'POST', {
                             'form_key': self.formKey,
-                            'ids': self.productIds
+                            'ids': self.productIds,
+                            'store': store
                         });
                     },
 

@@ -82,7 +82,7 @@ class Full extends ActionIndex
             $data[IndexingQueue::QUEUE_ID] = null;
         }
         if (!isset($data[IndexingQueue::STORE_ID])) {
-            $data[IndexingQueue::STORE_ID] = $this->getStore()->getId();
+            $data[IndexingQueue::STORE_ID] = $this->getCurrentStoreId();
         }
         if (!isset($data[IndexingQueue::STATUS])) {
             $data[IndexingQueue::STATUS] = IndexingQueue::STATUS_PENDING;

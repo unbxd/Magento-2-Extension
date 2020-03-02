@@ -218,6 +218,7 @@
                 <item name="unbxd_productfeed_incremental" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\Incremental</item>
                 <item name="unbxd_productfeed_upload_status" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\UploadStatus</item>
                 <item name="unbxd_productfeed_upload_size" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\UploadSize</item>
+                <item name="unbxd_productfeed_download" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\Download</item>
             </argument>
         </arguments>
     </type>
@@ -266,4 +267,17 @@
         </arguments>
     </type>
     <!-- END: data fields mapping config -->
+
+    <!-- START: shell background task -->
+    <virtualType name="unbxdFeedShellBackground" type="Magento\Framework\Shell">
+        <arguments>
+            <argument name="commandRenderer" xsi:type="object">Magento\Framework\Shell\CommandRendererBackground</argument>
+        </arguments>
+    </virtualType>
+    <type name="Unbxd\ProductFeed\Model\BackgroundTaskManager">
+        <arguments>
+            <argument name="shell" xsi:type="object">unbxdFeedShellBackground</argument>
+        </arguments>
+    </type>
+    <!-- END: shell background task -->
 </config>

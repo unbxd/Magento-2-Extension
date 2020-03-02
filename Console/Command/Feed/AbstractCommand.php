@@ -27,6 +27,8 @@ use Unbxd\ProductFeed\Model\Feed\Manager as FeedManager;
 use Unbxd\ProductFeed\Model\Feed\ManagerFactory as FeedManagerFactory;
 use Unbxd\ProductFeed\Model\Feed\Api\ConnectorFactory;
 use Unbxd\ProductFeed\Model\Feed\Api\Connector as ApiConnector;
+use Unbxd\ProductFeed\Model\Feed\FileManagerFactory;
+use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
 
 /**
  * Class AbstractCommand
@@ -113,6 +115,18 @@ abstract class AbstractCommand extends Command
     private $connectorManager = null;
 
     /**
+     * @var FileManagerFactory
+     */
+    private $fileManagerFactory;
+
+    /**
+     * Local cache for feed file manager
+     *
+     * @var null
+     */
+    private $feedFileManager = null;
+
+    /**
      * AbstractCommand constructor.
      * @param AppState $state
      * @param FeedHelper $feedHelper
@@ -123,6 +137,7 @@ abstract class AbstractCommand extends Command
      * @param CronManagerFactory $cronManagerFactory
      * @param FeedManagerFactory $feedManagerFactory
      * @param ConnectorFactory $connectorFactory
+     * @param FileManagerFactory $fileManagerFactory
      */
     public function __construct(
         AppState $state,
@@ -133,7 +148,8 @@ abstract class AbstractCommand extends Command
         CacheManagerFactory $cacheManagerFactory,
         CronManagerFactory $cronManagerFactory,
         FeedManagerFactory $feedManagerFactory,
-        ConnectorFactory $connectorFactory
+        ConnectorFactory $connectorFactory,
+        FileManagerFactory $fileManagerFactory
     ) {
         $this->appState = $state;
         $this->feedHelper = $feedHelper;
@@ -144,6 +160,7 @@ abstract class AbstractCommand extends Command
         $this->cronManagerFactory = $cronManagerFactory;
         $this->feedManagerFactory = $feedManagerFactory;
         $this->connectorFactory = $connectorFactory;
+        $this->fileManagerFactory = $fileManagerFactory;
         parent::__construct();
     }
 
@@ -217,6 +234,21 @@ abstract class AbstractCommand extends Command
         }
 
         return $this->connectorManager;
+    }
+
+    /**
+     * Retrieve feed file manager instance. Init if needed
+     *
+     * @return FeedFileManager|null
+     */
+    public function getFeedFileManager()
+    {
+        if (null === $this->feedFileManager) {
+            /** @var FeedFileManager */
+            $this->feedFileManager = $this->fileManagerFactory->create();
+        }
+
+        return $this->feedFileManager;
     }
 
     /**

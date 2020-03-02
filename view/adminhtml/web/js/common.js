@@ -101,7 +101,8 @@ define([
                 isCronConfigured = self.options.config.isCronConfigured,
                 actionUrl = self.options.config.url.fullSync,
                 params = {
-                    'form_key': this.formKey
+                    'form_key': this.formKey,
+                    'store': self.options.config.store
                 };
 
             if (!isActionAllow) {
@@ -145,7 +146,8 @@ define([
             var self = this,
                 actionUrl = self.options.config.url.generate,
                 params = {
-                    'form_key': this.formKey
+                    'form_key': this.formKey,
+                    'store': self.options.config.store
                 };
 
             confirm({
@@ -156,8 +158,7 @@ define([
                     /** @inheritdoc */
                     confirm: function () {
                         $.extend(params, self.options.params);
-                        actionManager(actionUrl, 'POST', params, true, false);
-                        window.location.reload();
+                        actionManager(actionUrl, 'POST', params);
                     },
 
                     /** @inheritdoc */

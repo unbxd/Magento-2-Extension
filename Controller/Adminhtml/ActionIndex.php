@@ -14,6 +14,7 @@ namespace Unbxd\ProductFeed\Controller\Adminhtml;
 use Magento\Backend\App\Action;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Backend\Model\View\Result\RedirectFactory;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Ui\Component\MassAction\Filter as MassActionFilter;
 use Unbxd\ProductFeed\Model\CronManager;
@@ -32,6 +33,7 @@ use Unbxd\ProductFeed\Model\ResourceModel\FeedView\CollectionFactory as FeedView
 use Unbxd\ProductFeed\Model\Indexer\Product\Full\Action\FullFactory as ReindexActionFactory;
 use Unbxd\ProductFeed\Model\Feed\ManagerFactory as FeedManagerFactory;
 use Unbxd\ProductFeed\Model\Feed\FileManagerFactory as FeedFileManagerFactory;
+use Unbxd\ProductFeed\Model\BackgroundTaskManagerFactory;
 
 /**
  * Class ActionIndex
@@ -140,6 +142,11 @@ abstract class ActionIndex extends Action
     protected $feedFileManagerFactory;
 
     /**
+     * @var BackgroundTaskManagerFactory
+     */
+    protected $backgroundTaskManagerFactory;
+
+    /**
      * ActionIndex constructor.
      * @param Action\Context $context
      * @param PageFactory $resultPageFactory
@@ -160,6 +167,7 @@ abstract class ActionIndex extends Action
      * @param ReindexActionFactory $reindexActionFactory
      * @param FeedManagerFactory $feedManagerFactory
      * @param FeedFileManagerFactory $feedFileManagerFactory
+     * @param BackgroundTaskManagerFactory $backgroundTaskManagerFactory
      */
     public function __construct(
         Action\Context $context,
@@ -180,7 +188,8 @@ abstract class ActionIndex extends Action
         StoreManagerInterface $storeManager,
         ReindexActionFactory $reindexActionFactory,
         FeedManagerFactory $feedManagerFactory,
-        FeedFileManagerFactory $feedFileManagerFactory
+        FeedFileManagerFactory $feedFileManagerFactory,
+        BackgroundTaskManagerFactory $backgroundTaskManagerFactory
     ) {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
@@ -207,6 +216,7 @@ abstract class ActionIndex extends Action
         $this->reindexActionFactory = $reindexActionFactory;
         $this->feedManagerFactory = $feedManagerFactory;
         $this->feedFileManagerFactory = $feedFileManagerFactory;
+        $this->backgroundTaskManagerFactory = $backgroundTaskManagerFactory;
     }
 
     /**
@@ -226,9 +236,19 @@ abstract class ActionIndex extends Action
      * @return \Magento\Store\Api\Data\StoreInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    protected function getStore($store = '')
+    protected function getStore($store = null)
     {
         return $this->storeManager->getStore($store);
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    protected function getCurrentStoreId($store = null)
+    {
+        return $this->_request->getParam(Store::ENTITY, $this->getStore($store)->getId());
     }
 
     /**

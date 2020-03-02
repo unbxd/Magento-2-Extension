@@ -71,8 +71,10 @@ class UploadSize extends AbstractCommand
     {
         $this->initAreaCode();
 
+        $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY) ?: 1;
+
         // check authorization credentials
-        if (!$this->feedHelper->isAuthorizationCredentialsSetup()) {
+        if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
             return false;
         }
@@ -80,14 +82,12 @@ class UploadSize extends AbstractCommand
         // pre process actions
         $this->preProcessActions($output);
 
-        $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY) ?: 1;
-
         /** @var ApiConnector $connectorManager */
         $connectorManager = $this->getConnectorManager();
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET);
+                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET, [], [], $storeId);
         } catch (\Exception $e) {
             throw new \Exception(__($e->getMessage()));
         }

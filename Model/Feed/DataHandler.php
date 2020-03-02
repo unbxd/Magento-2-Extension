@@ -13,6 +13,8 @@ namespace Unbxd\ProductFeed\Model\Feed;
 
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Helper\Product as HelperProduct;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Api\Data\StoreInterface;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Helper\Feed as FeedHelper;
 use Unbxd\ProductFeed\Helper\ProductHelper;
@@ -218,12 +220,13 @@ class DataHandler
 
     /**
      * @param array $index
+     * @param null $store
      * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    public function initFeed(array $index)
+    public function initFeed(array $index, $store = null)
     {
-        $this->prepareData($index);
+        $this->prepareData($index, $store);
         $this->buildFeed();
 
         return $this->getFullFeed();
@@ -233,10 +236,11 @@ class DataHandler
      * Prepare index data for feed operations
      *
      * @param array $index
+     * @param null $store
      * @return $this
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    public function prepareData(array $index)
+    public function prepareData(array $index, $store = null)
     {
         $this->logger->info('Prepare feed content based on index data.');
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_prepare_data_before.');
@@ -244,7 +248,7 @@ class DataHandler
             ['index' => $index, 'feed_manager' => $this]
         );
 
-        $this->buildCatalogData($index);
+        $this->buildCatalogData($index, $store);
 
         $schemaFields = array_key_exists('fields', $index) ? $index['fields'] : false;
         if ($schemaFields) {
@@ -258,6 +262,30 @@ class DataHandler
         );
 
         return $this;
+    }
+
+    /**
+     * @param $key
+     * @return $this
+     */
+    private function setChildrenSchemaFields($key)
+    {
+        if (!in_array($key, $this->childrenSchemaFields)) {
+            $this->childrenSchemaFields[] = $key;
+            if ($key == Config::SPECIFIC_FIELD_KEY_UNIQUE_ID) {
+                $this->childrenSchemaFields[] = Config::CHILD_PRODUCT_FIELD_VARIANT_ID;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    private function getChildrenSchemaFields()
+    {
+        return array_unique($this->childrenSchemaFields);
     }
 
     /**
@@ -308,32 +336,30 @@ class DataHandler
     private function appendChildFieldsToSchema(array &$fields)
     {
         // try to add children fields to schema
-        if (!empty($this->childrenSchemaFields)) {
-            foreach (array_values($this->childrenSchemaFields) as $childField) {
-                // add only fields that already exist in schema fields
-                if (array_key_exists($childField, $fields)) {
-                    $childKey = sprintf(
-                        '%s%s',
-                        FeedConfig::CHILD_PRODUCT_FIELD_PREFIX,
-                        ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField))
-                    );
-                    if (!array_key_exists($childKey, $fields)) {
-                        $childFieldData = $fields[$childField];
-                        if (!empty($childFieldData)) {
-                            $childFieldData['fieldName'] = $childKey;
-                            $fields[$childKey] = $childFieldData;
-                        }
+        foreach ($this->getChildrenSchemaFields() as $childField) {
+            // add only fields that already exist in schema fields
+            if (array_key_exists($childField, $fields)) {
+                $childKey = sprintf(
+                    '%s%s',
+                    FeedConfig::CHILD_PRODUCT_FIELD_PREFIX,
+                    ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField))
+                );
+                if (!array_key_exists($childKey, $fields)) {
+                    $childFieldData = $fields[$childField];
+                    if (!empty($childFieldData)) {
+                        $childFieldData['fieldName'] = $childKey;
+                        $fields[$childKey] = $childFieldData;
                     }
-                } else if ($childField == FeedConfig::CHILD_PRODUCT_FIELD_VARIANT_ID) {
-                    // field 'variant_id' doesn't exist in main schema fields, add it manually
-                    $childField = SimpleDataObjectConverter::snakeCaseToCamelCase($childField);
-                    $fields[$childField] = [
-                        'fieldName' => $childField,
-                        'dataType' => FeedConfig::FIELD_TYPE_TEXT,
-                        'multiValued' => false,
-                        'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE
-                    ];
                 }
+            } else if ($childField == FeedConfig::CHILD_PRODUCT_FIELD_VARIANT_ID) {
+                // field 'variant_id' doesn't exist in main schema fields, add it manually
+                $childField = SimpleDataObjectConverter::snakeCaseToCamelCase($childField);
+                $fields[$childField] = [
+                    'fieldName' => $childField,
+                    'dataType' => FeedConfig::FIELD_TYPE_TEXT,
+                    'multiValued' => false,
+                    'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE
+                ];
             }
         }
 
@@ -342,10 +368,11 @@ class DataHandler
 
     /**
      * @param array $index
+     * @param null $store
      * @return $this
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    private function buildCatalogData(array $index)
+    private function buildCatalogData(array $index, $store = null)
     {
         if (empty($index)) {
             $this->logger->error('Can\'t prepare catalog data. Index data is empty.');
@@ -356,24 +383,22 @@ class DataHandler
         foreach ($index as $productId => &$data) {
             // schema fields has key 'fields', do only for products
             if (is_int($productId)) {
-                // apply data fields mapping
-                $this->applyWebsiteStoreFields($data)
-                    ->applyDataFieldsMapping($data);
-
                 // append child data to parent
                 if (
                     isset($data[Config::CHILD_PRODUCT_IDS_FIELD_KEY])
                     && !empty($data[Config::CHILD_PRODUCT_IDS_FIELD_KEY])
                 ) {
                     $currentChildIds = $data[Config::CHILD_PRODUCT_IDS_FIELD_KEY];
-                    $this->appendChildDataToParent($index, $data, $currentChildIds);
+                    $this->appendChildDataToParent($index, $data, $currentChildIds, $store);
                 } else {
                     // if product doesn't have children - add empty variants data
                     $data[Config::CHILD_PRODUCTS_FIELD_KEY] = [];
                 }
 
-                // filter index data helper fields
-                $this->filterFields($data);
+                // prepare data fields for needed requirements
+                if (!isset($data[Config::getPreparedKey()])) {
+                    $this->prepareFields($data, $store);
+                }
 
                 // check if product related to parent product (variant product),
                 // if so - do not add child to feed catalog data, just add it like variant product
@@ -450,16 +475,36 @@ class DataHandler
     }
 
     /**
+     * @param array $data
+     * @param null $store
+     * @return $this
+     * @throws NoSuchEntityException
+     */
+    private function prepareFields(array &$data, $store = null)
+    {
+        $this->applyWebsiteStoreFields($data, $store)
+            ->applyDataFieldsMapping($data)
+            ->filterFields($data);
+
+        // mark to prevent not prepared data
+        $data[Config::getPreparedKey()] = true;
+
+        return $this;
+    }
+
+
+    /**
      * Check and add 'website_id' and 'store_id' fields to formed feed
      * (in case if they missing in some reason)
      *
      * @param array $data
+     * @param null $store
      * @return $this
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    private function applyWebsiteStoreFields(array &$data)
+    private function applyWebsiteStoreFields(array &$data, $store = null)
     {
-        $storeId = $this->getStore()->getId();
+        $storeId = $store ? $store : $this->getStore()->getId();
         $fields = [
             Store::STORE_ID => $storeId,
             'website_id' => $this->getWebsite($storeId)->getId()
@@ -479,7 +524,7 @@ class DataHandler
      *
      * @param array $data
      * @return $this
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     private function applyDataFieldsMapping(array &$data)
     {
@@ -591,28 +636,26 @@ class DataHandler
         return $this->dataFieldsMapping;
     }
 
-    /**\
+    /**
      * @param array $index
      * @param array $parentData
      * @param array $childIds
+     * @param null $store
      * @return $this
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
-    private function appendChildDataToParent(array &$index, array &$parentData, array $childIds)
+    private function appendChildDataToParent(array &$index, array &$parentData, array $childIds, $store = null)
     {
         foreach ($childIds as $id) {
             if (!array_key_exists($id, $index)) {
+                // child product doesn't exist in index
                 continue;
             }
 
             if (!isset($index[$id][Config::getPreparedKey()])) {
-                // in case if child data not prepared yet
-                $this->applyWebsiteStoreFields($index[$id])
-                    ->applyDataFieldsMapping($index[$id])
-                    ->filterFields($index[$id]);
+                $this->prepareFields($index[$id], $store);
             }
-
-            $childData = $this->formatChildData($index[$id], $id);
+            $childData = $this->formatChildFields($index[$id], $id);
             if (!empty($childData)) {
                 $parentData[Config::CHILD_PRODUCTS_FIELD_KEY][] = $childData;
             }
@@ -626,7 +669,7 @@ class DataHandler
      * @param $childId
      * @return array
      */
-    private function formatChildData(array $data, $childId)
+    private function formatChildFields(array $data, $childId)
     {
         if (!isset($this->childrenData[$childId])) {
             // remove helper fields from child data if any
@@ -642,17 +685,11 @@ class DataHandler
                 }
             }
 
-            $variantIdKey = SimpleDataObjectConverter::snakeCaseToCamelCase(
-                Config::CHILD_PRODUCT_FIELD_VARIANT_ID
-            );
+            $variantIdKey = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::CHILD_PRODUCT_FIELD_VARIANT_ID);
             foreach ($data as $key => $value) {
-                // map child fields to use for add to schema fields
-                if (!in_array($key, $this->childrenSchemaFields)) {
-                    $this->childrenSchemaFields[$key] = $key;
-                    if ($key == Config::SPECIFIC_FIELD_KEY_UNIQUE_ID) {
-                        $this->childrenSchemaFields[$key] = Config::CHILD_PRODUCT_FIELD_VARIANT_ID;
-                    }
-                }
+                // collect child fields to use for add to schema fields
+                $this->setChildrenSchemaFields($key);
+
                 $newKey = sprintf(
                     '%s%s',
                     Config::CHILD_PRODUCT_FIELD_PREFIX,
@@ -660,11 +697,10 @@ class DataHandler
                 );
 
                 if (
-                in_array($key, [
+                    in_array($key, [
                         Config::SPECIFIC_FIELD_KEY_UNIQUE_ID,
                         SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID)
-                    ]
-                )
+                    ])
                 ) {
                     $newKey = $variantIdKey;
                 }
@@ -677,9 +713,9 @@ class DataHandler
 
             if (!isset($data[$variantIdKey])) {
                 // omit children product if variant ID is not specified
-                return [];
+                $this->childrenData[$childId] = [];
+                return $this->childrenData[$childId];
             }
-
             $this->childrenData[$childId] = $data;
         }
 
@@ -793,11 +829,6 @@ class DataHandler
         // convert option values and labels only in labels
         $this->prepareOptionValues($data);
 
-        // mark to prevent not prepared data
-        if (!isset($data[Config::getPreparedKey()])) {
-            $data[Config::getPreparedKey()] = true;
-        }
-
         return $this;
     }
 
@@ -862,7 +893,8 @@ class DataHandler
     private function getFrontendUrl($routePath, $scope = '')
     {
         $this->frontendUrlBuilder->setScope($scope);
-        $href = $this->frontendUrlBuilder->getUrl(
+
+        return $this->frontendUrlBuilder->getUrl(
             $routePath,
             [
                 '_current' => false,
@@ -870,8 +902,6 @@ class DataHandler
                 '_query' => false
             ]
         );
-
-        return $href;
     }
 
     /**
@@ -893,8 +923,8 @@ class DataHandler
 
     /**
      * @param string $storeId
-     * @return \Magento\Store\Api\Data\StoreInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return StoreInterface
+     * @throws NoSuchEntityException
      */
     private function getStore($storeId = '')
     {
@@ -904,7 +934,7 @@ class DataHandler
     /**
      * @param string $storeId
      * @return mixed
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     private function getWebsite($storeId = '')
     {

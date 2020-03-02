@@ -1,4 +1,12 @@
-# Version 1.0.36
+# Version 1.0.37
+## 1.0.37 - Mar 02, 2020
+### Improvements
+- Implemented CLI command responsible for generate product feed for download.
+- Code refactoring.
+### Fix Issues
+- Fixed issues related to multi store.
+- Fixed issue related to generating feed for download.
+
 ## 1.0.36 - Feb 22, 2020
 ### Fix Issues
 - Fixed an issue with some mapped fields that were not declared in the product feed schema.
