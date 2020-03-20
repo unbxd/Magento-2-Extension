@@ -17,7 +17,7 @@
     <default>
         <unbxd_setup>
             <general>
-                <site_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <site_key></site_key>
                 <secret_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
                 <api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
             </general>

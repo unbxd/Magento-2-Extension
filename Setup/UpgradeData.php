@@ -18,6 +18,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Unbxd\ProductFeed\Helper\Feed as FeedHelper;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 /**
  * Class UpgradeData
@@ -41,6 +42,11 @@ class UpgradeData implements UpgradeDataInterface
     private $feedHelper;
 
     /**
+     * @var EncryptorInterface
+     */
+    private $encryptor;
+
+    /**
      * UpgradeData constructor.
      * @param StoreManagerInterface $storeManager
      * @param ConfigInterface $config
@@ -49,11 +55,13 @@ class UpgradeData implements UpgradeDataInterface
     public function __construct(
         StoreManagerInterface $storeManager,
         ConfigInterface $config,
-        FeedHelper $feedHelper
+        FeedHelper $feedHelper,
+        EncryptorInterface $encryptor
     ) {
         $this->storeManager = $storeManager;
         $this->config = $config;
         $this->feedHelper = $feedHelper;
+        $this->encryptor = $encryptor;
     }
 
     /**
@@ -64,6 +72,21 @@ class UpgradeData implements UpgradeDataInterface
     {
         $setup->startSetup();
 
+        $this->updateConfigFields($setup);
+
+        if (version_compare($context->getVersion(), '1.0.38', '<')) {
+            $this->decryptSiteKeys($setup);
+        }
+
+        $setup->endSetup();
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     * @return $this
+     */
+    private function updateConfigFields(ModuleDataSetupInterface $setup)
+    {
         $select = $setup->getConnection()->select()->from(
             $setup->getTable('core_config_data'),
             ['path', 'value']
@@ -82,7 +105,43 @@ class UpgradeData implements UpgradeDataInterface
             $this->feedHelper->saveConfig($path, $value);
         }
 
-        $setup->endSetup();
+        return $this;
+    }
+
+    /**
+     * Decrypt site key value for each store if it was stored in DB as encrypted value
+     *
+     * @param ModuleDataSetupInterface $setup
+     * @return $this
+     */
+    private function decryptSiteKeys(ModuleDataSetupInterface $setup)
+    {
+        $select = $setup->getConnection()->select()->from(
+            $setup->getTable('core_config_data'),
+            ['*']
+        )->where(
+            'path LIKE ?',
+            '%unbxd_setup/general/site_key%'
+        );
+
+        $affectedFields = $setup->getConnection()->fetchAll($select);
+        foreach ($affectedFields as $rowData) {
+            $scope = isset($rowData['scope']) ? $rowData['scope'] : null;
+            $scopeId = isset($rowData['scope_id']) ? $rowData['scope_id'] : 0;
+            $path = isset($rowData['path']) ? $rowData['path'] : null;
+            $value = isset($rowData['value']) ? $rowData['value'] : null;
+            if (!$scope || !$path || !$value) {
+                continue;
+            }
+
+            // decrypt site key value if it was stored in DB as encrypted value
+            $decryptedValue = $this->encryptor->decrypt($value);
+            if ($decryptedValue) {
+                $this->feedHelper->saveConfig($path, $decryptedValue, $scope, $scopeId);
+            }
+        }
+
+        return $this;
     }
 
     /**

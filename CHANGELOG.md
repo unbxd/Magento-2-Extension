@@ -1,3 +1,8 @@
+# Version 1.0.38
+## 1.0.38 - Mar 20, 2020
+### Improvements
+- Exposed Site Key in configuration. Changed field type to 'text'.
+
 # Version 1.0.37
 ## 1.0.37 - Mar 02, 2020
 ### Improvements
