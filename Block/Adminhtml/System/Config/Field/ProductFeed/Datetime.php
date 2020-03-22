@@ -13,6 +13,7 @@ namespace Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\ProductFeed;
 
 use Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\ProductFeed;
 use Magento\Framework\Data\Form\Element\AbstractElement;
+use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
 
 /**
  * Class Datetime
@@ -21,12 +22,20 @@ use Magento\Framework\Data\Form\Element\AbstractElement;
 class Datetime extends ProductFeed
 {
     /**
-     * @inheritdoc
+     * @param AbstractElement $element
+     * @return false|string
+     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function _getElementHtml(AbstractElement $element)
     {
         /** @var \Unbxd\ProductFeed\Model\Feed\FileManager $feedFileManager */
-        $feedFileManager = $this->getFeedFileManager();
+        $feedFileManager = $this->getFeedFileManager(
+            [
+                'subDir' => FeedFileManager::DEFAULT_SUB_DIR_FOR_DOWNLOAD,
+                'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $this->getCurrentStoreId())
+            ]
+        );
 
         $dateTime = '--------';
         if ($this->isFeedExist()) {

@@ -171,7 +171,7 @@ class Handler extends \Magento\Framework\DataObject
     {
         if (empty($entityIds)) {
             $affectedEntities = IndexingQueue::REINDEX_FULL_LABEL;
-            $qty = count($this->productHelper->getAllProductsIds());
+            $qty = count($this->productHelper->getAllProductsIds($storeId));
         } else {
             // queue for row/list reindex action
             $affectedEntities = (string) $this->convertIdsToString($entityIds);

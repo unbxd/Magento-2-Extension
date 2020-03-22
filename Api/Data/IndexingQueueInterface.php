@@ -34,6 +34,7 @@ interface IndexingQueueInterface
     const ADDITIONAL_INFORMATION    = 'additional_information';
     const SYSTEM_INFORMATION        = 'system_information';
     const NUMBER_OF_ATTEMPTS        = 'number_of_attempts';
+    const FEED_VIEW_ID              = 'feed_view_id';
     /**#@-*/
 
     /**
@@ -133,6 +134,13 @@ interface IndexingQueueInterface
      * @return int
      */
     public function getNumberOfAttempts();
+
+    /**
+     * Get feed view ID
+     *
+     * @return int
+     */
+    public function getFeedViewId();
 
     /**
      * Set ID
@@ -241,8 +249,16 @@ interface IndexingQueueInterface
     /**
      * Set the number of attempts
      *
-     * @param $value
-     * @return int
+     * @param int $value
+     * @return IndexingQueueInterface
      */
     public function setNumberOfAttempts($value);
+
+    /**
+     * Set feed view ID
+     *
+     * @param int $id
+     * @return IndexingQueueInterface
+     */
+    public function setFeedViewId($id);
 }

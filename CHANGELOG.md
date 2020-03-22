@@ -1,9 +1,16 @@
-# Version 1.0.38
+# Version 1.0.40
+## 1.0.40 - Mar 20, 2020
+### Improvements
+- Added cron job for full feed synchronization.
+- Reindex operation linked with synchronization process and vice versa.
+- The feed file generated separately for each store (store ID in file name).
+- Moved generated feed file for download to separate folder.
+- Added delete product feed button in configuration.
+
 ## 1.0.38 - Mar 20, 2020
 ### Improvements
 - Exposed Site Key in configuration. Changed field type to 'text'.
 
-# Version 1.0.37
 ## 1.0.37 - Mar 02, 2020
 ### Improvements
 - Implemented CLI command responsible for generate product feed for download.

@@ -17,18 +17,6 @@ namespace Unbxd\ProductFeed\Model\Config\Backend;
  */
 class Cron extends \Magento\Framework\App\Config\Value
 {
-    const CRON_STRING_PATH = 'crontab/unbxd/jobs/unbxd_product_feed_upload/schedule/cron_expr';
-
-    const CRON_MODEL_PATH = 'crontab/unbxd/jobs/unbxd_product_feed_upload/run/model';
-
-    const XML_PATH_CRON_ENABLED = 'groups/cron/fields/enabled/value';
-
-    const XML_PATH_CRON_TYPE = 'groups/cron/fields/cron_type/value';
-
-    const XML_PATH_CRON_TYPE_TEMPLATE_TIME = 'groups/cron/fields/cron_type_template_time/value';
-
-    const XML_PATH_CRON_TYPE_TEMPLATE_FREQUENCY = 'groups/cron/fields/cron_type_template_frequency/value';
-
     /**
      * @var \Magento\Framework\App\Config\ValueFactory
      */
@@ -75,44 +63,30 @@ class Cron extends \Magento\Framework\App\Config\Value
     }
 
     /**
-     * @return mixed
-     */
-    public function getIsCronIsEnabled()
-    {
-        return $this->getData(self::XML_PATH_CRON_ENABLED);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCronType()
-    {
-        return $this->getData(self::XML_PATH_CRON_TYPE);
-    }
-
-    /**
+     * @param $cronStringPath
+     * @param $cronModelPath
      * @param string $cronExprString
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function updateConfigValues($cronExprString = '')
+    public function updateConfigValues($cronStringPath, $cronModelPath, $cronExprString = '')
     {
         try {
             $this->configValueFactory->create()->load(
-                self::CRON_STRING_PATH,
+                $cronStringPath,
                 'path'
             )->setValue(
                 $cronExprString
             )->setPath(
-                self::CRON_STRING_PATH
+                $cronStringPath
             )->save();
 
             $this->configValueFactory->create()->load(
-                self::CRON_MODEL_PATH,
+                $cronModelPath,
                 'path'
             )->setValue(
                 $this->runModelPath
             )->setPath(
-                self::CRON_MODEL_PATH
+                $cronModelPath
             )->save();
         } catch (\Exception $e) {
             throw new \Magento\Framework\Exception\LocalizedException(__(

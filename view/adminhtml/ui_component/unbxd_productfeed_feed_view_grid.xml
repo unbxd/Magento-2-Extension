@@ -206,6 +206,16 @@
                 </item>
             </argument>
         </column>
+        <column name="reindex_job_id" class="Unbxd\ProductFeed\Ui\Component\Listing\Column\FeedView\ReindexJobId">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="label" xsi:type="string" translate="true">Reindex Job</item>
+                </item>
+            </argument>
+        </column>
         <column name="additional_information" class="Unbxd\ProductFeed\Ui\Component\Listing\Column\FeedView\AdditionalInformation">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">

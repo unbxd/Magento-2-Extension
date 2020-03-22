@@ -18,7 +18,8 @@ use Magento\Framework\App\Config\ValueInterface as ConfigValueInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Unbxd\ProductFeed\Model\Config\Backend\Cron;
+use Unbxd\ProductFeed\Model\Config\Backend\Cron\General as CronGeneral;
+use Unbxd\ProductFeed\Model\Config\Backend\Cron\FullFeed as CronFullFeed;
 use Unbxd\ProductFeed\Model\Config\Source\ProductTypes;
 use Unbxd\ProductFeed\Model\Config\Source\FilterAttribute;
 use Unbxd\ProductFeed\Model\FilterAttribute\FilterAttributeProvider;
@@ -59,17 +60,26 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS = 'unbxd_catalog/general/max_number_of_attempts';
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
-    const XML_PATH_CATALOG_CRON_ENABLED = 'unbxd_catalog/cron/enabled';
-    const XML_PATH_CATALOG_CRON_TYPE = 'unbxd_catalog/cron/cron_type';
-    const XML_PATH_CATALOG_CRON_TYPE_MANUALLY_SCHEDULE = 'unbxd_catalog/cron/cron_type_manually_schedule';
-    const XML_PATH_CATALOG_CRON_TYPE_TEMPLATE_TIME = 'unbxd_catalog/cron/cron_type_template_time';
-    const XML_PATH_CATALOG_CRON_TYPE_TEMPLATE_FREQUENCY = 'unbxd_catalog/cron/cron_type_template_frequency';
-    const XML_PATH_CATALOG_MANUAL_SYNCHRONIZATION_ENABLED = 'unbxd_catalog/actions/enabled';
-
     /**
-     * search section
+     * general cron settings
      */
-    const XML_PATH_SEARCH_PAGE_ENABLED = 'unbxd_search/general/enabled';
+    const XML_PATH_CATALOG_CRON_GENERAL_ENABLED = 'unbxd_catalog/cron/general_settings/enabled';
+    const XML_PATH_CATALOG_CRON_GENERAL_TYPE = 'unbxd_catalog/cron/general_settings/cron_type';
+    const XML_PATH_CATALOG_CRON_GENERAL_TYPE_MANUALLY_SCHEDULE = 'unbxd_catalog/cron/general_settings/cron_type_manually_schedule';
+    const XML_PATH_CATALOG_CRON_GENERAL_TYPE_TEMPLATE_TIME = 'unbxd_catalog/cron/general_settings/cron_type_template_time';
+    const XML_PATH_CATALOG_CRON_GENERAL_TYPE_TEMPLATE_FREQUENCY = 'unbxd_catalog/cron/general_settings/cron_type_template_frequency';
+    /**
+     * full feed cron settings
+     */
+    const XML_PATH_CATALOG_CRON_FULL_ENABLED = 'unbxd_catalog/cron/full_feed_settings/enabled';
+    const XML_PATH_CATALOG_CRON_FULL_TYPE = 'unbxd_catalog/cron/full_feed_settings/cron_type';
+    const XML_PATH_CATALOG_CRON_FULL_TYPE_MANUALLY_SCHEDULE = 'unbxd_catalog/cron/full_feed_settings/cron_type_manually_schedule';
+    const XML_PATH_CATALOG_CRON_FULL_TYPE_TEMPLATE_TIME = 'unbxd_catalog/cron/full_feed_settings/cron_type_template_time';
+    const XML_PATH_CATALOG_CRON_FULL_TYPE_TEMPLATE_FREQUENCY = 'unbxd_catalog/cron/full_feed_settings/cron_type_template_frequency';
+    /**
+     * manual sync settings
+     */
+    const XML_PATH_CATALOG_MANUAL_SYNCHRONIZATION_ENABLED = 'unbxd_catalog/actions/enabled';
 
     /**
      * @var ConfigInterface
@@ -459,10 +469,10 @@ class Data extends AbstractHelper
      * @param null $store
      * @return bool
      */
-    public function isCronEnabled($store = null)
+    public function isGeneralCronEnabled($store = null)
     {
         return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_CATALOG_CRON_ENABLED,
+            self::XML_PATH_CATALOG_CRON_GENERAL_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
         );
@@ -472,11 +482,11 @@ class Data extends AbstractHelper
      * @param null $store
      * @return bool|null
      */
-    public function getCronType($store = null)
+    public function getGeneralCronType($store = null)
     {
-        if ($this->isCronEnabled($store)) {
+        if ($this->isGeneralCronEnabled($store)) {
             return $this->scopeConfig->getValue(
-                self::XML_PATH_CATALOG_CRON_TYPE,
+                self::XML_PATH_CATALOG_CRON_GENERAL_TYPE,
                 ScopeInterface::SCOPE_STORE,
                 $store
             );
@@ -489,11 +499,11 @@ class Data extends AbstractHelper
      * @param null $store
      * @return bool|null
      */
-    public function getCronSchedule($store = null)
+    public function getGeneralCronSchedule($store = null)
     {
-        if ($this->isCronEnabled($store) && $this->getCronType()) {
+        if ($this->isGeneralCronEnabled($store) && $this->getGeneralCronType($store)) {
             return $this->scopeConfig->getValue(
-                Cron::CRON_STRING_PATH,
+                CronGeneral::CRON_GENERAL_STRING_PATH,
                 ScopeInterface::SCOPE_STORE,
                 $store
             );
@@ -503,14 +513,72 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Check whether related cron job is configured or not
+     * Check whether general cron job is configured or not
      *
      * @param null $store
      * @return bool
      */
-    public function isCronConfigured($store = null)
+    public function isGeneralCronConfigured($store = null)
     {
-        return (bool) ($this->isCronEnabled($store) && $this->getCronSchedule($store));
+        return (bool) ($this->isGeneralCronEnabled($store) && $this->getGeneralCronSchedule($store));
+    }
+
+    /**
+     * @param null $store
+     * @return bool
+     */
+    public function isFullFeedCronEnabled($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_CATALOG_CRON_FULL_ENABLED,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    /**
+     * @param null $store
+     * @return bool|null
+     */
+    public function getFullFeedCronType($store = null)
+    {
+        if ($this->isFullFeedCronEnabled($store)) {
+            return $this->scopeConfig->getValue(
+                self::XML_PATH_CATALOG_CRON_FULL_TYPE,
+                ScopeInterface::SCOPE_STORE,
+                $store
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * @param null $store
+     * @return bool|null
+     */
+    public function getFullFeedCronSchedule($store = null)
+    {
+        if ($this->isFullFeedCronEnabled($store) && $this->getFullFeedCronType($store)) {
+            return $this->scopeConfig->getValue(
+                CronFullFeed::CRON_FULL_STRING_PATH,
+                ScopeInterface::SCOPE_STORE,
+                $store
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Check whether full feed cron job is configured or not
+     *
+     * @param null $store
+     * @return bool
+     */
+    public function isFullFeedCronConfigured($store = null)
+    {
+        return (bool) ($this->isFullFeedCronEnabled($store) && $this->getFullFeedCronSchedule($store));
     }
 
     /**
@@ -523,21 +591,6 @@ class Data extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_CATALOG_MANUAL_SYNCHRONIZATION_ENABLED,
-            ScopeInterface::SCOPE_STORE,
-            $store
-        );
-    }
-
-    /**
-     * Check whether instance search page enabled or not
-     *
-     * @param null $store
-     * @return bool
-     */
-    public function isSearchPageEnabled($store = null)
-    {
-        return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_SEARCH_PAGE_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
         );

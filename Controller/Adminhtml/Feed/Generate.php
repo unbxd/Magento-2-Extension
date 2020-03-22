@@ -16,9 +16,10 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Unbxd\ProductFeed\Model\BackgroundTaskManager;
 use Unbxd\ProductFeed\Console\Command\Feed\Download;
+use Unbxd\ProductFeed\Model\CacheManager;
 
 /**
- * Class GenerateTest
+ * Class Generate
  * @package Unbxd\ProductFeed\Controller\Adminhtml\Feed
  */
 class Generate extends ActionIndex
@@ -30,6 +31,8 @@ class Generate extends ActionIndex
      */
     public function execute()
     {
+        $this->flushCache();
+
         // mark for download to display message notification after the feed is generated
         $this->setIsGeneratedForDownload(true);
 
@@ -55,11 +58,25 @@ class Generate extends ActionIndex
             return $resultJson;
         }
 
-        $this->messageManager->addSuccessMessage(__('Product feed generation for store with ID %1 (%2) was started.
-            Generating may take some time depending on the catalog size. Once the product feed is generated
+        $this->messageManager->addSuccessMessage(__('Product feed generation for store with ID %1 (%2) was started. 
+            Generating may take some time depending on the catalog size. Once the product feed is generated 
             you will be able to download it as an archive file in ZIP format.', $storeId, $storeName)
         );
 
         return $resultJson;
+    }
+
+    /**
+     * Flush cache by types before execute
+     *
+     * @return $this
+     */
+    private function flushCache()
+    {
+        /** @var CacheManager $cacheManager */
+        $cacheManager = $this->cacheManagerFactory->create();
+        $cacheManager->flushByTypes();
+
+        return $this;
     }
 }

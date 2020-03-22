@@ -66,7 +66,7 @@ class Common extends Template
     {
         return [
             'isActionAllow' => $this->isActionAllow(),
-            'isCronConfigured' => $this->isCronConfigured(),
+            'isGeneralCronConfigured' => $this->isGeneralCronConfigured(),
             'store' => $this->_request->getParam(Store::ENTITY, $this->getStore()->getId()),
             'url' => [
                 'cronJobs' => $this->getCronJobsActionUrl(),
@@ -110,14 +110,14 @@ class Common extends Template
     }
 
     /**
-     * Check whether related cron job is configured or not
+     * Check whether general cron job is configured or not
      *
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function isCronConfigured()
+    private function isGeneralCronConfigured()
     {
-        return $this->helperData->isCronConfigured($this->getStore());
+        return $this->helperData->isGeneralCronConfigured($this->getStore());
     }
 
     /**

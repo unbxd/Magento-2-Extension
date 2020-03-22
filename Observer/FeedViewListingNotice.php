@@ -31,8 +31,8 @@ class FeedViewListingNotice extends AbstractObserver implements ObserverInterfac
             $this->messageManager->addWarningMessage($this->getAuthorizationCredentialsAreNotSetupMessage());
         }
 
-        if (!$this->helperData->isCronConfigured()) {
-            $this->messageManager->addWarningMessage($this->getCronIsNotConfiguredMessage());
+        if (!$this->helperData->isGeneralCronConfigured()) {
+            $this->messageManager->addWarningMessage($this->getGeneralCronIsNotConfiguredMessage());
         }
 
         return $this;

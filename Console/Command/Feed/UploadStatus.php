@@ -212,7 +212,7 @@ class UploadStatus extends AbstractCommand
      */
     protected function postProcessActions($output)
     {
-        $this->flushSystemConfigCache();
+        $this->flushCache();
 
         return $this;
     }

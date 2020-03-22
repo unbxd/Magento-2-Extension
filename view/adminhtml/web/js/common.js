@@ -98,7 +98,7 @@ define([
             var self = this,
                 target = $(event.currentTarget),
                 isActionAllow = self.options.config.isActionAllow,
-                isCronConfigured = self.options.config.isCronConfigured,
+                isGeneralCronConfigured = self.options.config.isGeneralCronConfigured,
                 actionUrl = self.options.config.url.fullSync,
                 params = {
                     'form_key': this.formKey,

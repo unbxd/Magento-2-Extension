@@ -209,17 +209,14 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
                 if (php_sapi_name() === 'cli') {
                     $this->consoleOutput->writeln("<error>Indexing error: {$e->getMessage()}</error>");
                 }
-
                 return false;
             }
 
-            $this->feedManager->execute($index);
-
+            $this->feedManager->execute($index, $reindexType, $storeId);
             return true;
         }
 
         $this->queueHandler->add($ids, $reindexType, $storeId);
-
         return true;
     }
 

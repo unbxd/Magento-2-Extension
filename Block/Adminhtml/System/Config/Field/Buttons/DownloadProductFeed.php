@@ -15,6 +15,7 @@ use Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\AbstractButton;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Backend\Block\Template\Context;
 use Unbxd\ProductFeed\Helper\Feed as FeedHelper;
+use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
 use Unbxd\ProductFeed\Model\Feed\FileManagerFactory as FeedFileManagerFactory;
 
 /**
@@ -63,7 +64,7 @@ class DownloadProductFeed extends AbstractButton
     public function getButtonHtml()
     {
         $buttonData = [
-            'id' => 'unbxd_generate_product_fee',
+            'id' => 'unbxd_generate_product_feed',
             'label' => __('Download'),
             'onclick' => "setLocation('{$this->getButtonUrl()}')",
         ];
@@ -97,11 +98,21 @@ class DownloadProductFeed extends AbstractButton
 
     /**
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function isProductFeedAvailableForDownload()
     {
         /** @var \Unbxd\ProductFeed\Model\Feed\FileManager $feedFileManager */
-        $feedFileManager = $this->feedFileManagerFactory->create();
+        $feedFileManager = $this->feedFileManagerFactory->create(
+            [
+                'subDir' => FeedFileManager::DEFAULT_SUB_DIR_FOR_DOWNLOAD,
+                'store' => sprintf(
+                    '%s%s',
+                    FeedFileManager::STORE_PARAMETER,
+                    $this->_request->getParam('store', $this->_storeManager->getStore()->getId())
+                )
+            ]
+        );
         $feedFileManager->setIsConvertedToArchive(true);
 
         return $feedFileManager->isExist();

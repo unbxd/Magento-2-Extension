@@ -15,6 +15,8 @@ use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Backend\Block\Template\Context;
 use Unbxd\ProductFeed\Model\Feed\FileManagerFactory as FeedFileManagerFactory;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class ProductFeed
@@ -31,6 +33,11 @@ class ProductFeed extends Field
      * @var TimezoneInterface
      */
     protected $dateTime;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
 
     /**
      * @var \Unbxd\ProductFeed\Model\Feed\FileManager|null
@@ -54,16 +61,38 @@ class ProductFeed extends Field
         );
         $this->feedFileManagerFactory = $feedFileManagerFactory;
         $this->dateTime = $context->getLocaleDate();
+        $this->storeManager = $context->getStoreManager();
     }
 
     /**
+     * @param string $store
+     * @return \Magento\Store\Api\Data\StoreInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    protected function getStore($store = null)
+    {
+        return $this->storeManager->getStore($store);
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getCurrentStoreId($store = null)
+    {
+        return $this->_request->getParam(Store::ENTITY, $this->getStore($store)->getId());
+    }
+
+    /**
+     * @param array $data
      * @return \Unbxd\ProductFeed\Model\Feed\FileManager|null
      */
-    protected function getFeedFileManager()
+    protected function getFeedFileManager($data = [])
     {
         if (null === $this->feedFileManager) {
             /** @var \Unbxd\ProductFeed\Model\Feed\FileManager $feedFileManager */
-            $feedFileManager = $this->feedFileManagerFactory->create();
+            $feedFileManager = $this->feedFileManagerFactory->create($data);
             $feedFileManager->setIsConvertedToArchive(true);
 
             $this->feedFileManager = $feedFileManager;

@@ -225,10 +225,12 @@
     <!-- END: feed related -->
 
     <!-- START: config cache declared -->
-    <!-- this one is mandatory since no preference for FrontendInterface is declared elsewhere -->
     <type name="Unbxd\ProductFeed\Model\CacheManager">
         <arguments>
-            <argument name="configCache" xsi:type="object">Magento\Framework\App\Cache\Type\Config</argument>
+            <argument name="cacheTypes" xsi:type="array">
+                <item name="config" xsi:type="string">config</item>
+                <item name="layout" xsi:type="string">layout</item>
+            </argument>
         </arguments>
     </type>
     <!-- END: config cache declared -->

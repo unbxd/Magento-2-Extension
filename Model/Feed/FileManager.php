@@ -14,6 +14,7 @@ namespace Unbxd\ProductFeed\Model\Feed;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
+use Magento\Framework\Exception\FileSystemException;
 
 /**
  * Class FileManager
@@ -28,14 +29,20 @@ class FileManager
     const DEFAULT_ZIP_FILE_MIME_TYPE = 'application/zip';
 
     /**
+     * Default sub dirs
+     */
+    const DEFAULT_SUB_DIR = 'unbxd';
+    const DEFAULT_SUB_DIR_FOR_DOWNLOAD = 'unbxd/download';
+
+    /**
+     * Store parameter for feed file name
+     */
+    const STORE_PARAMETER = '_store';
+
+    /**
      * @var WriteInterface
      */
     private $dir;
-
-    /**
-     * @var string
-     */
-    private $subDir = 'unbxd';
 
     /**
      * @var array
@@ -66,6 +73,16 @@ class FileManager
     private $archiveFormat = null;
 
     /**
+     * @var null
+     */
+    private $subDir = null;
+
+    /**
+     * @var null
+     */
+    private $store = null;
+
+    /**
      * @var array
      */
     private $allowedMimeTypes = [];
@@ -81,6 +98,8 @@ class FileManager
      * @param null $fileName
      * @param null $contentFormat
      * @param null $archiveFormat
+     * @param null $subDir
+     * @param null $store
      * @param array $allowedMimeTypes
      * @throws \Magento\Framework\Exception\FileSystemException
      */
@@ -89,16 +108,21 @@ class FileManager
         $fileName = null,
         $contentFormat = null,
         $archiveFormat = null,
+        $subDir = null,
+        $store = null,
         array $allowedMimeTypes = []
     ) {
         $this->fileName = $fileName;
         $this->contentFormat = $contentFormat;
         $this->archiveFormat = $archiveFormat;
+        $this->subDir = $subDir ?: self::DEFAULT_SUB_DIR;
+        $this->store = $store;
         $this->filePath = sprintf(
-            '%s%s%s.%s',
+            '%s%s%s%s.%s',
             $this->subDir,
             DIRECTORY_SEPARATOR,
-             $this->fileName,
+            $this->fileName,
+            $this->store,
             $this->contentFormat
             );
         $this->allowedMimeTypes = array_unique(array_merge($this->defaultMimeTypes, array_values($allowedMimeTypes)));
@@ -312,6 +336,28 @@ class FileManager
     public function deleteSourcePath()
     {
         $this->dir->delete($this->getSourcePath());
+    }
+
+    /**
+     * Delete affected files
+     *
+     * @return void
+     * @throws FileSystemException
+     */
+    public function deleteAffectedFiles()
+    {
+        $defaultFilePath = $this->filePath;
+        $affectedFiles = [
+            $this->dir->getAbsolutePath($defaultFilePath),
+            $this->dir->getAbsolutePath($this->getArchiveFilePath($defaultFilePath))
+        ];
+        foreach ($affectedFiles as $file) {
+            try {
+                $this->dir->getDriver()->deleteFile($file);
+            } catch (FileSystemException $e) {
+                // ignore exception in case if file with specific type is not exist
+            }
+        }
     }
 
     /**

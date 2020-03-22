@@ -29,16 +29,16 @@ class NumberOfEntities extends Column
 
     /**
      * NumberOfEntities constructor.
-     * @param FilterManager $filterManager
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
+     * @param FilterManager $filterManager
      * @param array $components
      * @param array $data
      */
     public function __construct(
-        FilterManager $filterManager,
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
+        FilterManager $filterManager,
         array $components = [],
         array $data = []
     ) {

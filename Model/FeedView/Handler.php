@@ -172,7 +172,7 @@ class Handler extends \Magento\Framework\DataObject
     {
         if (empty($entityIds)) {
             $affectedEntities = FeedView::FEED_FULL_LABEL;
-            $qty = count($this->productHelper->getAllProductsIds());
+            $qty = count($this->productHelper->getAllProductsIds($storeId));
         } else {
             $affectedEntities = (string) $this->convertIdsToString($entityIds);
             $qty = count($entityIds);

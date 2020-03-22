@@ -40,18 +40,18 @@ class AffectedEntities extends Column
 
     /**
      * AffectedEntities constructor.
-     * @param UrlInterface $urlBuilder
-     * @param FilterManager $filterManager
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
+     * @param UrlInterface $urlBuilder
+     * @param FilterManager $filterManager
      * @param array $components
      * @param array $data
      */
     public function __construct(
-        UrlInterface $urlBuilder,
-        FilterManager $filterManager,
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
+        UrlInterface $urlBuilder,
+        FilterManager $filterManager,
         array $components = [],
         array $data = []
     ) {

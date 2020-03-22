@@ -35,18 +35,18 @@ class Status extends Column
 
     /**
      * Status constructor.
-     * @param IndexingQueue $indexingQueue
-     * @param FilterManager $filterManager
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
+     * @param IndexingQueue $indexingQueue
+     * @param FilterManager $filterManager
      * @param array $components
      * @param array $data
      */
     public function __construct(
-        IndexingQueue $indexingQueue,
-        FilterManager $filterManager,
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
+        IndexingQueue $indexingQueue,
+        FilterManager $filterManager,
         array $components = [],
         array $data = []
     ) {

@@ -77,6 +77,9 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '1.0.38', '<')) {
             $this->decryptSiteKeys($setup);
         }
+        if (version_compare($context->getVersion(), '1.0.39', '<')) {
+            $this->removeOldCronConfiguration($setup);
+        }
 
         $setup->endSetup();
     }
@@ -139,6 +142,35 @@ class UpgradeData implements UpgradeDataInterface
             if ($decryptedValue) {
                 $this->feedHelper->saveConfig($path, $decryptedValue, $scope, $scopeId);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     * @return $this
+     */
+    private function removeOldCronConfiguration(ModuleDataSetupInterface $setup)
+    {
+        $select = $setup->getConnection()->select()->from(
+            $setup->getTable('core_config_data'),
+            ['*']
+        )->where(
+            'path LIKE ?',
+            '%unbxd_catalog/cron%'
+        );
+
+        $affectedFields = $setup->getConnection()->fetchAll($select);
+        foreach ($affectedFields as $rowData) {
+            $scope = isset($rowData['scope']) ? $rowData['scope'] : null;
+            $scopeId = isset($rowData['scope_id']) ? $rowData['scope_id'] : 0;
+            $path = isset($rowData['path']) ? $rowData['path'] : null;
+            if (!$scope || !$path) {
+                continue;
+            }
+
+            $this->feedHelper->deleteConfig($path, $scope, $scopeId);
         }
 
         return $this;

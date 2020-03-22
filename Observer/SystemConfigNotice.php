@@ -37,8 +37,8 @@ class SystemConfigNotice extends AbstractObserver implements ObserverInterface
         }
 
         if ($section == self::SYSTEM_CONFIG_SECTION_PARAM_UNBXD_CATALOG) {
-            if (!$this->helperData->isCronConfigured()) {
-                $warningMessages[] = $this->getCronIsNotConfiguredMessage();
+            if (!$this->helperData->isGeneralCronConfigured()) {
+                $warningMessages[] = $this->getGeneralCronIsNotConfiguredMessage();
             }
             if (!$this->helperData->isIndexingQueueEnabled()) {
                 $warningMessages[] = $this->getIndexingQueueIsDisabledMessage();

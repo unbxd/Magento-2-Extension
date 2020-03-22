@@ -35,8 +35,8 @@ class IndexingQueueListingNotice extends AbstractObserver implements ObserverInt
             $this->messageManager->addWarningMessage($this->getIndexingQueueIsDisabledMessage());
         }
 
-        if (!$this->helperData->isCronConfigured()) {
-            $this->messageManager->addWarningMessage($this->getCronIsNotConfiguredMessage());
+        if (!$this->helperData->isGeneralCronConfigured()) {
+            $this->messageManager->addWarningMessage($this->getGeneralCronIsNotConfiguredMessage());
         }
 
         return $this;

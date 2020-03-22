@@ -239,28 +239,28 @@ abstract class AbstractCommand extends Command
     /**
      * Retrieve feed file manager instance. Init if needed
      *
+     * @param array $data
      * @return FeedFileManager|null
      */
-    public function getFeedFileManager()
+    public function getFeedFileManager($data = [])
     {
         if (null === $this->feedFileManager) {
             /** @var FeedFileManager */
-            $this->feedFileManager = $this->fileManagerFactory->create();
+            $this->feedFileManager = $this->fileManagerFactory->create($data);
         }
 
         return $this->feedFileManager;
     }
 
     /**
-     * Clean configuration cache.
-     * In some cases related config info doesn't refreshing on backend frontend
+     * Clean cache.
      *
      * @return $this
      */
-    protected function flushSystemConfigCache()
+    protected function flushCache()
     {
         try {
-            $this->getCacheManager()->flushSystemConfigCache();
+            $this->getCacheManager()->flushByTypes();
         } catch (\Exception $e) {
             return $this;
         }

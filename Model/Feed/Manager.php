@@ -287,7 +287,12 @@ class Manager
     {
         $this->initExecute($index, $store)
             ->serializeFeed()
-            ->writeFeed();
+            ->writeFeed(
+                [
+                    'subDir' => FeedFileManager::DEFAULT_SUB_DIR_FOR_DOWNLOAD,
+                    'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store)
+                ]
+            );
 
         return $this;
     }
@@ -298,28 +303,27 @@ class Manager
      * @param $index
      * @param string $type
      * @param null $store
-     * @return bool
+     * @param array $jobData
+     * @return bool|int
      * @throws \Magento\Framework\Exception\FileSystemException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function execute($index, $type = FeedConfig::FEED_TYPE_FULL, $store = null)
+    public function execute($index, $type = FeedConfig::FEED_TYPE_FULL, $store = null, $jobData = [])
     {
         if (empty($index)) {
             $this->logger->error('Unable to execute feed. Index data are empty.');
-
             return false;
         }
 
         $this->logger->info('START feed execute.')->startTimer();
 
         $ids = ($type == FeedConfig::FEED_TYPE_FULL) ? [] : array_keys($index);
-        $this->preProcessActions($ids, $type, $store);
+        $this->preProcessActions($ids, $type, $store, $jobData);
         if ($this->isFeedLock) {
             $this->lockedTime = round(microtime(true) - $this->lockedTime, 2);
             $this->logger->error(
                 'Unable to execute feed. Feed lock by another process. Locked time: ' . $this->lockedTime
             );
-
             return false;
         }
 
@@ -329,14 +333,18 @@ class Manager
         $this->startProfiler()
             ->initExecute($index, $store)
             ->serializeFeed()
-            ->writeFeed()
+            ->writeFeed(
+                [
+                    'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store)
+                ]
+            )
             ->sendFeed($store)
             ->postProcessActions()
             ->stopProfiler();
 
         $this->logger->info('END feed execute.');
 
-        return true;
+        return $this->feedViewId;
     }
 
     /**
@@ -363,21 +371,25 @@ class Manager
     }
 
     /**
-     * Write feed content to file
-     *
+     * @param array $fileParameters
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function writeFeed()
+    public function writeFeed($fileParameters = [])
     {
         $this->logger->info('Write feed content to file.');
 
         if (is_string($this->getFeed())) {
             /** @var \Unbxd\ProductFeed\Model\Feed\FileManager $fileManager */
-            $fileManager = $this->getFileManager();
-            // remove old file if exist
+            if (!empty($fileParameters)) {
+                $fileManager = $this->getFileManager($fileParameters);
+            } else {
+                $fileManager = $this->getFileManager();
+            }
+
+            // remove related old file(s) if exists
             if ($fileManager->isExist()) {
-                $fileManager->deleteSourcePath();
+                $fileManager->deleteAffectedFiles();
             }
 
             try {
@@ -564,7 +576,6 @@ class Manager
         $params = $this->buildFileParameters();
         if (empty($params)) {
             $this->logger->error('File parameters for request are empty.');
-
             return $this;
         }
 
@@ -580,7 +591,6 @@ class Manager
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
-
             return $this;
         }
 
@@ -612,10 +622,11 @@ class Manager
      * @param $ids
      * @param $type
      * @param null $store
+     * @param array $jobData
      * @return $this
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function preProcessActions($ids, $type, $store = null)
+    public function preProcessActions($ids, $type, $store = null, $jobData = [])
     {
         $this->logger->info('Pre-process execution actions.');
 
@@ -625,7 +636,6 @@ class Manager
                 $this->lockedTime = microtime(true);
             }
             $this->isFeedLock = true;
-
             return $this;
         } else {
             $this->isFeedLock = false;
@@ -643,8 +653,11 @@ class Manager
             }
         );
 
+        // reset feed view ID
+        $this->feedViewId = null;
+
         // create feed view for current API operation
-        $feedViewId = $this->getFeedViewManager()->add($ids, $type, $store);
+        $feedViewId = $this->getFeedViewManager()->add($ids, $type, $store, $jobData);
         if ($feedViewId) {
             $this->feedViewId = $feedViewId;
         }
@@ -757,17 +770,16 @@ class Manager
     }
 
     /**
-     * Clean configuration cache.
-     * In some cases related config info doesn't refreshing on backend frontend
+     * Clean cache.
      *
      * @return $this
      */
-    private function flushSystemConfigCache()
+    private function flushCache()
     {
         $this->logger->info('Flush system configuration cache.');
 
         try {
-            $this->cacheManager->flushSystemConfigCache();
+            $this->cacheManager->flushByTypes();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
@@ -787,7 +799,7 @@ class Manager
         /** @var \Unbxd\ProductFeed\Model\Feed\FileManager $fileManager */
         $fileManager = $this->getFileManager();
         try {
-            $fileManager->deleteSourcePath();
+            $fileManager->deleteAffectedFiles();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
@@ -820,13 +832,12 @@ class Manager
             $this->updateFeedView($response);
         }
 
+        $this->cleanupFeedFiles();
+
         // reset local cache to initial state
         $this->reset();
 
-        $this->cleanupFeedFiles();
-
-        // in some cases related config info doesn't refreshing on backend frontend
-        $this->flushSystemConfigCache();
+        $this->flushCache();
 
         return $this;
     }
@@ -927,7 +938,6 @@ class Manager
         $this->type = null;
         $this->isFeedLock = false;
         $this->lockedTime = null;
-        $this->feedViewId = null;
         $this->uploadedFeedSize = 0;
         $this->resetFileManager()
             ->resetConnectorManager();

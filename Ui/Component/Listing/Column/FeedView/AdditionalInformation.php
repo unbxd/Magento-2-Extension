@@ -46,20 +46,20 @@ class AdditionalInformation extends Column
 
     /**
      * AdditionalInformation constructor.
+     * @param ContextInterface $context
+     * @param UiComponentFactory $uiComponentFactory
      * @param StringUtils $string
      * @param UrlInterface $urlBuilder
      * @param FilterManager $filterManager
-     * @param ContextInterface $context
-     * @param UiComponentFactory $uiComponentFactory
      * @param array $components
      * @param array $data
      */
     public function __construct(
+        ContextInterface $context,
+        UiComponentFactory $uiComponentFactory,
         StringUtils $string,
         UrlInterface $urlBuilder,
         FilterManager $filterManager,
-        ContextInterface $context,
-        UiComponentFactory $uiComponentFactory,
         array $components = [],
         array $data = []
     ) {

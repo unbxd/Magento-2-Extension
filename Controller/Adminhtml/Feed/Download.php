@@ -13,9 +13,10 @@ namespace Unbxd\ProductFeed\Controller\Adminhtml\Feed;
 
 use Unbxd\ProductFeed\Controller\Adminhtml\ActionIndex;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
 
 /**
- * Class Full
+ * Class Download
  * @package Unbxd\ProductFeed\Controller\Adminhtml\Feed
  */
 class Download extends ActionIndex
@@ -23,6 +24,7 @@ class Download extends ActionIndex
     /**
      * @return \Magento\Backend\Model\View\Result\Redirect|\Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
      * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute()
     {
@@ -30,7 +32,12 @@ class Download extends ActionIndex
         $resultRedirect = $this->resultRedirectFactory->create();
 
         /** @var \Unbxd\ProductFeed\Model\Feed\FileManager $feedFileManager */
-        $feedFileManager = $this->feedFileManagerFactory->create();
+        $feedFileManager = $this->feedFileManagerFactory->create(
+            [
+                'subDir' => FeedFileManager::DEFAULT_SUB_DIR_FOR_DOWNLOAD,
+                'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $this->getCurrentStoreId())
+            ]
+        );
         $feedFileManager->setIsConvertedToArchive(true);
         if (!$feedFileManager->isExist()) {
             $this->messageManager->addErrorMessage(__('There are no product feed files available for download.'));
@@ -40,7 +47,13 @@ class Download extends ActionIndex
         $archiveFormat = $feedFileManager->getArchiveFormat();
         $fileName = str_replace(
             '.' . $archiveFormat,
-            sprintf('_%s.%s', date('Y-m-d-H-i-s', $feedFileManager->getFileMtime()), $archiveFormat),
+            sprintf(
+                '%s%s_%s.%s',
+                FeedFileManager::STORE_PARAMETER,
+                $this->getCurrentStoreId(),
+                date('Y-m-d-H-i-s', $feedFileManager->getFileMtime()),
+                $archiveFormat
+            ),
             $feedFileManager->getFileName()
         );
 

@@ -35,18 +35,18 @@ class Status extends Column
 
     /**
      * Status constructor.
-     * @param FeedView $feedView
-     * @param FilterManager $filterManager
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
+     * @param FeedView $feedView
+     * @param FilterManager $filterManager
      * @param array $components
      * @param array $data
      */
     public function __construct(
-        FeedView $feedView,
-        FilterManager $filterManager,
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
+        FeedView $feedView,
+        FilterManager $filterManager,
         array $components = [],
         array $data = []
     ) {

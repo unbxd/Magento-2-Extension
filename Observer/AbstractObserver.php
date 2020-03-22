@@ -76,8 +76,8 @@ abstract class AbstractObserver
     /**
      * @return mixed
      */
-    protected function getCronIsNotConfiguredMessage()
+    protected function getGeneralCronIsNotConfiguredMessage()
     {
-        return __('Cron is not configured. Please configure it to perform asynchronous operations with Unbxd service.');
+        return __('General cron is not configured. Please configure it to perform asynchronous operations with Unbxd service.');
     }
 }

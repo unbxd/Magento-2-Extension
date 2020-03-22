@@ -34,6 +34,7 @@ interface FeedViewInterface
     const SYSTEM_INFORMATION        = 'system_information';
     const UPLOAD_ID                 = 'upload_id';
     const NUMBER_OF_ATTEMPTS        = 'number_of_attempts';
+    const REINDEX_JOB_ID            = 'reindex_job_id';
     /**#@-*/
 
     /**
@@ -135,6 +136,13 @@ interface FeedViewInterface
     public function getNumberOfAttempts();
 
     /**
+     * Get reindex job ID
+     *
+     * @return int
+     */
+    public function getReindexJobId();
+
+    /**
      * Set ID
      *
      * @param int $id
@@ -234,15 +242,23 @@ interface FeedViewInterface
      * Set upload ID
      *
      * @param $uploadId
-     * @return mixed
+     * @return FeedViewInterface
      */
     public function setUploadId($uploadId);
 
     /**
      * Set the number of attempts
      *
-     * @param $value
-     * @return int
+     * @param int $value
+     * @return FeedViewInterface
      */
     public function setNumberOfAttempts($value);
+
+    /**
+     * Set reindex job ID
+     *
+     * @param int $id
+     * @return FeedViewInterface
+     */
+    public function setReindexJobId($id);
 }

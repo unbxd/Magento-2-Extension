@@ -34,6 +34,7 @@ use Unbxd\ProductFeed\Model\Indexer\Product\Full\Action\FullFactory as ReindexAc
 use Unbxd\ProductFeed\Model\Feed\ManagerFactory as FeedManagerFactory;
 use Unbxd\ProductFeed\Model\Feed\FileManagerFactory as FeedFileManagerFactory;
 use Unbxd\ProductFeed\Model\BackgroundTaskManagerFactory;
+use Unbxd\ProductFeed\Model\CacheManagerFactory;
 
 /**
  * Class ActionIndex
@@ -147,6 +148,11 @@ abstract class ActionIndex extends Action
     protected $backgroundTaskManagerFactory;
 
     /**
+     * @var CacheManagerFactory
+     */
+    protected $cacheManagerFactory;
+
+    /**
      * ActionIndex constructor.
      * @param Action\Context $context
      * @param PageFactory $resultPageFactory
@@ -168,6 +174,7 @@ abstract class ActionIndex extends Action
      * @param FeedManagerFactory $feedManagerFactory
      * @param FeedFileManagerFactory $feedFileManagerFactory
      * @param BackgroundTaskManagerFactory $backgroundTaskManagerFactory
+     * @param CacheManagerFactory $cacheManagerFactory
      */
     public function __construct(
         Action\Context $context,
@@ -189,7 +196,8 @@ abstract class ActionIndex extends Action
         ReindexActionFactory $reindexActionFactory,
         FeedManagerFactory $feedManagerFactory,
         FeedFileManagerFactory $feedFileManagerFactory,
-        BackgroundTaskManagerFactory $backgroundTaskManagerFactory
+        BackgroundTaskManagerFactory $backgroundTaskManagerFactory,
+        CacheManagerFactory $cacheManagerFactory
     ) {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
@@ -217,6 +225,7 @@ abstract class ActionIndex extends Action
         $this->feedManagerFactory = $feedManagerFactory;
         $this->feedFileManagerFactory = $feedFileManagerFactory;
         $this->backgroundTaskManagerFactory = $backgroundTaskManagerFactory;
+        $this->cacheManagerFactory = $cacheManagerFactory;
     }
 
     /**

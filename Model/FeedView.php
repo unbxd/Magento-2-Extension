@@ -211,6 +211,16 @@ class FeedView extends AbstractModel implements FeedViewInterface
     }
 
     /**
+     * Retrieve reindex job ID
+     *
+     * @return int
+     */
+    public function getReindexJobId()
+    {
+        return $this->getData(self::REINDEX_JOB_ID);
+    }
+
+    /**
      * Set ID
      *
      * @param int $id
@@ -346,7 +356,7 @@ class FeedView extends AbstractModel implements FeedViewInterface
      * Set upload ID
      *
      * @param $uploadId
-     * @return mixed|FeedView
+     * @return FeedViewInterface
      */
     public function setUploadId($uploadId)
     {
@@ -357,10 +367,21 @@ class FeedView extends AbstractModel implements FeedViewInterface
      * Set the number of attempts
      *
      * @param $value
-     * @return int|FeedView
+     * @return FeedViewInterface
      */
     public function setNumberOfAttempts($value)
     {
         return $this->setData(self::NUMBER_OF_ATTEMPTS, $value);
+    }
+
+    /**
+     * Set reindex job ID
+     *
+     * @param int $id
+     * @return FeedViewInterface
+     */
+    public function setReindexJobId($id)
+    {
+        return $this->setData(self::REINDEX_JOB_ID, $id);
     }
 }

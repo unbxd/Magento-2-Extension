@@ -78,11 +78,13 @@ class Full extends ActionIndex
      */
     private function prepareData(array &$data)
     {
+        $currentStoreId = $this->getCurrentStoreId();
+
         if (!isset($data[IndexingQueue::QUEUE_ID])) {
             $data[IndexingQueue::QUEUE_ID] = null;
         }
         if (!isset($data[IndexingQueue::STORE_ID])) {
-            $data[IndexingQueue::STORE_ID] = $this->getCurrentStoreId();
+            $data[IndexingQueue::STORE_ID] = $currentStoreId;
         }
         if (!isset($data[IndexingQueue::STATUS])) {
             $data[IndexingQueue::STATUS] = IndexingQueue::STATUS_PENDING;
@@ -94,7 +96,7 @@ class Full extends ActionIndex
             $data[IndexingQueue::AFFECTED_ENTITIES] = __(IndexingQueue::REINDEX_FULL_LABEL);
         }
         if (!isset($data[IndexingQueue::NUMBER_OF_ENTITIES])) {
-            $data[IndexingQueue::NUMBER_OF_ENTITIES] = count($this->productHelper->getAllProductsIds());
+            $data[IndexingQueue::NUMBER_OF_ENTITIES] = count($this->productHelper->getAllProductsIds($currentStoreId));
         }
         if (!isset($data[IndexingQueue::ACTION_TYPE])) {
             $data[IndexingQueue::ACTION_TYPE] = IndexingQueue::TYPE_REINDEX_FULL;

@@ -39,8 +39,14 @@
                 <enabled_queue>1</enabled_queue>
             </indexing>
             <cron>
-                <enabled>0</enabled>
-                <cron_type>manually</cron_type>
+                <general_settings>
+                    <enabled>0</enabled>
+                    <cron_type>manually</cron_type>
+                </general_settings>
+                <full_feed_settings>
+                    <enabled>0</enabled>
+                    <cron_type>manually</cron_type>
+                </full_feed_settings>
             </cron>
             <feed>
                 <full_state_flag></full_state_flag>
@@ -52,6 +58,7 @@
                 <last_status></last_status>
                 <last_upload_id></last_upload_id>
                 <uploaded_size></uploaded_size>
+                <generated_for_download></generated_for_download>
             </feed>
         </unbxd_catalog>
     </default>

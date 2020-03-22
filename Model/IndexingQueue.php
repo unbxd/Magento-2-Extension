@@ -236,6 +236,16 @@ class IndexingQueue extends AbstractModel implements IndexingQueueInterface
     }
 
     /**
+     * Retrieve feed view ID
+     *
+     * @return int
+     */
+    public function getFeedViewId()
+    {
+        return $this->getData(self::FEED_VIEW_ID);
+    }
+
+    /**
      * Set ID
      *
      * @param int $id
@@ -381,11 +391,22 @@ class IndexingQueue extends AbstractModel implements IndexingQueueInterface
     /**
      * Set the number of attempts
      *
-     * @param $value
+     * @param int $value
      * @return IndexingQueueInterface
      */
     public function setNumberOfAttempts($value)
     {
         return $this->setData(self::NUMBER_OF_ATTEMPTS, $value);
+    }
+
+    /**
+     * Set feed view ID
+     *
+     * @param int $id
+     * @return IndexingQueueInterface
+     */
+    public function setFeedViewId($id)
+    {
+        return $this->setData(self::FEED_VIEW_ID, $id);
     }
 }

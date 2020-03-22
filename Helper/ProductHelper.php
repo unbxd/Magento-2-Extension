@@ -200,12 +200,17 @@ class ProductHelper
     /**
      * Retrieve all ids for product collection
      *
+     * @param null $store
      * @return array
      */
-    public function getAllProductsIds()
+    public function getAllProductsIds($store = null)
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection */
         $productCollection = $this->collectionFactory->create();
+        if ($store != null) {
+            $productCollection->addStoreFilter($store);
+        }
+
         return $productCollection->getAllIds();
     }
 

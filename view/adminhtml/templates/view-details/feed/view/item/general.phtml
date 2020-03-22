@@ -12,50 +12,65 @@
 <div class="fieldset-wrapper feed-view-item-information">
     <table class="admin__table-secondary">
         <tbody>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Created At') ?></th>
-            <td><?php /* @escapeNotVerified */ echo $block->getFormattedDate($model->getCreatedAt()) ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Finished At'); ?></th>
-            <?php
-                $value = $model->getFinishedAt();
-                if (!$value || (strpos($value, '0000') !== false)) {
-                    $value = __('Not Performed Yet');
-                } else {
-                    $value = $block->getFormattedDate($value);
-                }
-            ?>
-            <td><?php /* @escapeNotVerified */ echo $value ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Status'); ?></th>
-            <td><?php /* @escapeNotVerified */ echo $block->getStatusLabelById($model->getStatus()); ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Execution Time (in seconds)'); ?></th>
-            <td><?php /* @escapeNotVerified */ echo $model->getExecutionTime(); ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Total Number Of Entities'); ?></th>
-            <td><?php /* @escapeNotVerified */ echo $model->getNumberOfEntities(); ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Operation Type'); ?></th>
-            <td><?php /* @escapeNotVerified */ echo $model->getOperationTypes(); ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Additional Information'); ?></th>
-            <td style="max-height: 300px"><?php /* @escapeNotVerified */ echo $model->getAdditionalInformation(); ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Number Of Synchronization Attempts'); ?></th>
-            <td><?php /* @escapeNotVerified */ echo $model->getNumberOfAttempts(); ?></td>
-        </tr>
-        <tr>
-            <th><?php /* @escapeNotVerified */ echo __('Upload ID'); ?></th>
-            <td><?php /* @escapeNotVerified */ echo $model->getUploadId(); ?></td>
-        </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Created At') ?></th>
+                <td><?php /* @escapeNotVerified */ echo $block->getFormattedDate($model->getCreatedAt()) ?></td>
+            </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Finished At'); ?></th>
+                <?php
+                    $value = $model->getFinishedAt();
+                    if (!$value || (strpos($value, '0000') !== false)) {
+                        $value = __('Not Performed Yet');
+                    } else {
+                        $value = $block->getFormattedDate($value);
+                    }
+                ?>
+                <td><?php /* @escapeNotVerified */ echo $value ?></td>
+            </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Status'); ?></th>
+                <td><?php /* @escapeNotVerified */ echo $block->getStatusLabelById($model->getStatus()); ?></td>
+            </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Execution Time (in seconds)'); ?></th>
+                <td><?php /* @escapeNotVerified */ echo $model->getExecutionTime(); ?></td>
+            </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Total Number Of Entities'); ?></th>
+                <td><?php /* @escapeNotVerified */ echo $model->getNumberOfEntities(); ?></td>
+            </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Operation Type'); ?></th>
+                <td><?php /* @escapeNotVerified */ echo $model->getOperationTypes(); ?></td>
+            </tr>
+            <?php if ($reindexJobId = $model->getReindexJobId()): ?>
+                <?php
+                    $viewDetailsUrl = $block->getUrl(
+                    'unbxd_productfeed/indexing_queue/viewDetails',
+                        ['id' => $reindexJobId]
+                    )
+                ?>
+                <tr>
+                    <th><?php /* @escapeNotVerified */ echo __('Reindex Job'); ?></th>
+                    <td>
+                        <a href="<?php /* @escapeNotVerified */ echo $viewDetailsUrl; ?>">
+                            <?php /* @escapeNotVerified */ echo $reindexJobId; ?></a>
+                    </td>
+                </tr>
+            <?php endif; ?>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Number Of Synchronization Attempts'); ?></th>
+                <td><?php /* @escapeNotVerified */ echo $model->getNumberOfAttempts(); ?></td>
+            </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Upload ID'); ?></th>
+                <td><?php /* @escapeNotVerified */ echo $model->getUploadId(); ?></td>
+            </tr>
+            <tr>
+                <th><?php /* @escapeNotVerified */ echo __('Additional Information'); ?></th>
+                <td style="max-height: 300px"><?php /* @escapeNotVerified */ echo $model->getAdditionalInformation(); ?></td>
+            </tr>
         </tbody>
     </table>
 </div>

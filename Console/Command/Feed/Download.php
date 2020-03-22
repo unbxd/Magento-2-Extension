@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\Store\Model\Store;
-use Unbxd\ProductFeed\Model\Feed\FileManager;
+use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
 use Magento\Framework\Exception\LocalizedException;
 
 /**
@@ -118,7 +118,7 @@ class Download extends AbstractCommand
         }
 
         // post process actions
-        $this->postProcessActions($output, $start);
+        $this->postProcessActions($output, $storeId, $start);
     }
 
     /**
@@ -137,12 +137,13 @@ class Download extends AbstractCommand
 
     /**
      * @param OutputInterface $output
+     * @param null $storeId
      * @param null $start
      * @return $this|\Unbxd\ProductFeed\Console\Command\Feed\AbstractCommand
      */
-    protected function postProcessActions($output, $start = null)
+    protected function postProcessActions($output, $storeId = null, $start = null)
     {
-        if ($path = $this->getFeedPath($output)) {
+        if ($path = $this->getFeedPath($output, $storeId)) {
             $output->writeln("<info>Product feed has been successfully generated.</info>");
             $output->writeln("<info>Can be download by following path: {$path}.</info>");
         }
@@ -151,19 +152,25 @@ class Download extends AbstractCommand
         $workingTime = round($end - $start, 2);
         $output->writeln("<info>Working time: {$workingTime}</info>");
 
-        $this->flushSystemConfigCache();
+        $this->flushCache();
 
         return $this;
     }
 
     /**
-     * @param OutputInterface $output
+     * @param $output
+     * @param null $storeId
      * @return bool|string
      */
-    private function getFeedPath($output)
+    private function getFeedPath($output, $storeId = null)
     {
-        /** @var FileManager $feedFileManager */
-        $feedFileManager = $this->getFeedFileManager();
+        /** @var FeedFileManager $feedFileManager */
+        $feedFileManager = $this->getFeedFileManager(
+            [
+                'subDir' => FeedFileManager::DEFAULT_SUB_DIR_FOR_DOWNLOAD,
+                'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $storeId)
+            ]
+        );
         $feedFileManager->setIsConvertedToArchive(true);
         if (!$feedFileManager->isExist()) {
             $output->writeln("<error>Generated feed doesn't exist.</error>");

@@ -282,6 +282,43 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 );
         }
 
+        // add fields which link re-index operation with synchronization process and vice versa
+        if (version_compare($context->getVersion(), '1.0.40', '<')) {
+            $indexingQueueColumnName = 'feed_view_id';
+            $indexingQueueTable = $installer->getTable('unbxd_productfeed_indexing_queue');
+            if (
+                $installer->tableExists($indexingQueueTable)
+                && !$installer->getConnection()->tableColumnExists($indexingQueueTable, $indexingQueueColumnName)
+            ) {
+                $installer->getConnection()->addColumn(
+                    $indexingQueueTable,
+                    $indexingQueueColumnName,
+                    [
+                        'type' => Table::TYPE_INTEGER,
+                        'default' => null,
+                        'comment' => 'Feed View ID'
+                    ]
+                );
+            }
+
+            $feedViewColumnName = 'reindex_job_id';
+            $feedViewTable = $installer->getTable('unbxd_productfeed_feed_view');
+            if (
+                $installer->tableExists($feedViewTable)
+                && !$installer->getConnection()->tableColumnExists($feedViewTable, $feedViewColumnName)
+            ) {
+                $installer->getConnection()->addColumn(
+                    $feedViewTable,
+                    $feedViewColumnName,
+                    [
+                        'type' => Table::TYPE_INTEGER,
+                        'default' => null,
+                        'comment' => 'Reindex Job ID'
+                    ]
+                );
+            }
+        }
+
         $installer->endSetup();
     }
 }

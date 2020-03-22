@@ -27,8 +27,8 @@ class CronTasksListingNotice extends AbstractObserver implements ObserverInterfa
      */
     public function execute(Observer $observer)
     {
-        if (!$this->helperData->isCronConfigured()) {
-            $this->messageManager->addWarningMessage($this->getCronIsNotConfiguredMessage());
+        if (!$this->helperData->isGeneralCronConfigured()) {
+            $this->messageManager->addWarningMessage($this->getGeneralCronIsNotConfiguredMessage());
         }
 
         return $this;
