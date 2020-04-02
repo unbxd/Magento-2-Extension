@@ -289,46 +289,57 @@ class Category extends Indexer
 
         $select = $this->connection->select();
 
-        // in cases if some category data (ex. name, url_path) set only for default store
-        $storeExpression = new \Zend_Db_Expr(
-            "CASE WHEN %s.value != NULL THEN {$storeId} ELSE 0 END"
-        );
+        $joinConditions = [];
+        $resultColumns = [];
+        // prepend entity ID field to result columns
+        $resultColumns[] = $entityIdField;
+        foreach ([$nameAttr, $urlKeyAttr, $urlPathAttr] as $attribute) {
+            // build join conditions
+            $attributeCode = $attribute->getAttributeCode();
+            $conditions = [
+                "{$attributeCode}_default.$linkField = {$attributeCode}_store.{$linkField}",
+                "{$attributeCode}_default.attribute_id = {$attributeCode}_store.attribute_id",
+                "{$attributeCode}_store.store_id = ?",
+            ];
+            $joinStoreValuesCondition = $this->connection->quoteInto(
+                implode(" AND ", $conditions),
+                $storeId
+            );
 
-        $conditionsName = [
-            "cat.{$linkField} = name.{$linkField}",
-            "name.attribute_id = " . (int) $nameAttr->getAttributeId(),
-            "name.store_id = " . sprintf($storeExpression, 'name')
-        ];
-        $joinConditionsName = new \Zend_Db_Expr(implode(" AND ", $conditionsName));
+            $joinConditions[$attribute->getAttributeId()] = [
+                'attribute_code' => $attributeCode,
+                'table' => (string) $attribute->getBackendTable(),
+                'conditions' => new \Zend_Db_Expr($joinStoreValuesCondition),
+            ];
 
-        $conditionsUrlKey = [
-            "cat.{$linkField} = url_key.{$linkField}",
-            "url_key.attribute_id = " . (int) $urlKeyAttr->getAttributeId(),
-            "url_key.store_id = " . sprintf($storeExpression, 'url_key')
-        ];
-        $joinConditionsUrlKey = new \Zend_Db_Expr(implode(" AND ", $conditionsUrlKey));
-
-        $conditionsUrlPath = [
-            "cat.{$linkField} = url_path.{$linkField}",
-            "url_path.attribute_id = " . (int) $urlPathAttr->getAttributeId(),
-            "url_path.store_id = " . sprintf($storeExpression, 'url_path')
-        ];
-        $joinConditionsUrlPath = new \Zend_Db_Expr(implode(" AND ", $conditionsUrlPath));
+            // build result columns, if store value is not specify, get default value
+            $resultColumns[] = new \Zend_Db_Expr(
+                "COALESCE({$attributeCode}_store.value, {$attributeCode}_default.value, NULL) AS {$attributeCode}"
+            );
+        }
 
         $select->distinct(
             true
         )->from(
             ['cat' => $this->getEntityMetaData(CategoryInterface::class)->getEntityTable()],
-            [
-                $entityIdField,
-                'name.value AS name',
-                'url_key.value AS url_key',
-                'url_path.value AS url_path'
-            ]
-        )->joinLeft(['name' => $nameAttr->getBackendTable()], $joinConditionsName, [])
-            ->joinLeft(['url_key' => $urlKeyAttr->getBackendTable()], $joinConditionsUrlKey, [])
-            ->joinLeft(['url_path' => $urlPathAttr->getBackendTable()], $joinConditionsUrlPath, [])
-            ->where("cat.$entityIdField != ?", $rootCategoryId)
+            $resultColumns
+        );
+
+        // apply join conditions
+        foreach ($joinConditions as $attributeId => $conditions) {
+            $attributeCode = $conditions['attribute_code'];
+
+            $select->joinInner(
+                ["{$attributeCode}_default" => $conditions['table']],
+                new \Zend_Db_Expr("cat.{$linkField} = {$attributeCode}_default.{$linkField}"),
+                []
+            )
+            ->joinLeft(["{$attributeCode}_store" => $conditions['table']], $conditions['conditions'], [])
+            ->where("{$attributeCode}_default.store_id = ?", 0)
+            ->where("{$attributeCode}_default.attribute_id = ?", $attributeId);
+        }
+
+        $select->where("cat.$entityIdField != ?", $rootCategoryId)
             ->where("cat.$entityIdField IN (?)", $loadCategoryIds);
 
         return $select;

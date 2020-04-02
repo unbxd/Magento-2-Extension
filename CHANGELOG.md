@@ -1,4 +1,9 @@
-# Version 1.0.40
+# Version 1.0.41
+## 1.0.41 - Apr 02, 2020
+### Fix Issues
+- Changed definition for some date fields in related tables.
+- Fixed issue with incorrect category building for multi store.
+
 ## 1.0.40 - Mar 20, 2020
 ### Improvements
 - Added cron job for full feed synchronization.

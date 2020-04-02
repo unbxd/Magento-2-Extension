@@ -194,9 +194,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 [],
                 'Status'
             )->addColumn(
+                null,
                 'additional_information',
                 Table::TYPE_TEXT,
-                null,
                 [],
                 'Additional Information'
             )->addColumn(
@@ -316,6 +316,53 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'comment' => 'Reindex Job ID'
                     ]
                 );
+            }
+        }
+
+        // change the definition for some date time fields
+        if (version_compare($context->getVersion(), '1.0.41', '<')) {
+            $affectedData = [
+                $installer->getTable('unbxd_productfeed_indexing_queue') => [
+                    'started_at' => [
+                        'type' => Table::TYPE_TIMESTAMP,
+                        'nullable' => true,
+                        'unsigned' => true,
+                        'default' => '',
+                        'comment' => 'Started Time'
+                    ],
+                    'finished_at' => [
+                        'type' => Table::TYPE_TIMESTAMP,
+                        'nullable' => true,
+                        'unsigned' => true,
+                        'default' => '',
+                        'comment' => 'Finished Time'
+                    ]
+                ],
+                $installer->getTable('unbxd_productfeed_feed_view') => [
+                    'finished_at' => [
+                        'type' => Table::TYPE_TIMESTAMP,
+                        'nullable' => true,
+                        'unsigned' => true,
+                        'default' => '',
+                        'comment' => 'Finished Time'
+                    ]
+                ],
+            ];
+            foreach ($affectedData as $tableName => $columns) {
+                if ($installer->tableExists($tableName)) {
+                    foreach ($columns as $columnName => $definition) {
+                        if (
+                            $installer->getConnection()->tableColumnExists($tableName, $columnName)
+                            && !empty($definition)
+                        ) {
+                            $installer->getConnection()->modifyColumn(
+                                $tableName,
+                                $columnName,
+                                $definition
+                            );
+                        }
+                    }
+                }
             }
         }
 
