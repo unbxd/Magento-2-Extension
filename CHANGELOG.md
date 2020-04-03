@@ -1,4 +1,8 @@
-# Version 1.0.41
+# Version 1.0.42
+## 1.0.42 - Apr 03, 2020
+### Fix Issues
+- Fixed issue with custom data mapping in schema.
+
 ## 1.0.41 - Apr 02, 2020
 ### Fix Issues
 - Changed definition for some date fields in related tables.

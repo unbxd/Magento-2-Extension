@@ -299,27 +299,24 @@ class DataHandler
             return $this;
         }
 
-        // add main product fields to schema
         $excludedFields = $this->feedConfig->getExcludedFields();
         $dataFieldsMapping = $this->buildDataFieldsMapping();
         foreach ($fields as $fieldCode => &$fieldData) {
+            // process excluded fields
             if (in_array($fieldCode, $excludedFields)) {
                 unset($fields[$fieldCode]);
             }
+            // process mapped fields
             if (array_key_exists($fieldCode, $dataFieldsMapping)) {
-                $fieldKey = $dataFieldsMapping[$fieldCode];
-                $fieldData['fieldName'] = $fieldKey;
-                $fields[$fieldKey] = $fieldData;
-                // unset mapped field only in case if it is not the same as the original
-                if ($fieldCode != $fieldKey) {
-                    unset($fields[$fieldCode]);
-                }
+                // include mapped field, leave the field from which it was mapped, as it can also be transferred
+                $mappedFieldKey = $dataFieldsMapping[$fieldCode];
+                $fields[$mappedFieldKey] = array_replace($fieldData, ['fieldName' => $mappedFieldKey]);
             }
-
             // convert to needed format
             $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);
         }
 
+        // process child fields
         $this->appendChildFieldsToSchema($fields);
 
         $this->schema = [
