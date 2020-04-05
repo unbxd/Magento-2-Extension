@@ -1,4 +1,10 @@
-# Version 1.0.42
+# Version 1.0.43
+## 1.0.43 - Apr 05, 2020
+### Fix Issues
+- Fixed issue with serialization of category data for some specific cases.
+### Improvements
+- Moved notification of maximum sync attempts to system information.
+
 ## 1.0.42 - Apr 03, 2020
 ### Fix Issues
 - Fixed issue with custom data mapping in schema.

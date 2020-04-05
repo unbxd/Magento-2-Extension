@@ -748,22 +748,25 @@ class CronManager
             }
 
             $currentNumberOfAttempts = (int) $job->getNumberOfAttempts();
-            $updatedData = [
-                IndexingQueueInterface::STARTED_AT => '',
-                IndexingQueueInterface::FINISHED_AT => '',
-                IndexingQueueInterface::EXECUTION_TIME => 0,
-                IndexingQueueInterface::STATUS => IndexingQueue::STATUS_PENDING,
-                IndexingQueueInterface::ADDITIONAL_INFORMATION => ''
-            ];
-
             if ($currentNumberOfAttempts >= $this->getMaxNumberOfAttempts()) {
-                $additionalMessage = sprintf(
-                    '%s<br/>Unable to reindex related data. Maximum number of attempts - %s.',
-                    $job->getAdditionalInformation(),
+                if ($job->getSystemInformation()) {
+                    continue;
+                }
+
+                $systemInformation = sprintf(
+                    'Unable to reindex related data. Maximum number of attempts - %s.',
                     $currentNumberOfAttempts
                 );
                 $updatedData = [
-                    IndexingQueueInterface::ADDITIONAL_INFORMATION => __($additionalMessage)
+                    IndexingQueueInterface::SYSTEM_INFORMATION => __($systemInformation)
+                ];
+            } else {
+                $updatedData = [
+                    IndexingQueueInterface::STARTED_AT => '',
+                    IndexingQueueInterface::FINISHED_AT => '',
+                    IndexingQueueInterface::EXECUTION_TIME => 0,
+                    IndexingQueueInterface::STATUS => IndexingQueue::STATUS_PENDING,
+                    IndexingQueueInterface::ADDITIONAL_INFORMATION => ''
                 ];
             }
 
@@ -808,14 +811,17 @@ class CronManager
 
             $currentNumberOfAttempts = (int) $job->getNumberOfAttempts();
             if ($currentNumberOfAttempts >= $this->getMaxNumberOfAttempts()) {
-                $additionalMessage = sprintf(
-                    '%s<br/>Unable to synchronization related data. Maximum number of attempts - %s.',
-                    $job->getAdditionalInformation(),
+                if ($job->getSystemInformation()) {
+                    continue;
+                }
+
+                $systemInformation = sprintf(
+                    'Unable to synchronization related data. Maximum number of attempts - %s.',
                     $currentNumberOfAttempts
                 );
                 $this->feedViewHandler->update($jobId,
                     [
-                        FeedViewInterface::ADDITIONAL_INFORMATION => __($additionalMessage)
+                        FeedViewInterface::SYSTEM_INFORMATION => __($systemInformation)
                     ]
                 );
             } else {

@@ -82,6 +82,6 @@ class Category
             }
         }
 
-        return array_unique($result, SORT_REGULAR);
+        return array_values(array_unique($result, SORT_REGULAR));
     }
 }
