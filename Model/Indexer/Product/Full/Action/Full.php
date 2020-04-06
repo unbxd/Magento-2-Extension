@@ -78,29 +78,37 @@ class Full
      * @param $storeId
      * @param array $productIds
      * @param int $fromId
+     * @param null $fromUpdatedDate
      * @param bool $useFilters
      * @param null $limit
-     * @return mixed
-     * @throws \Exception
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function getProducts($storeId, $productIds = [], $fromId = 0, $useFilters = true, $limit = null)
-    {
-        return $this->resourceModel->getProducts($storeId, $productIds, $fromId, $useFilters, $limit);
+    private function getProducts(
+        $storeId,
+        $productIds = [],
+        $fromId = 0,
+        $fromUpdatedDate = null,
+        $useFilters = true,
+        $limit = null
+    ) {
+        return $this->resourceModel->getProducts($storeId, $productIds, $fromId, $fromUpdatedDate, $useFilters, $limit);
     }
 
     /**
-     * Get data for a list of product in a store id.
-     * If the product list ids is null, all products data will be loaded.
+     * Get data for a list of product in a store ID.
+     * If the product list IDs is null, all products data will be loaded.
      *
      * @param $storeId
      * @param array $productIds
-     * @return array
-     * @throws \Exception
+     * @param null $fromUpdatedDate
+     * @return \Generator
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function initProductStoreIndex($storeId, $productIds = [])
+    private function initProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null)
     {
         if (!empty($productIds)) {
-            // ensure to reindex also the child product ids, if parent was passed.
+            // ensure to reindex also the child product IDs, if parent was passed.
             $relationsByParent = $this->resourceModel->getRelationsByParent($productIds);
             if (!empty($relationsByParent)) {
                 $productIds = array_unique(array_merge($productIds, $relationsByParent));
@@ -109,7 +117,7 @@ class Full
 
 		$productId = 0;
         do {
-            $products = $this->getProducts($storeId, $productIds, $productId);
+            $products = $this->getProducts($storeId, $productIds, $productId, $fromUpdatedDate);
             foreach ($products as $productData) {
                 $productId = (int) $productData['entity_id'];
                 // check if product related to parent product, if so - mark it (use for filtering index data in feed process)
@@ -181,12 +189,13 @@ class Full
      *
      * @param $storeId
      * @param array $productIds
+     * @param null $fromUpdatedDate
      * @return array|mixed
-     * @throws \Exception
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function rebuildProductStoreIndex($storeId, $productIds = [])
+    public function rebuildProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null)
     {
-        $initIndexData = $this->initProductStoreIndex($storeId, $productIds);
+        $initIndexData = $this->initProductStoreIndex($storeId, $productIds, $fromUpdatedDate);
         $fullIndex = [];
         if (!empty($initIndexData)) {
 			$fullIndex = $this->appendIndexData($storeId, $initIndexData);

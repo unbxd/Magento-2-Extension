@@ -216,6 +216,7 @@
             <argument name="commands" xsi:type="array">
                 <item name="unbxd_productfeed_full" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\Full</item>
                 <item name="unbxd_productfeed_incremental" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\Incremental</item>
+                <item name="unbxd_productfeed_incremental_from_date" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\IncrementalFromDate</item>
                 <item name="unbxd_productfeed_upload_status" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\UploadStatus</item>
                 <item name="unbxd_productfeed_upload_size" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\UploadSize</item>
                 <item name="unbxd_productfeed_download" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\Download</item>

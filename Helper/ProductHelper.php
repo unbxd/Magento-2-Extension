@@ -201,15 +201,20 @@ class ProductHelper
      * Retrieve all ids for product collection
      *
      * @param null $store
+     * @param null $updatedAtFrom
      * @return array
      */
-    public function getAllProductsIds($store = null)
+    public function getAllProductsIds($store = null, $updatedAtFrom = null)
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection */
         $productCollection = $this->collectionFactory->create();
-        if ($store != null) {
+        if ($store !== null) {
             $productCollection->addStoreFilter($store);
         }
+        if ($updatedAtFrom !== null) {
+            $productCollection->addFieldToFilter(Product::UPDATED_AT, ['from' => $updatedAtFrom]);
+        }
+        $productCollection->addAttributeToFilter('status', Status::STATUS_ENABLED);
 
         return $productCollection->getAllIds();
     }

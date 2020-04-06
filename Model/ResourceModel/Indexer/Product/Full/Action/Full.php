@@ -153,13 +153,20 @@ class Full extends Indexer
      * @param $storeId
      * @param array $productIds
      * @param int $fromId
+     * @param null $fromUpdatedDate
      * @param bool $useFilters
      * @param int $limit
-     * @return mixed
-     * @throws \Exception
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getProducts($storeId, $productIds = [], $fromId = 0, $useFilters = true, $limit = 10000)
-    {
+    public function getProducts(
+        $storeId,
+        $productIds = [],
+        $fromId = 0,
+        $fromUpdatedDate = null,
+        $useFilters = true,
+        $limit = 10000
+    ) {
         $select = $this->getConnection()->select()
             ->from(['e' => $this->getEntityTable()]);
 
@@ -171,12 +178,16 @@ class Full extends Indexer
             $select->where('e.entity_id IN (?)', $productIds);
         }
 
+        if ($fromUpdatedDate !== null) {
+            $select->where('e.updated_at >= ?', $fromUpdatedDate);
+        }
+
 		$select->limit($limit);
         $select->where('e.entity_id > ?', $fromId);
         $select->where('e.type_id IN (?)', $this->getSupportedProductTypes($storeId));
         $select->order('e.entity_id');
 
-        return $this->connection->fetchAll($select);
+        return $this->getConnection()->fetchAll($select);
     }
 
     /**

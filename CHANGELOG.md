@@ -1,4 +1,8 @@
-# Version 1.0.43
+# Version 1.0.44
+## 1.0.44 - Apr 06, 2020
+### Improvements
+- Implemented CLI command for incremental catalog products synchronization from specific date.
+
 ## 1.0.43 - Apr 05, 2020
 ### Fix Issues
 - Fixed issue with serialization of category data for some specific cases.
