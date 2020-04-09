@@ -178,13 +178,16 @@ class Config
     /**
      * Default fields declaration use for map
      */
-    const FIELD_KEY_ENTITY_ID       = 'entity_id';
-    const FIELD_KEY_PRODUCT_NAME    = 'name';
-    const FIELD_KEY_IMAGE_PATH      = 'image';
-    const FIELD_KEY_PRODUCT_URL_KEY = 'url_key';
-    const FIELD_KEY_STOCK_STATUS    = 'quantity_and_stock_status';
-    const FIELD_KEY_CATEGORY_DATA   = 'category';
-    const FIELD_KEY_VISIBILITY      = ProductInterface::VISIBILITY;
+    const FIELD_KEY_ENTITY_ID           = 'entity_id';
+    const FIELD_KEY_PRODUCT_NAME        = 'name';
+    const FIELD_KEY_IMAGE_PATH          = 'image';
+    const FIELD_KEY_SMALL_IMAGE_PATH    = 'small_image';
+    const FIELD_KEY_THUMBNAIL_PATH      = 'thumbnail';
+    const FIELD_KEY_SWATCH_IMAGE_PATH   = 'swatch_image';
+    const FIELD_KEY_PRODUCT_URL_KEY     = 'url_key';
+    const FIELD_KEY_STOCK_STATUS        = 'quantity_and_stock_status';
+    const FIELD_KEY_CATEGORY_DATA       = 'category';
+    const FIELD_KEY_VISIBILITY          = ProductInterface::VISIBILITY;
 
     /**
      * Specific fields declaration
@@ -278,12 +281,7 @@ class Config
     public function getExcludedFields()
     {
         return [
-            'indexed_attributes',
-            'image_label',
-            'small_image',
-            'small_image_label',
-            'thumbnail',
-            'thumbnail_label'
+            'indexed_attributes'
         ];
     }
 

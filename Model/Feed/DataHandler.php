@@ -112,6 +112,13 @@ class DataHandler
     private $visibility = [];
 
     /**
+     * Local cache for images that have been processed
+     *
+     * @var array
+     */
+    protected $processedImages = [];
+
+    /**
      * Feed catalog data
      *
      * @var array
@@ -481,6 +488,7 @@ class DataHandler
     {
         $this->applyWebsiteStoreFields($data, $store)
             ->applyDataFieldsMapping($data)
+            ->applyMediaAttributes($data)
             ->filterFields($data);
 
         // mark to prevent not prepared data
@@ -550,10 +558,14 @@ class DataHandler
                     }
                     break;
                 case Config::FIELD_KEY_IMAGE_PATH:
-                    $imageUrl = $this->imageDataHandler->getImageUrl($value);
+                case Config::FIELD_KEY_SMALL_IMAGE_PATH:
+                case Config::FIELD_KEY_THUMBNAIL_PATH:
+                case Config::FIELD_KEY_SWATCH_IMAGE_PATH:
+                    $imageUrl = $this->imageDataHandler->getImageUrl($value, $productAttribute);
                     if ($imageUrl) {
                         $data[$unbxdField] = $imageUrl;
                         unset($data[$productAttribute]);
+                        $this->setProcessedImages($productAttribute);
                     }
                     break;
                 case Config::FIELD_KEY_CATEGORY_DATA:
@@ -577,6 +589,54 @@ class DataHandler
                     break;
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @param $imageType
+     * @return $this
+     */
+    private function setProcessedImages($imageType)
+    {
+        if (!in_array($imageType, $this->processedImages)) {
+            $this->processedImages[] = $imageType;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    private function getProcessedImages()
+    {
+        return array_values(array_unique($this->processedImages));
+    }
+
+    /**
+     * @return $this
+     */
+    private function resetProcessedImages()
+    {
+        $this->processedImages = [];
+        return $this;
+    }
+
+    /**
+     * @param array $data
+     * @return $this
+     */
+    private function applyMediaAttributes(array &$data)
+    {
+        foreach (ImageDataHandler::getMediaAttributes() as $attribute) {
+            if (isset($data[$attribute]) && !in_array($attribute, $this->getProcessedImages())) {
+                $value = is_array($data[$attribute]) ? $data[$attribute][0] : $data[$attribute];
+                $data[$attribute] = $this->imageDataHandler->getImageUrl((string) $value, $attribute);
+            }
+        }
+        // clear processed images for current product
+        $this->resetProcessedImages();
 
         return $this;
     }
@@ -950,6 +1010,7 @@ class DataHandler
         $this->fullFeed = [];
         $this->productUrlSuffix = [];
         $this->visibility = [];
+        $this->processedImages = [];
         $this->childrenSchemaFields = [];
         $this->childrenData = [];
         $this->dataFieldsMapping = [];

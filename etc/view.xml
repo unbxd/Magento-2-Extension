@@ -16,22 +16,25 @@
 <view xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Config/etc/view.xsd">
     <media>
         <images module="Magento_Catalog">
-            <image id="indexing_queue_item_product_image" type="thumbnail">
-                <width>80</width>
-                <height>80</height>
-            </image>
             <image id="feed_adminhtml_grid_details_product_image" type="thumbnail">
                 <width>80</width>
                 <height>80</height>
             </image>
-            <image id="feed_product_image_small" type="thumbnail">
-                <width>88</width>
-                <height>110</height>
-                <!--<aspect_ratio>1</aspect_ratio>-->
-                <!--<frame>1</frame>-->
-                <!--<transparency>1</transparency>-->
-                <!--<background>[255, 255, 255]</background>-->
-                <!--<constrain>1</constrain>-->
+            <image id="unbxd_feed_product_image" type="image">
+                <width>700</width>
+                <height>700</height>
+            </image>
+            <image id="unbxd_feed_product_small_image" type="small_image">
+                <width>135</width>
+                <height>135</height>
+            </image>
+            <image id="unbxd_feed_product_thumbnail" type="thumbnail">
+                <width>75</width>
+                <height>75</height>
+            </image>
+            <image id="unbxd_feed_product_swatch_image" type="swatch_image">
+                <width>30</width>
+                <height>20</height>
             </image>
         </images>
     </media>

@@ -1,4 +1,8 @@
-# Version 1.0.44
+# Version 1.0.45
+## 1.0.45 - Apr 09, 2020
+### Improvements
+- Included additional media attributes in feed.
+
 ## 1.0.44 - Apr 06, 2020
 ### Improvements
 - Implemented CLI command for incremental catalog products synchronization from specific date.
