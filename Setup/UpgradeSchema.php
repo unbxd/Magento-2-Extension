@@ -194,9 +194,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 [],
                 'Status'
             )->addColumn(
-                null,
                 'additional_information',
                 Table::TYPE_TEXT,
+                null,
                 [],
                 'Additional Information'
             )->addColumn(

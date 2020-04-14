@@ -1,4 +1,8 @@
-# Version 1.0.45
+# Version 1.0.46
+## 1.0.46 - Apr 14, 2020
+### Fix Issues
+- Fixed issue with incorrect arguments order for column 'additional_information' in table 'unbxd_productfeed_feed_view'.
+
 ## 1.0.45 - Apr 09, 2020
 ### Improvements
 - Included additional media attributes in feed.
