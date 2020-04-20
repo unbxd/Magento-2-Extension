@@ -236,7 +236,8 @@ class AttributeHelper extends AbstractHelper
      */
     public function isFieldMultivalued(AttributeInterface $attribute)
     {
-        return (bool) ($attribute->getBackendType() == 'varchar') && ($attribute->getFrontendInput() == 'multiselect');
+        return (bool) (in_array($attribute->getBackendType(), ['varchar', 'text'])
+            && ($attribute->getFrontendInput() == 'multiselect'));
     }
 
     /**
@@ -285,6 +286,7 @@ class AttributeHelper extends AbstractHelper
         if ($attribute->usesSource()) {
             $optionTextFieldName = $this->getOptionTextFieldName($attributeCode);
             $optionTextValues = $this->getIndexOptionsText($attribute, $storeId, $value);
+            $this->normalizeOptionTextValues($optionTextValues);
             // filter empty values, not using array_filter here because it could remove "0" string from values.
             $optionTextValues = array_diff(array_map('trim', $optionTextValues), ['', null, false]);
             $optionTextValues = array_values($optionTextValues);
@@ -292,6 +294,25 @@ class AttributeHelper extends AbstractHelper
         }
 
         return array_filter($values);
+    }
+
+    /**
+     * Transform an array of options text values into an simple array
+     *
+     * @param array $optionTextValues
+     * @return $this
+     */
+    private function normalizeOptionTextValues(array &$optionTextValues)
+    {
+        foreach ($optionTextValues as $key => $optionTextValue) {
+            if (!is_array($optionTextValue)) {
+                continue;
+            }
+            $values = array_values($optionTextValue);
+            // get first valid value
+            $optionTextValues[$key] = (string) array_shift($values);
+        }
+        return $this;
     }
 
     /**

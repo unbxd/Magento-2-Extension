@@ -200,6 +200,9 @@ class Serializer
         // 0x08 => \b
         // 0x0c => \f
         $string = str_replace([chr(0x08), chr(0x0C)], ['\b', '\f'], $string);
+        if (class_exists(\Zend_Json_Encoder::class)) {
+            $string = \Zend_Json_Encoder::encodeUnicodeString($string);
+        }
 
         return self::JSON_DOUBLE_QUOTE . $string . self::JSON_DOUBLE_QUOTE;
     }

@@ -1,4 +1,9 @@
-# Version 1.0.46
+# Version 1.0.47
+## 1.0.47 - Apr 20, 2020
+### Improvements
+- Added encoding for unicode string for serialize feed content.
+- Updated method to check if fields can be multi-valued.
+
 ## 1.0.46 - Apr 14, 2020
 ### Fix Issues
 - Fixed issue with incorrect arguments order for column 'additional_information' in table 'unbxd_productfeed_feed_view'.
