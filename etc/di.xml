@@ -228,6 +228,7 @@
     <!-- START: config cache declared -->
     <type name="Unbxd\ProductFeed\Model\CacheManager">
         <arguments>
+            <argument name="cache" xsi:type="object">Magento\Framework\App\Cache\Type\Config</argument>
             <argument name="cacheTypes" xsi:type="array">
                 <item name="config" xsi:type="string">config</item>
                 <item name="layout" xsi:type="string">layout</item>
@@ -283,4 +284,12 @@
         </arguments>
     </type>
     <!-- END: shell background task -->
+
+    <!-- START: feed images data handler -->
+    <type name="Unbxd\ProductFeed\Model\Feed\DataHandler\Image">
+        <arguments>
+            <argument name="cacheSubDir" xsi:type="string">cache</argument>
+        </arguments>
+    </type>
+    <!-- END: feed images data handler -->
 </config>

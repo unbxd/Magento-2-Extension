@@ -95,10 +95,54 @@
                     out of stock, disabled, not visible individually, with no image, etc.<br/>
                     Don't choose any one if you want all products to be synchronized.]]></comment>
                 </field>
-                <field id="max_number_of_attempts" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="max_number_of_attempts" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Max Number Of Synchronization Attempts</label>
                     <validate>validate-number validate-number-range number-range-1-5</validate>
                     <comment><![CDATA[The maximum number of synchronization attempts, when operation(s) are in 'ERROR' state.<br/>Available value in range from 1 to 5.]]></comment>
+                </field>
+            </group>
+            <group id="images" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product Images Settings</label>
+                <field id="use_cached_product_images" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use Cached Product Images</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Use cached product images in product feed instead of non-cached.]]></comment>
+                </field>
+                <field id="base_image_id" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Base Image</label>
+                    <source_model>Unbxd\ProductFeed\Model\Config\Source\MediaTypes</source_model>
+                    <comment><![CDATA[Please specify image ID which use for <strong>base image</strong>.<br/>
+                    All media types are declared in the theme being used and can be found in <i>etc/view.xml</i>]]></comment>
+                    <depends>
+                        <field id="use_cached_product_images">1</field>
+                    </depends>
+                </field>
+                <field id="small_image_id" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Small Image</label>
+                    <source_model>Unbxd\ProductFeed\Model\Config\Source\MediaTypes</source_model>
+                    <comment><![CDATA[Please specify image ID which use for <strong>small image</strong>.<br/>
+                    All media types are declared in the theme being used and can be found in <i>etc/view.xml</i>]]></comment>
+                    <depends>
+                        <field id="use_cached_product_images">1</field>
+                    </depends>
+                </field>
+                <field id="thumbnail_id" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Thumbnail</label>
+                    <source_model>Unbxd\ProductFeed\Model\Config\Source\MediaTypes</source_model>
+                    <comment><![CDATA[Please specify image ID which use for <strong>thumbnail</strong>.<br/>
+                    All media types are declared in the theme being used and can be found in <i>etc/view.xml</i>]]></comment>
+                    <depends>
+                        <field id="use_cached_product_images">1</field>
+                    </depends>
+                </field>
+                <field id="swatch_image_id" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Swatch Image</label>
+                    <source_model>Unbxd\ProductFeed\Model\Config\Source\MediaTypes</source_model>
+                    <comment><![CDATA[Please specify image ID which use for <strong>swatch image</strong>.<br/>
+                    All media types are declared in the theme being used and can be found in <i>etc/view.xml</i>]]></comment>
+                    <depends>
+                        <field id="use_cached_product_images">1</field>
+                    </depends>
                 </field>
             </group>
             <group id="indexing" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">

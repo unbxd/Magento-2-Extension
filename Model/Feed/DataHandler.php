@@ -487,8 +487,8 @@ class DataHandler
     private function prepareFields(array &$data, $store = null)
     {
         $this->applyWebsiteStoreFields($data, $store)
-            ->applyDataFieldsMapping($data)
-            ->applyMediaAttributes($data)
+            ->applyDataFieldsMapping($data, $store)
+            ->applyMediaAttributes($data, $store)
             ->filterFields($data);
 
         // mark to prevent not prepared data
@@ -528,10 +528,11 @@ class DataHandler
      * Apply data fields mapping
      *
      * @param array $data
+     * @param null $store
      * @return $this
      * @throws NoSuchEntityException
      */
-    private function applyDataFieldsMapping(array &$data)
+    private function applyDataFieldsMapping(array &$data, $store = null)
     {
         $dataFieldsMapping = $this->buildDataFieldsMapping();
         foreach ($dataFieldsMapping as $productAttribute => $unbxdField) {
@@ -561,7 +562,7 @@ class DataHandler
                 case Config::FIELD_KEY_SMALL_IMAGE_PATH:
                 case Config::FIELD_KEY_THUMBNAIL_PATH:
                 case Config::FIELD_KEY_SWATCH_IMAGE_PATH:
-                    $imageUrl = $this->imageDataHandler->getImageUrl($value, $productAttribute);
+                    $imageUrl = $this->imageDataHandler->getImageUrl($value, $productAttribute, $store);
                     if ($imageUrl) {
                         $data[$unbxdField] = $imageUrl;
                         unset($data[$productAttribute]);
@@ -625,14 +626,15 @@ class DataHandler
 
     /**
      * @param array $data
+     * @param null $store
      * @return $this
      */
-    private function applyMediaAttributes(array &$data)
+    private function applyMediaAttributes(array &$data, $store = null)
     {
         foreach (ImageDataHandler::getMediaAttributes() as $attribute) {
             if (isset($data[$attribute]) && !in_array($attribute, $this->getProcessedImages())) {
                 $value = is_array($data[$attribute]) ? $data[$attribute][0] : $data[$attribute];
-                $data[$attribute] = $this->imageDataHandler->getImageUrl((string) $value, $attribute);
+                $data[$attribute] = $this->imageDataHandler->getImageUrl((string) $value, $attribute, $store);
             }
         }
         // clear processed images for current product

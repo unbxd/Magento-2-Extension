@@ -61,6 +61,14 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     /**
+     * product images settings
+     */
+    const XML_PATH_IMAGES_USE_CACHED_PRODUCT_IMAGES = 'unbxd_catalog/images/use_cached_product_images';
+    const XML_PATH_IMAGES_BASE_IMAGE_ID = 'unbxd_catalog/images/base_image_id';
+    const XML_PATH_IMAGES_SMALL_IMAGE_ID = 'unbxd_catalog/images/small_image_id';
+    const XML_PATH_IMAGES_THUMBNAIL_ID = 'unbxd_catalog/images/thumbnail_id';
+    const XML_PATH_IMAGES_SWATCH_IMAGE_ID = 'unbxd_catalog/images/swatch_image_id';
+    /**
      * general cron settings
      */
     const XML_PATH_CATALOG_CRON_GENERAL_ENABLED = 'unbxd_catalog/cron/general_settings/enabled';
@@ -394,12 +402,50 @@ class Data extends AbstractHelper
                         $result[] = $attribute;
                     }
                 }
-
                 return $result;
             }
         }
-
         return $attributes;
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function useCachedProductImages($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_IMAGES_USE_CACHED_PRODUCT_IMAGES,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    /**
+     * @param $type
+     * @param null $store
+     * @return mixed|null
+     */
+    public function getImageByType($type, $store = null)
+    {
+        if ($this->useCachedProductImages($store)) {
+            switch ($type) {
+                case 'image':
+                    $path = self::XML_PATH_IMAGES_BASE_IMAGE_ID;
+                    break;
+                case 'small_image':
+                    $path = self::XML_PATH_IMAGES_SMALL_IMAGE_ID;
+                    break;
+                case 'thumbnail':
+                    $path = self::XML_PATH_IMAGES_THUMBNAIL_ID;
+                    break;
+                case 'swatch_image':
+                    $path = self::XML_PATH_IMAGES_SWATCH_IMAGE_ID;
+                    break;
+            }
+            return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $store);
+        }
+        return null;
     }
 
     /**

@@ -1,4 +1,8 @@
-# Version 1.0.47
+# Version 1.0.48
+## 1.0.48 - Apr 20, 2020
+### Improvements
+- Added the ability to manage which product images will be transmitted in the feed.
+
 ## 1.0.47 - Apr 20, 2020
 ### Improvements
 - Added encoding for unicode string for serialize feed content.

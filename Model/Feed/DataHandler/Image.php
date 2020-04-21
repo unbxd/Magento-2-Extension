@@ -11,13 +11,14 @@
  */
 namespace Unbxd\ProductFeed\Model\Feed\DataHandler;
 
-use Magento\Catalog\Model\Product\Image as ProductImage;
+use Unbxd\ProductFeed\Model\Feed\DataHandler\Image\MiscParamsBuilder;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Magento\Catalog\Model\Product\Media\Config as MediaConfig;
 use Magento\Framework\View\ConfigInterface as ViewConfigInterface;
 use Magento\Framework\Encryption\Encryptor;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
 
 /**
  * Class Image
@@ -31,69 +32,9 @@ class Image
     const FEED_PRODUCT_IMAGE_PREFIX = 'unbxd_feed_product';
 
     /**
-     * Product image cache sub directory
+     * @var MediaConfig
      */
-    const CACHE_SUB_DIR = 'cache';
-
-    /**
-     * XML path watermark image properties
-     */
-    const WATERMARK_PATH_IMAGE = 'design/watermark/%s_image';
-    const WATERMARK_PATH_OPACITY = 'design/watermark/%s_imageOpacity';
-    const WATERMARK_PATH_POSITION = 'design/watermark/%s_position';
-    const WATERMARK_PATH_SIZE = 'design/watermark/%s_size';
-
-    /**
-     * Default quality value (for JPEG images only).
-     *
-     * @var int
-     */
-    protected $quality = 80;
-
-    /**
-     * @var bool
-     */
-    protected $keepAspectRatio = true;
-
-    /**
-     * @var bool
-     */
-    protected $keepFrame = true;
-
-    /**
-     * @var bool
-     */
-    protected $keepTransparency = true;
-
-    /**
-     * @var bool
-     */
-    protected $constrainOnly = true;
-
-    /**
-     * @var int[]
-     */
-    protected $backgroundColor = [255, 255, 255];
-
-    /**
-     * @var \Magento\Framework\Config\View
-     */
-    protected $configView;
-
-    /**
-     * @var ViewConfigInterface
-     */
-    protected $viewConfig;
-
-    /**
-     * @var ProductImage
-     */
-    private $productImage;
-
-    /**
-     * @var ImageHelper
-     */
-    private $imageHelper;
+    private $catalogProductMediaConfig;
 
     /**
      * @var HelperData
@@ -101,9 +42,19 @@ class Image
     private $helperData;
 
     /**
-     * @var MediaConfig
+     * @var MiscParamsBuilder
      */
-    private $catalogProductMediaConfig;
+    private $miscParamsBuilder;
+
+    /**
+     * @var \Magento\Framework\Config\View|null
+     */
+    private $configView = null;
+
+    /**
+     * @var ViewConfigInterface
+     */
+    protected $viewConfig;
 
     /**
      * @var EncryptorInterface
@@ -111,9 +62,9 @@ class Image
     private $encryptor;
 
     /**
-     * @var null
+     * Product image cache sub directory
      */
-    private $defaultImagePlaceHolderUrl = null;
+    private $cacheSubDir;
 
     /**
      * Local cache for image properties
@@ -123,18 +74,11 @@ class Image
     private $miscParams = [];
 
     /**
-     * Local cache for image role
-     *
-     * @var null
-     */
-    private $imageType = null;
-
-    /**
-     * Local cache for images cache sub dir by image type
+     * Local cache for images cache URL by image type
      *
      * @var array
      */
-    private $cacheSubDirs = [];
+    private $cachedUrl = [];
 
     /**
      * Local cache for current working directory
@@ -145,27 +89,27 @@ class Image
 
     /**
      * Image constructor.
-     * @param ViewConfigInterface $viewConfig
-     * @param ProductImage $productImage
-     * @param ImageHelper $imageHelper
-     * @param HelperData $helperData
      * @param MediaConfig $catalogProductMediaConfig
+     * @param HelperData $helperData
+     * @param ViewConfigInterface $viewConfig
+     * @param MiscParamsBuilder $miscParamsBuilder
      * @param EncryptorInterface $encryptor
+     * @param $cacheSubDir
      */
     public function __construct(
-        ViewConfigInterface $viewConfig,
-        ProductImage $productImage,
-        ImageHelper $imageHelper,
-        HelperData $helperData,
         MediaConfig $catalogProductMediaConfig,
-        EncryptorInterface $encryptor
+        HelperData $helperData,
+        ViewConfigInterface $viewConfig,
+        MiscParamsBuilder $miscParamsBuilder,
+        EncryptorInterface $encryptor,
+        $cacheSubDir
     ) {
-        $this->viewConfig = $viewConfig;
-        $this->productImage = $productImage;
-        $this->imageHelper = $imageHelper;
-        $this->helperData = $helperData;
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
+        $this->helperData = $helperData;
+        $this->viewConfig = $viewConfig;
+        $this->miscParamsBuilder = $miscParamsBuilder;
         $this->encryptor = $encryptor;
+        $this->cacheSubDir = $cacheSubDir;
     }
 
     /**
@@ -177,47 +121,12 @@ class Image
     }
 
     /**
-     * @param string $imageType
-     * @return $this
+     * @param $type
+     * @return mixed|null
      */
-    private function setImageType($imageType)
+    private function getDefaultImageIdByType($type)
     {
-        $this->imageType = $imageType;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    private function getImageType()
-    {
-        return $this->imageType;
-    }
-
-    /**
-     * @return string|null
-     */
-    private function getMediaIdByType()
-    {
-        return sprintf('%s_%s', self::FEED_PRODUCT_IMAGE_PREFIX, $this->getImageType());
-    }
-
-    /**
-     * @param $attributeName
-     * @param null $default
-     * @return array|null
-     */
-    public function getImageAttribute($attributeName, $default = null)
-    {
-        $attributes = $this->getConfigView()->getMediaAttributes(
-                'Magento_Catalog',
-                ImageHelper::MEDIA_TYPE_CONFIG_NODE,
-                $this->getMediaIdByType()
-            );
-
-        return $attributeName ?
-            (isset($attributes[$attributeName]) ? $attributes[$attributeName] : $default)
-            : $attributes;
+        return sprintf('%s_%s', self::FEED_PRODUCT_IMAGE_PREFIX, $type);
     }
 
     /**
@@ -227,203 +136,105 @@ class Image
      */
     private function getConfigView()
     {
-        if (!$this->configView) {
+        if (null == $this->configView) {
             $this->configView = $this->viewConfig->getViewConfig();
         }
         return $this->configView;
     }
 
+    /**
+     * @param $type
+     * @param null $store
+     * @param null $attributeName
+     * @param null $default
+     * @return array|mixed|null
+     */
+    public function getMediaAttribute($type, $store = null, $attributeName = null, $default = null)
+    {
+        $imageType = $this->helperData->getImageByType($type, $store);
+        $imageType = explode('|', strtolower($imageType), 2);
+
+        $attributes = $this->getConfigView()->getMediaAttributes(
+                'Magento_Catalog',
+                ImageHelper::MEDIA_TYPE_CONFIG_NODE,
+                $imageType[0]
+            );
+        if (empty($attributes)) {
+            // doesn't pick up image attributes from module/theme?
+            if (isset($imageType[1])) {
+                $attributes = [
+                    'type' => $type,
+                    'frame' => (bool) !strpos($imageType[0], 'no_frame')
+                ];
+                // size parameters are provided - try to add height and width
+                $size = explode('x', strtolower($imageType[1]), 2);
+                if (sizeof($size) == 2) {
+                    $attributes['height'] = $size[0] > 0 ? $size[0] : null;
+                    $attributes['width'] = $size[1] > 0 ? $size[1] : null;
+                }
+            } else {
+                // try to retrieve default values declared in etc/view.xml
+                $attributes = $this->getConfigView()->getMediaAttributes(
+                    'Magento_Catalog',
+                    ImageHelper::MEDIA_TYPE_CONFIG_NODE,
+                    $this->getDefaultImageIdByType($type)
+                );
+            }
+        }
+
+        return $attributeName ?
+            (isset($attributes[$attributeName]) ? $attributes[$attributeName] : $default)
+            : $attributes;
+    }
 
     /**
      * Retrieve misc params based on all image attributes. Init if needed
      *
-     * @param $imageType
+     * @param $type
+     * @param null $store
      * @return mixed
      */
-    private function getMiscParams($imageType)
+    private function getMiscParams($type, $store = null)
     {
-        if (!isset($this->miscParams[$imageType])) {
-            $this->miscParams[$imageType] = [
-                'image_type' => $this->getImageAttribute('type'),
-                'image_height' => $this->getImageAttribute('height'),
-                'image_width' => $this->getImageAttribute('width'),
-                'keep_aspect_ratio' => (
-                    ($this->getImageAttribute('aspect_ratio') || $this->keepAspectRatio) ? '' : 'non'
-                    ) . 'proportional',
-                'keep_frame' => (
-                    ($this->getImageAttribute('frame') || $this->keepFrame) ? '' : 'no'
-                    ) . 'frame',
-                'keep_transparency' => (
-                    ($this->getImageAttribute('transparency') || $this->keepTransparency) ? '' : 'no'
-                    ) . 'transparency',
-                'constrain_only' => (
-                    ($this->getImageAttribute('constrain') || $this->constrainOnly) ? 'do' : 'not'
-                    ) . 'constrainonly',
-                'background' => $this->rgbToString(
-                    $this->getImageAttribute('background') ?: $this->backgroundColor),
-                'angle' => null,
-                'quality' => $this->quality,
-            ];
-
-            // if has watermark add watermark params to hash
-            $this->setWatermarkProperties($this->miscParams[$imageType]);
+        if (!isset($this->miscParams[$type])) {
+            $this->miscParams[$type] = $this->miscParamsBuilder->build($this->getMediaAttribute($type, $store));
         }
-
-        return $this->miscParams[$imageType];
+        return $this->miscParams[$type];
     }
 
     /**
-     * Set watermark properties
+     * Retrieve part of image path based on misc params
      *
-     * @param array $miscParams
-     * @return $this
-     */
-    private function setWatermarkProperties(array &$miscParams)
-    {
-        $type = $this->getImageAttribute('type');
-        $waterMarkImage = $this->helperData->getConfigValue(
-            sprintf(self::WATERMARK_PATH_IMAGE, $type),
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
-        if (!$waterMarkImage) {
-            return $this;
-        }
-
-        $miscParams['watermark_file'] = $waterMarkImage;
-        $miscParams['watermark_image_opacity'] =
-            $this->helperData->getConfigValue(
-                sprintf(self::WATERMARK_PATH_OPACITY, $type),
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-            );
-        $miscParams['watermark_position'] =
-            $this->helperData->getConfigValue(
-                sprintf(self::WATERMARK_PATH_POSITION, $type),
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-            );
-
-        $size = $this->parseSize(
-            $this->helperData->getConfigValue(
-                sprintf(self::WATERMARK_PATH_SIZE, $type),
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-            )
-        );
-        if ($size) {
-            $miscParams['watermark_width'] = isset($size['width']) ? $size['width'] : 0;
-            $miscParams['watermark_height'] = isset($size['height']) ? $size['height'] : 0;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Retrieve part of path based on misc params
-     *
-     * @param string $imageType
+     * @param $type
+     * @param null $store
      * @return string
      */
-    private function getMiscPath($imageType)
+    private function getMiscPath($type, $store = null)
     {
         return $this->encryptor->hash(
-            implode('_', $this->getMiscParams($imageType)),
+            implode('_', $this->getMiscParams($type, $store)),
             Encryptor::HASH_VERSION_MD5
         );
     }
 
     /**
-     * Retrieve product image cache sub directory. Init if needed
+     * Retrieve product image cache URL. Init if needed
      *
-     * @param string $imageType
-     * @return string|null
+     * @param $type
+     * @param null $store
+     * @return mixed
      */
-    private function getImageCacheSubUrl($imageType)
+    private function getCachedUrl($type, $store = null)
     {
-        if (!isset($this->cacheSubDirs[$imageType])) {
-            $this->cacheSubDirs[$imageType] = sprintf(
+        if (!isset($this->cacheSubDirs[$type])) {
+            $this->cachedUrl[$type] = sprintf(
                 '%s/%s/%s',
                 $this->catalogProductMediaConfig->getBaseMediaUrl(),
-                self::CACHE_SUB_DIR,
-                $this->getMiscPath($imageType)
+                $this->cacheSubDir,
+                $this->getMiscPath($type, $store)
             );
         }
-
-        return $this->cacheSubDirs[$imageType];
-    }
-
-    /**
-     * Retrieve product image url
-     *
-     * @param string $imagePath
-     * @param string $imageType
-     * @return string
-     */
-    public function getImageUrl($imagePath, $imageType)
-    {
-        // check if provided value already as url
-        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            return $imagePath;
-        }
-
-        $this->setImageType($imageType);
-        // try to retrieve cache url
-        $url = $this->getImageCacheSubUrl($imageType) . $imagePath;
-        $imageSubPath = substr($url, strpos($url, '/pub'));
-        $imageRealPath = $this->getRootPath() . $imageSubPath;
-        if (!file_exists($imageRealPath)) {
-            // non cache url
-            $url = $this->catalogProductMediaConfig->getMediaUrl($imagePath);
-        }
-
-        return $url;
-    }
-
-    /**
-     * Retrieve default product image placeholder url. Init if needed
-     *
-     * @return null
-     */
-    public function getDefaultImagePlaceHolderUrl()
-    {
-        if (null == $this->defaultImagePlaceHolderUrl) {
-            $this->defaultImagePlaceHolderUrl = $this->imageHelper->getDefaultPlaceholderUrl();
-        }
-
-        return $this->defaultImagePlaceHolderUrl;
-    }
-
-    /**
-     * Convert array of 3 items (decimal r, g, b) to string of their hex values
-     *
-     * @param int[] $rgbArray
-     * @return string
-     */
-    private function rgbToString($rgbArray)
-    {
-        $result = [];
-        foreach ($rgbArray as $value) {
-            if (null === $value) {
-                $result[] = 'null';
-            } else {
-                $result[] = sprintf('%02s', dechex($value));
-            }
-        }
-
-        return implode($result);
-    }
-
-    /**
-     * Retrieve size from string
-     *
-     * @param string $string
-     * @return array|bool
-     */
-    private function parseSize($string)
-    {
-        $size = explode('x', strtolower($string));
-        if (sizeof($size) == 2) {
-            return ['width' => $size[0] > 0 ? $size[0] : null, 'height' => $size[1] > 0 ? $size[1] : null];
-        }
-
-        return false;
+        return $this->cachedUrl[$type];
     }
 
     /**
@@ -440,7 +251,41 @@ class Image
             }
             $this->rootPath = $rootPath;
         }
-
         return $this->rootPath;
+    }
+
+    /**
+     * Build real filepath, to check if image cached file is exist
+     *
+     * @param $url
+     * @return string
+     */
+    private function getCachedImageRealPath($url)
+    {
+        $cachedSubPath = substr($url, strpos($url, DIRECTORY_SEPARATOR . DirectoryList::PUB));
+        return sprintf('%s%s', $this->getRootPath(), $cachedSubPath);
+    }
+
+    /**
+     * Retrieve product image url
+     *
+     * @param $imagePath
+     * @param $imageType
+     * @param null $store
+     * @return string
+     */
+    public function getImageUrl($imagePath, $imageType, $store = null)
+    {
+        // check if provided value already as url
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            return $imagePath;
+        }
+        $url = $this->catalogProductMediaConfig->getMediaUrl($imagePath);
+        if ($this->helperData->useCachedProductImages($store)) {
+            $cachedUrl = sprintf('%s%s', $this->getCachedUrl($imageType, $store), $imagePath);
+            $cachedImageRealPath = $this->getCachedImageRealPath($cachedUrl);
+            $url = file_exists($cachedImageRealPath) ? $cachedUrl : $url;
+        }
+        return $url;
     }
 }
