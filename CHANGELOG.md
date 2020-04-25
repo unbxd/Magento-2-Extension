@@ -1,4 +1,8 @@
-# Version 1.0.48
+# Version 1.0.49
+## 1.0.49 - Apr 25, 2020
+### Fix Issues
+- Fixed issue with incorrect validation for cached product images.
+
 ## 1.0.48 - Apr 20, 2020
 ### Improvements
 - Added the ability to manage which product images will be transmitted in the feed.

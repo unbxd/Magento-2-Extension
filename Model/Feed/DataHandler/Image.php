@@ -262,7 +262,19 @@ class Image
      */
     private function getCachedImageRealPath($url)
     {
-        $cachedSubPath = substr($url, strpos($url, DIRECTORY_SEPARATOR . DirectoryList::PUB));
+        $pointDirectory = DirectoryList::PUB;
+        $isPubDirectoryOmit = false;
+        if (!strpos($url, $pointDirectory)) {
+            // pub directory can be omit in url due to store configuration
+            $pointDirectory = DirectoryList::MEDIA;
+            $isPubDirectoryOmit = true;
+        }
+        // get absolute path to image file
+        $cachedSubPath = substr($url, strpos($url, DIRECTORY_SEPARATOR . $pointDirectory));
+        if ($isPubDirectoryOmit) {
+            // added pub directory to result path
+            return sprintf('%s%s/%s', $this->getRootPath(), DirectoryList::PUB, $cachedSubPath);
+        }
         return sprintf('%s%s', $this->getRootPath(), $cachedSubPath);
     }
 
