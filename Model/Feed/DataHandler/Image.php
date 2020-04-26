@@ -18,6 +18,8 @@ use Magento\Catalog\Model\Product\Media\Config as MediaConfig;
 use Magento\Framework\View\ConfigInterface as ViewConfigInterface;
 use Magento\Framework\Encryption\Encryptor;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Filesystem\Directory\Read as Directory;
+use Magento\Framework\Filesystem;
 use Magento\Framework\App\Filesystem\DirectoryList;
 
 /**
@@ -62,6 +64,11 @@ class Image
     private $encryptor;
 
     /**
+     * @var Directory
+     */
+    protected $directory;
+
+    /**
      * Product image cache sub directory
      */
     private $cacheSubDir;
@@ -94,6 +101,7 @@ class Image
      * @param ViewConfigInterface $viewConfig
      * @param MiscParamsBuilder $miscParamsBuilder
      * @param EncryptorInterface $encryptor
+     * @param Filesystem $filesystem
      * @param $cacheSubDir
      */
     public function __construct(
@@ -102,6 +110,7 @@ class Image
         ViewConfigInterface $viewConfig,
         MiscParamsBuilder $miscParamsBuilder,
         EncryptorInterface $encryptor,
+        Filesystem $filesystem,
         $cacheSubDir
     ) {
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
@@ -109,6 +118,7 @@ class Image
         $this->viewConfig = $viewConfig;
         $this->miscParamsBuilder = $miscParamsBuilder;
         $this->encryptor = $encryptor;
+        $this->directory = $filesystem->getDirectoryRead(DirectoryList::ROOT);
         $this->cacheSubDir = $cacheSubDir;
     }
 
@@ -240,16 +250,13 @@ class Image
     /**
      * Retrieve current working root directory. Init if needed
      *
-     * @return bool|string|null
+     * @return string|null
+     * @throws \Magento\Framework\Exception\ValidatorException
      */
     private function getRootPath()
     {
         if (null == $this->rootPath) {
-            $rootPath = getcwd();
-            if (!$rootPath) {
-                $rootPath = substr(__DIR__, 0, strpos(__DIR__, '/app'));
-            }
-            $this->rootPath = $rootPath;
+            $this->rootPath = rtrim($this->directory->getAbsolutePath(), '/');
         }
         return $this->rootPath;
     }
@@ -257,34 +264,36 @@ class Image
     /**
      * Build real filepath, to check if image cached file is exist
      *
-     * @param $url
+     * @param string $url
      * @return string
+     * @throws \Magento\Framework\Exception\ValidatorException
      */
     private function getCachedImageRealPath($url)
     {
         $pointDirectory = DirectoryList::PUB;
         $isPubDirectoryOmit = false;
-        if (!strpos($url, $pointDirectory)) {
+        if (!stripos($url, $pointDirectory)) {
             // pub directory can be omit in url due to store configuration
             $pointDirectory = DirectoryList::MEDIA;
             $isPubDirectoryOmit = true;
         }
         // get absolute path to image file
-        $cachedSubPath = substr($url, strpos($url, DIRECTORY_SEPARATOR . $pointDirectory));
+        $cachedSubPath = trim(substr($url, strpos($url, DIRECTORY_SEPARATOR . $pointDirectory)), '/');
         if ($isPubDirectoryOmit) {
             // added pub directory to result path
-            return sprintf('%s%s/%s', $this->getRootPath(), DirectoryList::PUB, $cachedSubPath);
+            return sprintf('%s/%s/%s', $this->getRootPath(), DirectoryList::PUB, $cachedSubPath);
         }
-        return sprintf('%s%s', $this->getRootPath(), $cachedSubPath);
+        return sprintf('%s/%s', $this->getRootPath(), $cachedSubPath);
     }
 
     /**
      * Retrieve product image url
      *
-     * @param $imagePath
-     * @param $imageType
+     * @param string $imagePath
+     * @param string $imageType
      * @param null $store
      * @return string
+     * @throws \Magento\Framework\Exception\ValidatorException
      */
     public function getImageUrl($imagePath, $imageType, $store = null)
     {
