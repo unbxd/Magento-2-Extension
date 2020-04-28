@@ -1,4 +1,8 @@
-# Version 1.0.50
+# Version 1.0.51
+## 1.0.51 - Apr 28, 2020
+### Fix Issues
+- Fixed an issue with incorrect feed fields building.
+
 ## 1.0.50 - Apr 26, 2020
 ### Fix Issues
 - Fixed issue with incorrect root directory formation in some environments. Being used to validate product cached images.

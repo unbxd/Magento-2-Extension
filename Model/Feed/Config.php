@@ -82,6 +82,11 @@ class Config
     const CHILD_PRODUCT_CONFIGURABLE_ATTRIBUTES_FIELD_KEY = 'configurable_attributes';
 
     /**
+     * Index field which responsible for indexed attributes
+     */
+    const INDEXED_ATTRIBUTES_FIELD_KEY = 'indexed_attributes';
+
+    /**
      * Field key for feed data
      */
     const FEED_FIELD_KEY = 'feed';
@@ -259,29 +264,18 @@ class Config
     }
 
     /**
-     * Parent product fields which contain children related information
+     * Product helper fields which contain information about children data, indexed attributes, etc.
      *
      * @return array
      */
-    public function getParentChildrenRelatedFields()
+    public function getAdditionalFields()
     {
         return [
             self::CHILD_PRODUCT_SKUS_FIELD_KEY,
             self::CHILD_PRODUCT_IDS_FIELD_KEY,
             self::CHILD_PRODUCT_ATTRIBUTES_FIELD_KEY,
-            self::CHILD_PRODUCT_CONFIGURABLE_ATTRIBUTES_FIELD_KEY
-        ];
-    }
-
-    /**
-     * Additional fields which must be excluded from feed content.
-     *
-     * @return array
-     */
-    public function getExcludedFields()
-    {
-        return [
-            'indexed_attributes'
+            self::CHILD_PRODUCT_CONFIGURABLE_ATTRIBUTES_FIELD_KEY,
+            self::INDEXED_ATTRIBUTES_FIELD_KEY
         ];
     }
 

@@ -15,6 +15,7 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Helper\Product as HelperProduct;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterface;
+use Unbxd\ProductFeed\Helper\AttributeHelper;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Helper\Feed as FeedHelper;
 use Unbxd\ProductFeed\Helper\ProductHelper;
@@ -96,6 +97,13 @@ class DataHandler
      * @var UrlInterface
      */
     private $frontendUrlBuilder;
+
+    /**
+     * Indexed fields with properties
+     *
+     * @var array
+     */
+    private $indexedFields = [];
 
     /**
      * Cache for product rewrite suffix
@@ -207,13 +215,30 @@ class DataHandler
     }
 
     /**
+     * @param array $fields
+     * @return $this
+     */
+    private function setIndexedFields(array $fields = [])
+    {
+        $this->indexedFields = $fields;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    private function getIndexedFields()
+    {
+        return $this->indexedFields;
+    }
+
+    /**
      * @param $data
      * @return $this
      */
     private function setFullFeed($data)
     {
         $this->fullFeed = $data;
-
         return $this;
     }
 
@@ -255,13 +280,12 @@ class DataHandler
             ['index' => $index, 'feed_manager' => $this]
         );
 
+        $indexedFields = array_key_exists('fields', $index) ? $index['fields'] : [];
+        // must be set before build catalog data for validate field values according to fields properties
+        $this->setIndexedFields($indexedFields);
+        unset($index['fields']);
         $this->buildCatalogData($index, $store);
-
-        $schemaFields = array_key_exists('fields', $index) ? $index['fields'] : false;
-        if ($schemaFields) {
-            $this->buildSchemaFields($schemaFields);
-            unset($index['fields']);
-        }
+        $this->buildSchemaFields();
 
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_prepare_data_after.');
         $this->eventManager->dispatch($this->eventPrefix . '_prepare_data_after',
@@ -296,38 +320,37 @@ class DataHandler
     }
 
     /**
-     * @param array $fields
      * @return $this
      */
-    private function buildSchemaFields(array $fields)
+    private function buildSchemaFields()
     {
-        if (empty($fields)) {
+        $indexedFields = $this->getIndexedFields();
+        if (empty($indexedFields)) {
             $this->logger->info('Can\'t prepare schema fields. Index data is empty.');
             return $this;
         }
 
-        $excludedFields = $this->feedConfig->getExcludedFields();
+        $additionalFields = $this->feedConfig->getAdditionalFields();
         $dataFieldsMapping = $this->buildDataFieldsMapping();
-        foreach ($fields as $fieldCode => &$fieldData) {
+        foreach ($indexedFields as $fieldCode => &$fieldData) {
             // process excluded fields
-            if (in_array($fieldCode, $excludedFields)) {
-                unset($fields[$fieldCode]);
+            if (in_array($fieldCode, $additionalFields)) {
+                unset($indexedFields[$fieldCode]);
             }
             // process mapped fields
             if (array_key_exists($fieldCode, $dataFieldsMapping)) {
                 // include mapped field, leave the field from which it was mapped, as it can also be transferred
                 $mappedFieldKey = $dataFieldsMapping[$fieldCode];
-                $fields[$mappedFieldKey] = array_replace($fieldData, ['fieldName' => $mappedFieldKey]);
+                $indexedFields[$mappedFieldKey] = array_replace($fieldData, ['fieldName' => $mappedFieldKey]);
             }
             // convert to needed format
             $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);
         }
-
         // process child fields
-        $this->appendChildFieldsToSchema($fields);
+        $this->appendChildFieldsToSchema($indexedFields);
 
         $this->schema = [
-            Config::SCHEMA_FIELD_KEY => array_values($fields)
+            Config::SCHEMA_FIELD_KEY => array_values($indexedFields)
         ];
 
         return $this;
@@ -383,7 +406,6 @@ class DataHandler
             return $this;
         }
 
-        $catalog = [];
         foreach ($index as $productId => &$data) {
             // schema fields has key 'fields', do only for products
             if (is_int($productId)) {
@@ -429,13 +451,8 @@ class DataHandler
                     $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
                     $data = [$key => $productId];
                 }
-
-                $catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
+                $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
             }
-        }
-
-        if (!empty($catalog)) {
-            $this->catalog = $catalog;
         }
 
         return $this;
@@ -457,22 +474,20 @@ class DataHandler
             return false;
         }
 
+        $fullFeed = [];
         if (!empty($this->schema) && Config::INCLUDE_SCHEMA) {
-            $this->fullFeed = array_merge($this->fullFeed, $this->schema);
+            $fullFeed = array_merge($fullFeed, $this->schema);
         }
-
         if (!empty($this->catalog) && Config::INCLUDE_CATALOG) {
-            $this->fullFeed = array_merge($this->fullFeed, $this->catalog);
+            $fullFeed = array_merge($fullFeed, $this->catalog);
         }
-
-        if (!empty($this->fullFeed)) {
-            $this->fullFeed = [
+        if (!empty($fullFeed)) {
+            $fullFeed = [
                 FeedConfig::FEED_FIELD_KEY => [
-                    FeedConfig::CATALOG_FIELD_KEY => $this->fullFeed
+                    FeedConfig::CATALOG_FIELD_KEY => $fullFeed
                 ]
             ];
-
-            $this->setFullFeed($this->fullFeed);
+            $this->setFullFeed($fullFeed);
         }
 
         return $this;
@@ -489,7 +504,7 @@ class DataHandler
         $this->applyWebsiteStoreFields($data, $store)
             ->applyDataFieldsMapping($data, $store)
             ->applyMediaAttributes($data, $store)
-            ->filterFields($data);
+            ->buildFields($data);
 
         // mark to prevent not prepared data
         $data[Config::getPreparedKey()] = true;
@@ -639,7 +654,6 @@ class DataHandler
         }
         // clear processed images for current product
         $this->resetProcessedImages();
-
         return $this;
     }
 
@@ -669,7 +683,6 @@ class DataHandler
                 // merge with custom data fields mapping
                 $dataFieldsMapping = array_merge($dataFieldsMapping, $this->getCustomDataFieldsMapping());
                 $this->dataFieldsMapping = $dataFieldsMapping;
-
                 return $this->dataFieldsMapping;
             }
 
@@ -686,7 +699,6 @@ class DataHandler
                     $dataFieldsMapping[$unbxField] = $productAttribute;
                 }
             }
-
             // merge with custom data fields mapping
             $dataFieldsMapping = array_merge($dataFieldsMapping, $this->getCustomDataFieldsMapping());
             $this->dataFieldsMapping = $dataFieldsMapping;
@@ -710,7 +722,6 @@ class DataHandler
                 // child product doesn't exist in index
                 continue;
             }
-
             if (!isset($index[$id][Config::getPreparedKey()])) {
                 $this->prepareFields($index[$id], $store);
             }
@@ -782,111 +793,78 @@ class DataHandler
     }
 
     /**
-     * @param array $data
-     * @return $this
-     */
-    private function filterParentFieldsChildrenAttributes(array &$data)
-    {
-        if (array_key_exists(Config::CHILD_PRODUCT_ATTRIBUTES_FIELD_KEY, $data)) {
-            foreach ($data[Config::CHILD_PRODUCT_ATTRIBUTES_FIELD_KEY] as $attributeCode) {
-                if (array_key_exists($attributeCode, $data)) {
-                    unset($data[$attributeCode]);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param array $data
-     * @return $this
-     */
-    private function filterParentFieldsChildrenRelated(array &$data)
-    {
-        $excludedFields = $this->feedConfig->getParentChildrenRelatedFields();
-        if (!empty($excludedFields)) {
-            foreach ($excludedFields as $field) {
-                if (array_key_exists($field, $data)) {
-                    unset($data[$field]);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param array $data
-     * @return $this
-     */
-    private function filterAdditionalFields(array &$data)
-    {
-        $excludedFields = $this->feedConfig->getExcludedFields();
-        if (!empty($excludedFields)) {
-            foreach ($excludedFields as $field) {
-                if (array_key_exists($field, $data)) {
-                    unset($data[$field]);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param array $data
-     */
-    private function prepareOptionValues(array &$data)
-    {
-        $matchKeyPart = 'option_text_';
-        foreach ($data as $key => $value) {
-            $pureKey = str_replace($matchKeyPart, '', $key);
-            $searchKey = $matchKeyPart . $key;
-            if (strpos($key, $matchKeyPart) !== false) {
-                // fields with option values
-                $data[$pureKey] = array_key_exists($searchKey, $data)
-                    ? implode(',', $data[$searchKey])
-                    : (
-                        // format to string array only with one record, otherwise put it as is
-                    (is_array($value) && (count($value) == 1) && ($key != Config::SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID))
-                        ? implode(',', $value)
-                        : $value
-                    );
-            } else {
-                $excluded = [
-                    Config::SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID,
-                    Config::CHILD_PRODUCTS_FIELD_KEY
-                ];
-
-                // format to string array only with one record, otherwise put it as is
-                $data[$key] = (is_array($value) && (count($value) == 1) && !in_array($key, $excluded))
-                    ? implode(',', $value)
-                    : $value;
-            }
-            unset($data[$searchKey]);
-        }
-    }
-
-    /**
-     * Filter fields in feed data
+     * Convert field values to needed format
      *
      * @param array $data
      * @return $this
      */
-    private function filterFields(array &$data)
+    private function prepareFieldValues(array &$data)
     {
-        // remove attributes fields related to child products
-        $this->filterParentFieldsChildrenAttributes($data);
+        $optionTextPrefix = sprintf('%s_', AttributeHelper::OPTION_TEXT_PREFIX);
+        foreach ($data as $key => $value) {
+            $pureKey = str_replace($optionTextPrefix, '', $key);
+            $optionTextKey = sprintf('%s%s', $optionTextPrefix, $pureKey);
+            if (strpos($key, $optionTextPrefix) !== false) {
+                // field with option labels
+                if (!array_key_exists($pureKey, $data)) {
+                    // don't proceed current data if option values doesn't exist
+                    continue;
+                }
+                // result value as field with option labels
+                $resultValue = $value;
+            } else {
+                // by default, result value as field without option labels
+                $resultValue = $value;
+                // try to find option labels
+                if (array_key_exists($optionTextKey, $data)) {
+                    // result value as field with option labels
+                    $resultValue = $data[$optionTextKey];
+                }
+            }
+            // these fields are already declared in schema as multivalued,
+            // but make sure that they will be displayed correctly in the current data
+            $specificMultiFields = [
+                Config::SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID,
+                Config::CHILD_PRODUCTS_FIELD_KEY
+            ];
+            if (is_array($resultValue) && !in_array($key, $specificMultiFields)) {
+                if (
+                    isset($this->getIndexedFields()[$pureKey])
+                    && empty($this->getIndexedFields()[$pureKey]['multiValued'])
+                ) {
+                    // not multivalued fields can't contain more than one value.
+                    // for fields which should not have multiple values, multiply values occur for some types
+                    // of products as a result of combining parent and child values (bundle, grouped).
+                    $resultValue = (string) $resultValue[0];
+                }
+            }
+            $data[$pureKey] = $resultValue;
+        }
+        // remove helper fields with option text prefix
+        foreach ($data as $key => $value) {
+            if (strpos($key, $optionTextPrefix) !== false) {
+                unset($data[$key]);
+            }
+        }
+        return $this;
+    }
 
-        // remove fields related to child products
-        $this->filterParentFieldsChildrenRelated($data);
-
-        // index helper fields which must be deleted from feed content
-        $this->filterAdditionalFields($data);
-
+    /**
+     * Build fields in feed data
+     *
+     * @param array $data
+     * @return $this
+     */
+    private function buildFields(array &$data)
+    {
+        // clean additional helper fields
+        foreach ($this->feedConfig->getAdditionalFields() as $field) {
+            if (array_key_exists($field, $data)) {
+                unset($data[$field]);
+            }
+        }
         // convert option values and labels only in labels
-        $this->prepareOptionValues($data);
+        $this->prepareFieldValues($data);
 
         return $this;
     }
@@ -1007,6 +985,7 @@ class DataHandler
      */
     public function reset()
     {
+        $this->indexedFields = [];
         $this->schema = [];
         $this->catalog = [];
         $this->fullFeed = [];
