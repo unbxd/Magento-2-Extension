@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Model\Feed;
 
 use Magento\Catalog\Api\Data\ProductInterface;
@@ -162,6 +164,13 @@ class DataHandler
      */
     private $childrenData = [];
 
+     /**
+     * Local cache for children which can also be sold individually and data is prepared
+     *
+     * @var array
+     */
+    private $relatedEntityPreparedDataList = [];
+
     /**
      * Local cache for data fields mapping
      *
@@ -276,7 +285,8 @@ class DataHandler
     {
         $this->logger->info('Prepare feed content based on index data.');
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_prepare_data_before.');
-        $this->eventManager->dispatch($this->eventPrefix . '_prepare_data_before',
+        $this->eventManager->dispatch(
+            $this->eventPrefix . '_prepare_data_before',
             ['index' => $index, 'feed_manager' => $this]
         );
 
@@ -288,7 +298,8 @@ class DataHandler
         $this->buildSchemaFields();
 
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_prepare_data_after.');
-        $this->eventManager->dispatch($this->eventPrefix . '_prepare_data_after',
+        $this->eventManager->dispatch(
+            $this->eventPrefix . '_prepare_data_after',
             ['index' => $index, 'feed_manager' => $this]
         );
 
@@ -407,51 +418,61 @@ class DataHandler
         }
 
         foreach ($index as $productId => &$data) {
-            // schema fields has key 'fields', do only for products
-            if (is_int($productId)) {
-                // append child data to parent
-                if (
-                    isset($data[Config::CHILD_PRODUCT_IDS_FIELD_KEY])
-                    && !empty($data[Config::CHILD_PRODUCT_IDS_FIELD_KEY])
-                ) {
-                    $currentChildIds = $data[Config::CHILD_PRODUCT_IDS_FIELD_KEY];
-                    $this->appendChildDataToParent($index, $data, $currentChildIds, $store);
-                } else {
-                    // if product doesn't have children - add empty variants data
-                    $data[Config::CHILD_PRODUCTS_FIELD_KEY] = [];
+            try {
+                // schema fields has key 'fields', do only for products
+                if (is_int($productId)) {
+                    // append child data to parent
+                    if (
+                        isset($data[Config::CHILD_PRODUCT_IDS_FIELD_KEY])
+                        && !empty($data[Config::CHILD_PRODUCT_IDS_FIELD_KEY])
+                    ) {
+                        $currentChildIds = $data[Config::CHILD_PRODUCT_IDS_FIELD_KEY];
+                        $this->appendChildDataToParent($index, $data, $currentChildIds, $store);
+                    } else {
+                        // if product doesn't have children - add empty variants data
+                        $data[Config::CHILD_PRODUCTS_FIELD_KEY] = [];
+                    }
+
+                    // check if product related to parent product (variant product),
+                    // if so - do not add child to feed catalog data, just add it like variant product
+                    if (isset($data[Config::PARENT_ID_KEY])) {
+                        unset($data[Config::PARENT_ID_KEY]);
+                        if (!isset($data[Config::FIELD_KEY_VISIBILITY]) || empty($data[Config::FIELD_KEY_VISIBILITY]) || $this->getVisibilityTypeLabel($data[Config::FIELD_KEY_VISIBILITY][0]) == "Not Visible Individually") {
+                            continue;
+                        }
+                        $this->relatedEntityPreparedDataList[]=$data['entity_id'];
+                    }
+
+                    // prepare data fields for needed requirements
+                    if (!isset($data[Config::getPreparedKey()])) {
+                        $this->prepareFields($data, $store);
+                    }
+
+
+
+
+                    // change array keys to needed format
+                    $this->formatArrayKeysToCamelCase($data);
+
+                    // remove helper field
+                    if (isset($data[Config::PREPARED_FIELDS_KEY])) {
+                        unset($data[Config::PREPARED_FIELDS_KEY]);
+                    }
+
+                    // combine data by type of operations
+                    $operationKey = array_key_exists('action', $data)
+                        ? trim($data['action'])
+                        : Config::OPERATION_TYPE_ADD;
+
+                    // if operation type is 'delete' uniqueId is only one required field
+                    if ($operationKey == Config::OPERATION_TYPE_DELETE) {
+                        $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
+                        $data = [$key => $productId];
+                    }
+                    $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
                 }
-
-                // prepare data fields for needed requirements
-                if (!isset($data[Config::getPreparedKey()])) {
-                    $this->prepareFields($data, $store);
-                }
-
-                // check if product related to parent product (variant product),
-                // if so - do not add child to feed catalog data, just add it like variant product
-                if (isset($data[Config::PARENT_ID_KEY])) {
-                    unset($data[Config::PARENT_ID_KEY]);
-                    continue;
-                }
-
-                // change array keys to needed format
-                $this->formatArrayKeysToCamelCase($data);
-
-                // remove helper field
-                if (isset($data[Config::PREPARED_FIELDS_KEY])) {
-                    unset($data[Config::PREPARED_FIELDS_KEY]);
-                }
-
-                // combine data by type of operations
-                $operationKey = array_key_exists('action', $data)
-                    ? trim($data['action'])
-                    : Config::OPERATION_TYPE_ADD;
-
-                // if operation type is 'delete' uniqueId is only one required field
-                if ($operationKey == Config::OPERATION_TYPE_DELETE) {
-                    $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
-                    $data = [$key => $productId];
-                }
-                $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
+            } catch (\Exception $e) {
+                $this->logger->error("Encountered exception while processing product -" . $data["sku"]." with error ".$e->getMessage()." -stack-".$e->getTraceAsString());
             }
         }
 
@@ -499,6 +520,7 @@ class DataHandler
      * @return $this
      * @throws NoSuchEntityException
      */
+
     private function prepareFields(array &$data, $store = null)
     {
         $this->applyWebsiteStoreFields($data, $store)
@@ -577,7 +599,7 @@ class DataHandler
                 case Config::FIELD_KEY_SMALL_IMAGE_PATH:
                 case Config::FIELD_KEY_THUMBNAIL_PATH:
                 case Config::FIELD_KEY_SWATCH_IMAGE_PATH:
-                    $imageUrl = $this->imageDataHandler->getImageUrl($value, $productAttribute, $store);
+                    $imageUrl = $this->imageDataHandler->getImageUrl($value, $productAttribute,  $store);
                     if ($imageUrl) {
                         $data[$unbxdField] = $imageUrl;
                         unset($data[$productAttribute]);
@@ -605,9 +627,10 @@ class DataHandler
                     break;
             }
         }
-
         return $this;
     }
+
+
 
     /**
      * @param $imageType
@@ -722,7 +745,7 @@ class DataHandler
                 // child product doesn't exist in index
                 continue;
             }
-            if (!isset($index[$id][Config::getPreparedKey()])) {
+            if (!isset($index[$id][Config::getPreparedKey()]) && (!in_array($id, $this->relatedEntityPreparedDataList))) {
                 $this->prepareFields($index[$id], $store);
             }
             $childData = $this->formatChildFields($index[$id], $id);
@@ -995,5 +1018,6 @@ class DataHandler
         $this->childrenSchemaFields = [];
         $this->childrenData = [];
         $this->dataFieldsMapping = [];
+        $this->relatedEntityPreparedDataList = [];
     }
 }
