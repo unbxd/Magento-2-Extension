@@ -27,9 +27,9 @@ class PriceDefault implements PriceReaderInterface
     public function getPrice($priceData)
     {
         return isset($priceData['final_price'])
-            ? $priceData['final_price']
-            : isset($priceData['price'])
-                ? $priceData['price'] : 0;
+            ? $priceData['final_price'] 
+            : (isset($priceData['price'])
+                ? $priceData['price'] : 0);
     }
 
     /**
