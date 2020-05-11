@@ -1,4 +1,10 @@
-# Version 1.0.51
+# Version 1.0.52
+## 1.0.52 - May 11, 2020
+### Fix Issues
+- Fixed an issue with final price for default products.
+- Added feature to export the components of the bundle which are also sold individually.
+
+
 ## 1.0.51 - Apr 28, 2020
 ### Fix Issues
 - Fixed an issue with incorrect feed fields building.
