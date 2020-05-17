@@ -108,6 +108,13 @@ class DataHandler
     private $indexedFields = [];
 
     /**
+     * used to hold the snakecase conversion to actual key
+     *
+     * @var array
+     */
+    private $keyMap = [];
+
+    /**
      * Cache for product rewrite suffix
      *
      * @var array
@@ -781,12 +788,20 @@ class DataHandler
             $variantIdKey = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::CHILD_PRODUCT_FIELD_VARIANT_ID);
             foreach ($data as $key => $value) {
                 // collect child fields to use for add to schema fields
-                $this->setChildrenSchemaFields($key);
+
+                $camelCaseKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
+
+                if ($camelCaseKey == $key && array_key_exists($key,$this->keyMap)){
+                    //This could be a component product which is already formated with keys
+                    $this->setChildrenSchemaFields($this->keyMap[$key]);
+                }else{
+                    $this->setChildrenSchemaFields($key);
+                }
 
                 $newKey = sprintf(
                     '%s%s',
                     Config::CHILD_PRODUCT_FIELD_PREFIX,
-                    ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($key))
+                    ucfirst($camelCaseKey)
                 );
 
                 if (
@@ -974,6 +989,7 @@ class DataHandler
             $newKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
             $data[$newKey] = $value;
             if ($newKey != $key) {
+                $this->keyMap[$newKey]=$key;
                 unset($data[$key]);
             }
         }
