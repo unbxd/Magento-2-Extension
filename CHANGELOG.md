@@ -1,4 +1,9 @@
-# Version 1.0.53
+# Version 1.0.54
+## 1.0.54 - May 27, 2020
+### Fix Issues
+- Fixed an issue where inactive categories where exported in the feed.
+
+
 ## 1.0.53 - May 18, 2020
 ### Fix Issues
 - Fixed an issue where specific variant attributes where not part of the schema.
