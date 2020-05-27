@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Model\ResourceModel\Indexer\Product\Full\DataSourceProvider;
 
 use Magento\Catalog\Api\Data\CategoryAttributeInterface;
@@ -20,6 +22,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Unbxd\ProductFeed\Model\ResourceModel\Eav\Indexer\Indexer;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Indexer\Table\StrategyInterface;
+use Unbxd\ProductFeed\Logger\LoggerInterface;
 
 /**
  * Categories data source resource model.
@@ -42,6 +45,11 @@ class Category extends Indexer
     private $categoryNameAttribute = null;
 
     /**
+     * @var null|categoryActiveFlagAttribute
+     */
+    private $categoryActiveFlagAttribute = null;
+
+    /**
      * @var null|CategoryAttributeInterface
      */
     private $categoryUrlKeyAttribute = null;
@@ -62,6 +70,11 @@ class Category extends Indexer
     private $objectManager;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * Category constructor.
      * @param ResourceConnection $resource
      * @param StrategyInterface $tableStrategy
@@ -76,10 +89,12 @@ class Category extends Indexer
         StoreManagerInterface $storeManager,
         MetadataPool $metadataPool,
         Config $eavConfig,
-        ObjectManagerInterface $objectManager
+        ObjectManagerInterface $objectManager,
+        LoggerInterface $logger
     ) {
         $this->eavConfig = $eavConfig;
         $this->objectManager = $objectManager;
+        $this->logger = $logger->create("feed");
         parent::__construct(
             $resource,
             $tableStrategy,
@@ -166,11 +181,31 @@ class Category extends Indexer
     {
         if (null === $this->categoryNameAttribute) {
             $this->categoryNameAttribute = $this->eavConfig->getAttribute(
-                \Magento\Catalog\Model\Category::ENTITY, 'name'
+                \Magento\Catalog\Model\Category::ENTITY,
+                'name'
             );
         }
 
         return $this->categoryNameAttribute;
+    }
+
+
+    /**
+     * Returns category name attribute
+     *
+     * @return CategoryAttributeInterface|\Magento\Eav\Model\Entity\Attribute\AbstractAttribute|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    protected function getCategoryActiveFlagAttribute()
+    {
+        if (null === $this->categoryActiveFlagAttribute) {
+            $this->categoryActiveFlagAttribute = $this->eavConfig->getAttribute(
+                \Magento\Catalog\Model\Category::ENTITY,
+                'is_active'
+            );
+        }
+
+        return $this->categoryActiveFlagAttribute;
     }
 
     /**
@@ -183,7 +218,8 @@ class Category extends Indexer
     {
         if (null === $this->categoryUrlKeyAttribute) {
             $this->categoryUrlKeyAttribute = $this->eavConfig->getAttribute(
-                \Magento\Catalog\Model\Category::ENTITY, 'url_key'
+                \Magento\Catalog\Model\Category::ENTITY,
+                'url_key'
             );
         }
 
@@ -200,7 +236,8 @@ class Category extends Indexer
     {
         if (null === $this->categoryUrlPathAttribute) {
             $this->categoryUrlPathAttribute = $this->eavConfig->getAttribute(
-                \Magento\Catalog\Model\Category::ENTITY, 'url_path'
+                \Magento\Catalog\Model\Category::ENTITY,
+                'url_path'
             );
         }
 
@@ -255,12 +292,16 @@ class Category extends Indexer
             $entityIdField = $this->getEntityMetaData(CategoryInterface::class)->getIdentifierField();
 
             foreach ($this->getConnection()->fetchAll($select) as $row) {
+
                 $categoryId = isset($row[$entityIdField]) ? (int) $row[$entityIdField] : false;
                 if (!$categoryId) {
                     continue;
                 }
-
-                $this->categoryDataCache[$storeId][$categoryId] = $row;
+                if (isset($row["is_active"]) && $row["is_active"]) {
+                    $this->categoryDataCache[$storeId][$categoryId] = $row;
+                } else {
+                    $this->logger->info($categoryId . "is disabled , hence will not be updated in product feed");
+                }
             }
         }
 
@@ -286,6 +327,7 @@ class Category extends Indexer
         $nameAttr = $this->getCategoryNameAttribute();
         $urlKeyAttr = $this->getCategoryUrlKeyAttribute();
         $urlPathAttr = $this->getCategoryUrlPathAttribute();
+        $is_ActiveAttr = $this->getCategoryActiveFlagAttribute();
 
         $select = $this->connection->select();
 
@@ -293,7 +335,7 @@ class Category extends Indexer
         $resultColumns = [];
         // prepend entity ID field to result columns
         $resultColumns[] = $entityIdField;
-        foreach ([$nameAttr, $urlKeyAttr, $urlPathAttr] as $attribute) {
+        foreach ([$nameAttr, $urlKeyAttr, $urlPathAttr, $is_ActiveAttr] as $attribute) {
             // build join conditions
             $attributeCode = $attribute->getAttributeCode();
             $conditions = [
@@ -301,6 +343,7 @@ class Category extends Indexer
                 "{$attributeCode}_default.attribute_id = {$attributeCode}_store.attribute_id",
                 "{$attributeCode}_store.store_id = ?",
             ];
+
             $joinStoreValuesCondition = $this->connection->quoteInto(
                 implode(" AND ", $conditions),
                 $storeId
@@ -334,13 +377,14 @@ class Category extends Indexer
                 new \Zend_Db_Expr("cat.{$linkField} = {$attributeCode}_default.{$linkField}"),
                 []
             )
-            ->joinLeft(["{$attributeCode}_store" => $conditions['table']], $conditions['conditions'], [])
-            ->where("{$attributeCode}_default.store_id = ?", 0)
-            ->where("{$attributeCode}_default.attribute_id = ?", $attributeId);
+                ->joinLeft(["{$attributeCode}_store" => $conditions['table']], $conditions['conditions'], [])
+                ->where("{$attributeCode}_default.store_id = ?", 0)
+                ->where("{$attributeCode}_default.attribute_id = ?", $attributeId);
         }
 
         $select->where("cat.$entityIdField != ?", $rootCategoryId)
             ->where("cat.$entityIdField IN (?)", $loadCategoryIds);
+
 
         return $select;
     }
