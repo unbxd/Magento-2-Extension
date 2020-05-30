@@ -444,7 +444,7 @@ class DataHandler
                     // if so - do not add child to feed catalog data, just add it like variant product
                     if (isset($data[Config::PARENT_ID_KEY])) {
                         unset($data[Config::PARENT_ID_KEY]);
-                        if (!isset($data[Config::FIELD_KEY_VISIBILITY]) || empty($data[Config::FIELD_KEY_VISIBILITY]) || $this->getVisibilityTypeLabel($data[Config::FIELD_KEY_VISIBILITY][0]) == "Not Visible Individually") {
+                        if (!isset($data[Config::FIELD_KEY_VISIBILITY]) || empty($data[Config::FIELD_KEY_VISIBILITY]) || $data[Config::FIELD_KEY_VISIBILITY][0] == "Not Visible Individually" || $this->getVisibilityTypeLabel($data[Config::FIELD_KEY_VISIBILITY][0]) == "Not Visible Individually") {
                             continue;
                         }
                         $this->relatedEntityPreparedDataList[]=$data['entity_id'];
@@ -628,7 +628,7 @@ class DataHandler
                 default:
                     $data[$unbxdField] = (string) $value;
                     // don't remove SKU field from feed data, even if the field is mapped
-                    if ($productAttribute != ProductInterface::SKU) {
+                    if ($productAttribute != ProductInterface::SKU && $productAttribute != "entity_id") {
                         unset($data[$productAttribute]);
                     }
                     break;
