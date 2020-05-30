@@ -1,4 +1,9 @@
-# Version 1.0.54
+# Version 1.0.55
+## 1.0.55 - May 30, 2020
+### Fix Issues
+- Fixed an issue to exclude products with visibility status as Not Visible Individually.
+
+
 ## 1.0.54 - May 27, 2020
 ### Fix Issues
 - Fixed an issue where inactive categories where exported in the feed.
