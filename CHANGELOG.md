@@ -1,4 +1,9 @@
-# Version 1.0.55
+# Version 1.0.56
+## 1.0.56 - June 15, 2020
+### Fix Issues
+- Fixed an issue with out of memory exception while loading feed view.
+- Fixed an issue where category names were mapped incorrectly when the category has the same url_key
+
 ## 1.0.55 - May 30, 2020
 ### Fix Issues
 - Fixed an issue to exclude products with visibility status as Not Visible Individually.
