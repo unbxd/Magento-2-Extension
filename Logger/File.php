@@ -26,6 +26,10 @@ use Magento\Framework\Profiler\Driver\Standard\StatFactory;
  */
 class File extends LoggerAbstract
 {
+
+
+    const NUMBER_OF_LOGGER_LINE   = 250;
+
     /**
      * @var WriteInterface
      */
@@ -164,8 +168,14 @@ class File extends LoggerAbstract
      */
     public function getFileContent()
     {
+        //$this->dir->getDriver()->fileGetContents($this->getFileLocation());
         $this->initFile();
-        return $this->dir->getDriver()->fileGetContents($this->getFileLocation());
+        $view_logs = '';
+        $file = file($this->getFileLocation());
+        for ($i = max(0, count($file)-self::NUMBER_OF_LOGGER_LINE); $i < count($file); $i++) {
+            $view_logs .= $file[$i] . "\n";
+        }
+        return $view_logs;
     }
 
     /**

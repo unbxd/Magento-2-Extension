@@ -65,15 +65,18 @@ class Category
             if (!empty($pathData)) {
                 $path = '';
                 $urlPart = '';
+                $tempPath = '';
                 foreach ($pathData as $urlKey) {
-                    $key = array_search($urlKey, array_column($categoryData, 'url_key'));
+                    $tempPath .=  $urlKey;
+                    $key = array_search($tempPath, array_column($categoryData, 'url_path'));
                     $name = ucwords(trim(str_replace('-', ' ', strtolower($urlKey))));
-                    if ($key && isset($categoryData[$key]['name'])) {
+                    if ($key !== FALSE && isset($categoryData[$key]['name'])) {
                         $name = trim($categoryData[$key]['name']);
                     }
 
                     $urlPart .= '/' . $urlKey;
                     $path .= sprintf('%s|%s>', $urlPart, $name);
+                    $tempPath .= '/';
                 }
                 $pathString = rtrim(trim($path, '>'), '/');
                 $result[] = $pathString;

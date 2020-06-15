@@ -136,6 +136,8 @@ class Category extends Indexer
                 $categoryDataRow['name'] = $storeCategoryData[$id]['name'];
                 $categoryDataRow['url_key'] = $storeCategoryData[$id]['url_key'];
                 $categoryDataRow['url_path'] = $storeCategoryData[$id]['url_path'];
+            }else{
+                unset($categoryData[$key]);
             }
         }
 
