@@ -917,7 +917,8 @@ class DataHandler
     private function buildProductUrl($urlKey, $storeId)
     {
         $path = sprintf('%s%s', $urlKey, $this->getProductUrlSuffix($storeId));
-        $url = $this->getFrontendUrl($path);
+        $url = $this->getStore($storeId)->getBaseUrl() . $path;
+        //$url = $this->getFrontendUrl($path);
         // check if use category path for product url
         if ($this->helperData->isSetFlag(HelperProduct::XML_PATH_PRODUCT_URL_USE_CATEGORY)) {
             // @TODO - we need to implement this?

@@ -34,7 +34,8 @@ class Grouped implements PriceReaderInterface
      */
     public function getOriginalPrice($priceData)
     {
-        return isset($priceData['min_price']) ? $priceData['min_price'] : 0;
+        return isset($priceData['max_price']) ? $priceData['max_price']  : (isset($priceData['min_price'])
+        ? $priceData['min_price'] : 0);
     }
 
     /**
