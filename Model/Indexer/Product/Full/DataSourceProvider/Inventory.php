@@ -27,7 +27,7 @@ class Inventory implements DataSourceProviderInterface
      * Related data source code
      */
 	const DATA_SOURCE_CODE = 'inventory';
-	
+
     /**
      * @var ResourceModel
      */
@@ -50,7 +50,7 @@ class Inventory implements DataSourceProviderInterface
         $this->resourceModel = $resourceModel;
         $this->attributeHelper = $attributeHelper;
     }
-	
+
 	/**
      * {@inheritdoc}
      */
@@ -74,6 +74,10 @@ class Inventory implements DataSourceProviderInterface
 
             if (!in_array('quantity_and_stock_status', $indexedFields)) {
                 $indexedFields[] = 'quantity_and_stock_status';
+            }
+            $indexData[$productId]['availabilityText']= ($isInStock ? "true" : "false");
+            if (!in_array('availabilityText', $indexedFields)) {
+                $indexedFields[] = 'availabilityText';
             }
         }
 
