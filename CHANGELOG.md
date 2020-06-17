@@ -1,4 +1,8 @@
-# Version 1.0.56
+# Version 1.0.57
+## 1.0.57 - June 17, 2020
+### Feature
+- Added support for RECS V1
+
 ## 1.0.56 - June 15, 2020
 ### Fix Issues
 - Fixed an issue with out of memory exception while loading feed view.
