@@ -1,4 +1,9 @@
-# Version 1.0.57
+# Version 1.0.58
+## 1.0.58 - July 1, 2020
+### Feature
+- Skip products with visibility status not visible individually
+
+
 ## 1.0.57 - June 17, 2020
 ### Feature
 - Added support for RECS V1
