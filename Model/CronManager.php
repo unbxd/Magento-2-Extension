@@ -370,22 +370,16 @@ class CronManager
      *
      * @return bool
      */
-    private function isProcessAvailable()
+    private function isProcessAvailable($store = null)
     {
-        // prevent duplicate jobs
-        if ($this->lockProcess) {
-            $this->logger->info('Lock reindex by another process.');
-            return false;
-        }
-
         // check authorization keys
-        if (!$this->helperData->isAuthorizationCredentialsSetup()) {
+        if (!$this->helperData->isAuthorizationCredentialsSetup($store)) {
             $this->logger->error('Please check authorization credentials to perform this operation.');
             return false;
         }
 
         // check if cron is configured
-        if (!$this->helperData->isGeneralCronConfigured()) {
+        if (!$this->helperData->isGeneralCronConfigured($store)) {
             $this->logger->error('General cron is not configured. Please configure it to perform this operation.');
             return false;
         }
@@ -402,10 +396,11 @@ class CronManager
     {
         $this->flushCache();
 
-        if (!$this->isProcessAvailable()) {
-            return;
+         // prevent duplicate jobs
+         if ($this->lockProcess) {
+            $this->logger->info('Lock reindex by another process.');
+            return false;
         }
-
         /** @var \Unbxd\ProductFeed\Model\ResourceModel\IndexingQueue\Collection $jobs */
         $jobs = $this->indexingQueueCollectionFactory->create();
         $jobs->addFieldToFilter(
@@ -425,6 +420,10 @@ class CronManager
         $this->logger->info('Run cron by schedule.');
 
         foreach ($jobs as $job) {
+            //Check if api configured
+            if (!$this->isProcessAvailable($job->getStoreId())) {
+                continue;
+            }
             $isFullReindex = (bool) ($job->getActionType() == IndexingQueue::TYPE_REINDEX_FULL);
             /** @var \Unbxd\ProductFeed\Model\IndexingQueue $job */
             $jobId = $job->getId();
@@ -525,22 +524,22 @@ class CronManager
     public function generateFullFeedJobsForIndexingQueue()
     {
         $this->flushCache();
+       
+        /** @var \Magento\Store\Api\Data\StoreInterface $store */
+        foreach ($this->storeManager->getStores() as $store) {
+            $storeId = $store->getId();
 
-        // check authorization keys
-        if (!$this->helperData->isAuthorizationCredentialsSetup()) {
-            $this->logger->error('Please check authorization credentials to perform this operation.');
+            // check authorization keys
+        if (!$this->helperData->isAuthorizationCredentialsSetup($storeId)) {
+            $this->logger->error('Please check authorization credentials for store '.$storeId.'to perform this operation.');
             return $this;
         }
 
         // check if cron is configured
-        if (!$this->helperData->isFullFeedCronConfigured()) {
-            $this->logger->error('Full feed cron is not configured. Please configure it to perform this operation.');
+        if (!$this->helperData->isFullFeedCronConfigured($storeId)) {
+            $this->logger->error('Full feed cron is not configured for store '.$storeId.'. Please configure it to perform this operation.');
             return $this;
         }
-
-        /** @var \Magento\Store\Api\Data\StoreInterface $store */
-        foreach ($this->storeManager->getStores() as $store) {
-            $storeId = $store->getId();
 
             /** @var \Unbxd\ProductFeed\Model\IndexingQueue $indexingQueue */
             $queue = $this->indexingQueueFactory->create();
@@ -856,8 +855,9 @@ class CronManager
     {
         $this->flushCache();
 
-        if (!$this->isProcessAvailable()) {
-            return;
+        if ($this->lockProcess) {
+            $this->logger->info('Lock reindex by another process.');
+            return false;
         }
 
         // check indexing operation(s) in 'error' state
