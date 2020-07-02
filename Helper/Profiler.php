@@ -220,11 +220,14 @@ class Profiler
         if ($this->isWin()) {
             return false;
         }
-
+        try {
         $cores = $this->getCpuCoresNumber();
         $currentAvg = $this->getCurrentCpuLoadAvg();
         $fullLoad = $cores + $cores/2;
         return round(min(100, $currentAvg * 100 / $fullLoad), 3);
+        }catch (\Exception $e){
+            return 0;
+        }
     }
 
     /**
