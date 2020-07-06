@@ -1,4 +1,8 @@
-# Version 1.0.58
+# Version 1.0.59
+## 1.0.59 - July 6, 2020
+### Fix
+- Handle simple variants which are not visible and not in seqeunce 
+- Handle top level category names in categorypath
 ## 1.0.58 - July 1, 2020
 ### Feature
 - Skip products with visibility status not visible individually
