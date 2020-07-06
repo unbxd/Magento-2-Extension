@@ -617,7 +617,7 @@ class DataHandler
                     }
                     break;
                 case Config::FIELD_KEY_CATEGORY_DATA:
-                    $categoryData = $this->categoryDataHandler->buildCategoryList($data[Config::FIELD_KEY_CATEGORY_DATA]);
+                    $categoryData = $this->categoryDataHandler->buildCategoryList($data[Config::FIELD_KEY_CATEGORY_DATA],$store,$data["entity_id"]);
                     if (!empty($categoryData)) {
                         $data[$unbxdField] = $categoryData;
                     }
