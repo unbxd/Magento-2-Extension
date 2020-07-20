@@ -108,6 +108,11 @@ class Full
     private function initProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null)
     {
         if (!empty($productIds)) {
+            //ensure the parent products are fetched
+            $parentProducts = $this->resourceModel->getParentProductForChilds($productIds);
+            if (!empty($parentProducts)) {
+                $productIds = array_unique(array_merge($productIds, $parentProducts));
+            }
             // ensure to reindex also the child product IDs, if parent was passed.
             $relationsByParent = $this->resourceModel->getRelationsByParent($productIds);
             if (!empty($relationsByParent)) {

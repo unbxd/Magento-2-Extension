@@ -530,11 +530,7 @@ class AttributeHelper extends AbstractHelper
         $indexedFields = array_key_exists('fields', $indexData) ? $indexData['fields'] : [];
         foreach ($fields as $field) {
             $fieldOptions = $this->getSpecificFieldOptions($field);
-            if (!empty($indexedFields)) {
-                $indexData['fields'] = array_merge_recursive($indexData['fields'], [$field => $fieldOptions]);
-            } else {
-                $indexData['fields'][$field] = $fieldOptions;
-            }
+            $indexData['fields'][$field] = $fieldOptions;
         }
 
         return true;

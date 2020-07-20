@@ -197,7 +197,9 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
         if (empty($ids) && (php_sapi_name() === 'cli')) {
             return true;
         }
-
+        if (!$this->helperData->isAuthorizationCredentialsSetup($storeId)){
+            return false;
+        }
         // check if in indexing queue enabled
         if (!$this->helperData->isIndexingQueueEnabled($storeId)) {
             try {

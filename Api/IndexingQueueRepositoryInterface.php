@@ -62,4 +62,27 @@ interface IndexingQueueRepositoryInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function deleteById($queueId);
+
+
+    /**
+     * Update Queue in bulk which matches the given conditions
+     *
+     * @param array $conditions
+     * @param array $columnData
+     * @return bool
+     * @throws CouldNotSaveException
+     */
+    public function updateIndexQueueRecords($conditions,$columnData);
+
+    /**
+     * Delete queue records which matches the condition
+     *
+     * @param array $conditions
+     * @return bool
+     * @throws CouldNotDeleteException
+     */
+    public function deleteIndexQueueRecords($conditions);
+
+
+
 }

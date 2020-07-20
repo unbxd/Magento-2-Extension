@@ -62,4 +62,18 @@ interface FeedViewRepositoryInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function deleteById($feedViewId);
+
+
+     /**
+     * Delete feed views by given conditions
+     *
+     * @param array $conditions
+     * @return bool
+     * @throws CouldNotDeleteException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function deleteFeedViewRecords($conditions);
+
+
+
 }

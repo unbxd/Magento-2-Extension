@@ -275,6 +275,24 @@ class FeedViewRepository implements FeedViewRepositoryInterface
         return $this->delete($this->getById($feedViewId));
     }
 
+     /**
+     * Delete feed views by given conditions
+     *
+     * @param array $conditions
+     * @return bool
+     * @throws CouldNotDeleteException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function deleteFeedViewRecords($conditions){
+        try {
+            $this->resource->deleteFeedViewRecords($conditions);
+        } catch (\Exception $exception) {
+            throw new CouldNotDeleteException(__($exception->getMessage()));
+        }
+
+        return true;
+    }
+
     /**
      * Retrieve collection processor
      *
@@ -290,4 +308,6 @@ class FeedViewRepository implements FeedViewRepositoryInterface
 
         return $this->collectionProcessor;
     }
+
+    
 }

@@ -169,6 +169,8 @@
             </argument>
         </arguments>
     </type>
+    <type name="Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\PriceIndexerFallback">
+    </type>
     <type name="Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider">
         <arguments>
             <argument name="typeName" xsi:type="string">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider::DATA_SOURCES_DEFAULT_TYPE</argument>
@@ -177,6 +179,7 @@
                 <item name="price" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Price</item>
                 <item name="inventory" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Inventory</item>
                 <item name="category" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Category</item>
+                <item name="pricefallback" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\PriceIndexerFallback</item>
             </argument>
         </arguments>
     </type>

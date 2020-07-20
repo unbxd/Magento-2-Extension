@@ -202,4 +202,11 @@ class FeedView extends AbstractDb
         $this->entityManager->delete($object);
         return $this;
     }
+
+    public function deleteFeedViewRecords($conditions){
+        return $this->getConnection()->delete(
+            $this->getTable('unbxd_productfeed_feed_view'), 
+            $conditions
+        );
+    }
 }

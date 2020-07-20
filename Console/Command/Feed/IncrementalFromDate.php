@@ -11,15 +11,15 @@
  */
 namespace Unbxd\ProductFeed\Console\Command\Feed;
 
-use Unbxd\ProductFeed\Console\Command\Feed\AbstractCommand;
-use Symfony\Component\Console\Input\InputOption;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Store\Model\Store;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Unbxd\ProductFeed\Console\Command\Feed\AbstractCommand;
 use Unbxd\ProductFeed\Model\CronManager;
 use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
-use Magento\Store\Model\Store;
-use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class IncrementalFromDate
@@ -53,7 +53,7 @@ class IncrementalFromDate extends AbstractCommand
             ->addOption(
                 self::STORE_INPUT_OPTION_KEY,
                 's',
-                InputOption::VALUE_REQUIRED,
+                InputOption::VALUE_OPTIONAL,
                 'Use the specific Store View',
                 Store::DEFAULT_STORE_ID
             );
@@ -95,27 +95,26 @@ class IncrementalFromDate extends AbstractCommand
                 $storeId = $this->getStoreIdByCode($storeId, $stores);
             }
             $stores = [$storeId];
+        } else {
+            $stores = array_keys($this->storeManager->getStores());
         }
 
         // check authorization credentials
-        if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
-            $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
-            return false;
+        foreach ($stores as $key => $value) {
+            if (!$this->feedHelper->isAuthorizationCredentialsSetup($value)) {
+                unset($stores[$key]);
+            }
         }
 
+        if (empty($stores)) {
+            $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
+        }
         // check if related cron process doesn't occur to this process to prevent duplicate execution
         $jobs = $this->getCronManager()->getRunningSchedules(CronManager::FEED_JOB_CODE_UPLOAD);
         if ($jobs->getSize()) {
-            $message = 'At the moment, the cron job is already executing this process. '. "\n" . 'To prevent duplicate process, which will increase the load on the server, please try it later.';
+            $message = 'At the moment, the cron job is already executing this process. ' . "\n" . 'To prevent duplicate process, which will increase the load on the server, please try it later.';
             $output->writeln("<error>{$message}</error>");
             return false;
-        }
-
-        // validate provided date before perform
-        $fromDate = $input->getArgument(self::FROM_DATE_ARGUMENT_KEY);
-        if (!$this->isDateValid($fromDate)) {
-            $output->writeln("<error>Please provide a valid datetime to perform this operation.</error>");
-            return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
         }
 
         // pre process actions
@@ -126,36 +125,14 @@ class IncrementalFromDate extends AbstractCommand
         foreach ($stores as $storeId) {
             $storeName = $this->getStoreNameById($storeId);
             $output->writeln("<info>Performing operations for store with ID {$storeId} ({$storeName}):</info>");
-            $output->writeln("<info>From date: {$fromDate}</info>");
-
-            $qty = count($this->productHelper->getAllProductsIds($storeId, $fromDate));
-            if (!$qty) {
-                $output->writeln("<info>There are no products to perform this operation.</info>");
-                continue;
-            }
-            $output->writeln("<info>Detected entities: {$qty}</info>");
-
-            try {
-                $output->writeln("<info>Rebuild index...</info>");
-                $index = $this->reindexAction->rebuildProductStoreIndex($storeId, [], $fromDate);
-            } catch (\Exception $e) {
-                $output->writeln("<error>Indexing error: {$e->getMessage()}</error>");
-                $errors[$storeId] = $e->getMessage();
-                continue;
-            }
-
-            if (empty($index)) {
-                $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
-                continue;
-            }
-
-            try {
-                $output->writeln("<info>Execute feed...</info>");
-                $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL, $storeId);
-            } catch (\Exception $e) {
-                $output->writeln("<error>Feed execution error: {$e->getMessage()}</error>");
-                $errors[$storeId] = $e->getMessage();
-                continue;
+            // validate provided date before perform
+            $fromDate = $input->getArgument(self::FROM_DATE_ARGUMENT_KEY);
+            if ($this->isDateValid($fromDate)) {
+                $output->writeln("<info>From date: {$fromDate}</info>");
+                $this->uploadFromDate($storeId,$fromDate);
+            }else{
+                $output->writeln("<info>Process Indexing Queue Entries...</info>");
+                $this->getCronManager()->uploadFeed($storeId);
             }
 
             $this->buildResponse = true;
@@ -167,6 +144,40 @@ class IncrementalFromDate extends AbstractCommand
         return true;
     }
 
+    private function uploadFromDate($storeId, $fromDate)
+    {
+
+        $qty = count($this->productHelper->getAllProductsIds($storeId, $fromDate));
+        if (!$qty) {
+            $output->writeln("<info>There are no products to perform this operation.</info>");
+            return;
+        }
+        $output->writeln("<info>Detected entities: {$qty}</info>");
+
+        try {
+            $output->writeln("<info>Rebuild index...</info>");
+            $index = $this->reindexAction->rebuildProductStoreIndex($storeId, [], $fromDate);
+        } catch (\Exception $e) {
+            $output->writeln("<error>Indexing error: {$e->getMessage()}</error>");
+            $errors[$storeId] = $e->getMessage();
+            return;
+        }
+
+        if (empty($index)) {
+            $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
+            return;
+        }
+
+        try {
+            $output->writeln("<info>Execute feed...</info>");
+            $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL, $storeId);
+        } catch (\Exception $e) {
+            $output->writeln("<error>Feed execution error: {$e->getMessage()}</error>");
+            $errors[$storeId] = $e->getMessage();
+            return;
+        }
+    }
+
     /**
      * @param null $date
      * @param string $format
@@ -174,12 +185,12 @@ class IncrementalFromDate extends AbstractCommand
      */
     private function isDateValid(&$date = null, $format = 'Y-m-d H:i:s')
     {
-        if (null == $date) {
-            // if date is not specified, get the last synchronization date from config
-            // flush cache to get actual last synchronization date
-            $this->flushCache();
-            $date = $this->feedHelper->getLastSynchronizationDatetime();
-        }
+        /* if (null == $date) {
+        // if date is not specified, get the last synchronization date from config
+        // flush cache to get actual last synchronization date
+        $this->flushCache();
+        $date = $this->feedHelper->getLastSynchronizationDatetime();
+        }*/
 
         try {
             $createdDate = \DateTime::createFromFormat($format, $date);
@@ -211,9 +222,8 @@ class IncrementalFromDate extends AbstractCommand
         } else if ($this->feedHelper->isLastSynchronizationProcessing()) {
             $output->writeln("<info>" . strip_tags(FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_INDEXING) . "</info>");
         } else {
-            $affectedIds = implode(',', array_values($stores));
-            $errorMessage = sprintf($errorMessage, $affectedIds);
-            $output->writeln("<error>{$errorMessage}</error>");
+            $output->writeln("<info>" . strip_tags(FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_RUNNING) . "</info>");
+
         }
 
         return $this;

@@ -31,6 +31,7 @@ class IndexingQueue extends AbstractModel implements IndexingQueueInterface
     const STATUS_COMPLETE = 3;
     const STATUS_ERROR = 4;
     const STATUS_HOLD = 5;
+    const STATUS_SKIPPED = 6;
     /**#@-*/
 
     /**#@+
@@ -41,6 +42,7 @@ class IndexingQueue extends AbstractModel implements IndexingQueueInterface
     const STATUS_COMPLETE_LABEL = 'Complete';
     const STATUS_ERROR_LABEL = 'Error';
     const STATUS_HOLD_LABEL = 'Hold';
+    const STATUS_SKIPPED_LABEL = 'Skipped';
     /**#@-*/
 
     /**#@+
@@ -77,7 +79,8 @@ class IndexingQueue extends AbstractModel implements IndexingQueueInterface
             self::STATUS_RUNNING => __(self::STATUS_RUNNING_LABEL),
             self::STATUS_COMPLETE => __(self::STATUS_COMPLETE_LABEL),
             self::STATUS_ERROR => __(self::STATUS_ERROR_LABEL),
-            self::STATUS_HOLD => __(self::STATUS_HOLD_LABEL)
+            self::STATUS_HOLD => __(self::STATUS_HOLD_LABEL),
+            self::STATUS_SKIPPED => __(self::STATUS_SKIPPED_LABEL)
         ];
     }
 

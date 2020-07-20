@@ -261,6 +261,40 @@ class IndexingQueueRepository implements IndexingQueueRepositoryInterface
         return true;
     }
 
+     /**
+     * Update Queue in bulk which matches the given conditions
+     *
+     * @param array $conditions
+     * @param array $columnData
+     * @return bool
+     * @throws CouldNotSaveException
+     */
+    public function updateIndexQueueRecords($conditions,$columnData){
+        try {
+            $this->resource->updateIndexQueueRecords($conditions,$columnData);
+        } catch (\Exception $exception) {
+            throw new CouldNotSaveException(__($exception->getMessage()));
+        }
+
+        return true;
+    }
+    /**
+     * Delete queue records which matches the condition
+     *
+     * @param array $conditions
+     * @return bool
+     * @throws CouldNotDeleteException
+     */
+    public function deleteIndexQueueRecords($conditions){
+        try {
+            $this->resource->deleteIndexQueueRecords($conditions);
+        } catch (\Exception $exception) {
+            throw new CouldNotDeleteException(__($exception->getMessage()));
+        }
+
+        return true;
+    }
+
     /**
      * Delete queue by given queue Identity
      *

@@ -230,7 +230,28 @@ class Full extends Indexer
             ->from(['relation' => $relationTable], [])
             ->join(['entity' => $entityTable], $joinCondition, [$metadata->getIdentifierField()])
             ->where('parent_id IN (?)', array_map('intval', $parentIds));
+        return $this->getConnection()->fetchCol($select);
+    }
 
+    /**
+     * Retrieve parent products relations by child
+     *
+     * @param $parentIds
+     * @return array
+     * @throws \Exception
+     */
+    public function getParentProductForChilds($childIds)
+    {
+        $metadata = $this->getEntityMetaData($this->getEntityType());
+        $entityTable = $this->getEntityTable();
+        $relationTable = $this->getTable('catalog_product_relation');
+        $joinCondition = sprintf('relation.child_id = entity.%s', $metadata->getLinkField());
+
+        $select = $this->getConnection()->select()
+            ->from(['relation' => $relationTable], ['parent_id'])
+            ->join(['entity' => $entityTable], $joinCondition, [$metadata->getIdentifierField()])
+            ->where('child_id IN (?)', array_map('intval', $childIds))
+            ->where ('parent_id NOT in (?)',array_map('intval', $childIds));
         return $this->getConnection()->fetchCol($select);
     }
 

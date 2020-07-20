@@ -202,4 +202,21 @@ class IndexingQueue extends AbstractDb
         $this->entityManager->delete($object);
         return $this;
     }
+
+
+    public function updateIndexQueueRecords($conditions,$columnData){
+        return $this->getConnection()->update(
+            $this->getTable('unbxd_productfeed_indexing_queue'), 
+            $columnData, 
+            $conditions
+        );
+    }
+
+
+    public function deleteIndexQueueRecords($conditions){
+        return $this->getConnection()->delete(
+            $this->getTable('unbxd_productfeed_indexing_queue'), 
+            $conditions
+        );
+    }
 }
