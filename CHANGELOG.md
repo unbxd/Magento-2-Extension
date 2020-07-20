@@ -1,4 +1,7 @@
-# Version 1.0.59
+# Version 1.0.60
+## 1.0.60 - July 20, 2020
+### Fix
+- Reset category cache to handle store specific labels in a multi store environment 
 ## 1.0.59 - July 6, 2020
 ### Fix
 - Handle simple variants which are not visible and not in seqeunce 
