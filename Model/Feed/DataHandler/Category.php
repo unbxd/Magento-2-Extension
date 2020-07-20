@@ -132,4 +132,8 @@ class Category
 
         return array_values(array_unique($result, SORT_REGULAR));
     }
+
+    public function reset(){
+        $this->categoryCacheList = [];
+    }
 }

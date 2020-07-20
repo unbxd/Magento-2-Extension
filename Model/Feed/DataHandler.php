@@ -1039,5 +1039,6 @@ class DataHandler
         $this->childrenData = [];
         $this->dataFieldsMapping = [];
         $this->relatedEntityPreparedDataList = [];
+        $this->categoryDataHandler->reset();
     }
 }
