@@ -1,4 +1,8 @@
-# Version 1.0.60
+# Version 1.0.61
+## 1.0.61 - July 20, 2020
+### Fix
+- Optimise incremental feed to cater for large loads and reimplement the incremental from date job to be same as the the scheduled one.
+- Provision cleanup/archival of indexing queue and feedview logs
 ## 1.0.60 - July 20, 2020
 ### Fix
 - Reset category cache to handle store specific labels in a multi store environment 
