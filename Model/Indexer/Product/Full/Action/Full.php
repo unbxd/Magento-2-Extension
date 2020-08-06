@@ -172,6 +172,7 @@ class Full
     private function appendIndexData($storeId, $initIndexData)
     {
         $index = [];
+        $fields = [];
         $batchSize = $this->batchRowsCount;
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
 			if (!empty($batchIndex)) {
@@ -179,13 +180,16 @@ class Full
 					/** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
 					$batchIndex = $dataSource->appendData($storeId, $batchIndex);
 				}
-			}
-			
+            }
+            if (isset($batchIndex["fields"])){
+            $fields = array_merge($fields,$batchIndex["fields"]);
+            unset($batchIndex["fields"]);
+            }
 			if (!empty($batchIndex)) {
 				$index += $batchIndex;
 			}
         }
-		
+		$index["fields"]=$fields;
         return $index;
     }
 

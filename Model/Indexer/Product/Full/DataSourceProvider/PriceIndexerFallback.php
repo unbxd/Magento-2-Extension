@@ -18,6 +18,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductColl
 use Magento\Framework\Indexer\IndexerRegistry;
 use Magento\Framework\Mview\View\ChangelogTableNotExistsException;
 use Unbxd\ProductFeed\Helper\AttributeHelper;
+use Magento\Framework\App\ObjectManager;
 use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface;
 use Magento\ConfigurableProduct\Pricing\Price\ConfigurableOptionsProviderInterface;
@@ -67,8 +68,7 @@ class PriceIndexerFallback implements DataSourceProviderInterface
         IndexerRegistry $indexerRegistry,
         PriceIndexer $indexer,
         ProductRepositoryInterface $productRepository,
-        LoggerInterface $logger,
-        ConfigurableOptionsProviderInterface $configurableOptionsProvider
+        LoggerInterface $logger
     ) {
         $this->attributeHelper = $attributeHelper;
         $this->productCollection = $productCollection;
@@ -76,7 +76,6 @@ class PriceIndexerFallback implements DataSourceProviderInterface
         $this->priceIndexer = $indexerRegistry->get('catalog_product_price');
         $this->productRepository = $productRepository;
         $this->logger = $logger->create("feed");
-        $this->configurableOptionsProvider=$configurableOptionsProvider;
     }
 
     /**
@@ -178,13 +177,26 @@ class PriceIndexerFallback implements DataSourceProviderInterface
     private function getMinPriceForConfigurableProduct($parentProduct)
     {
         $minAmount = null;
-        foreach ($this->configurableOptionsProvider->getProducts($parentProduct) as $product) {
+        foreach ($this->getConfigurableOptionsProvider()->getProducts($parentProduct) as $product) {
             $childPriceAmount = $product->getPriceInfo()->getPrice("regular_price")->getAmount();
             if (!$minAmount || ($childPriceAmount->getValue() < $minAmount->getValue())) {
                 $minAmount = $childPriceAmount;
             }
         }
         return $minAmount;
+    }
+
+    /**
+     * @return \Magento\ConfigurableProduct\Pricing\Price\ConfigurableOptionsProviderInterface
+     * @deprecated 100.1.1
+     */
+    private function getConfigurableOptionsProvider()
+    {
+        if (null === $this->configurableOptionsProvider) {
+            $this->configurableOptionsProvider = ObjectManager::getInstance()
+                ->get(ConfigurableOptionsProviderInterface::class);
+        }
+        return $this->configurableOptionsProvider;
     }
 
 }
