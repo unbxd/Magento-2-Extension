@@ -1,4 +1,8 @@
-# Version 1.0.61
+# Version 1.0.62
+## 1.0.62 - August 06, 2020
+### Fix
+- Fixed the error in missing fields in schema
+- Provision cleanup/archival of indexing queue and feedview logs
 ## 1.0.61 - July 20, 2020
 ### Fix
 - Optimise incremental feed to cater for large loads and reimplement the incremental from date job to be same as the the scheduled one.
