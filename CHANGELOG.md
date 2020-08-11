@@ -1,4 +1,8 @@
-# Version 1.0.62
+# Version 1.0.63
+## 1.0.63 - August 11, 2020
+### Fix
+- Rearrange the setup form fields
+- Updated the index view queueid from smallint to bigint
 ## 1.0.62 - August 06, 2020
 ### Fix
 - Fixed the error in missing fields in schema
