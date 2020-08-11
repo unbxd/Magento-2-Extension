@@ -11,11 +11,10 @@
  */
 namespace Unbxd\ProductFeed\Setup;
 
-use Magento\Framework\Setup\UpgradeSchemaInterface;
+use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\DB\Adapter\AdapterInterface;
-use Magento\Framework\DB\Ddl\Table;
+use Magento\Framework\Setup\UpgradeSchemaInterface;
 
 /**
  * Class UpgradeSchema
@@ -40,7 +39,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $installer->getTable('unbxd_productfeed_indexing_queue')
             )->addColumn(
                 'queue_id',
-                Table::TYPE_SMALLINT,
+                Table::TYPE_BIGINT,
                 null,
                 ['identity' => true, 'primary' => true, 'nullable' => false, 'unsigned' => true],
                 'Queue Id'
@@ -237,7 +236,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     [
                         'type' => Table::TYPE_SMALLINT,
                         'default' => 0,
-                        'comment' => 'The Number Of Attempts'
+                        'comment' => 'The Number Of Attempts',
                     ]
                 );
             }
@@ -253,7 +252,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     [
                         'type' => Table::TYPE_SMALLINT,
                         'default' => 0,
-                        'comment' => 'The Number Of Attempts'
+                        'comment' => 'The Number Of Attempts',
                     ]
                 );
             }
@@ -277,7 +276,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'unsigned' => true,
                         'length' => 1,
                         'default' => 1,
-                        'comment' => 'Include In Unbxd Product Feed'
+                        'comment' => 'Include In Unbxd Product Feed',
                     ]
                 );
         }
@@ -296,7 +295,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     [
                         'type' => Table::TYPE_INTEGER,
                         'default' => null,
-                        'comment' => 'Feed View ID'
+                        'comment' => 'Feed View ID',
                     ]
                 );
             }
@@ -313,12 +312,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     [
                         'type' => Table::TYPE_INTEGER,
                         'default' => null,
-                        'comment' => 'Reindex Job ID'
+                        'comment' => 'Reindex Job ID',
                     ]
                 );
             }
         }
-
         // change the definition for some date time fields
         if (version_compare($context->getVersion(), '1.0.41', '<')) {
             $affectedData = [
@@ -328,15 +326,15 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'nullable' => true,
                         'unsigned' => true,
                         'default' => '',
-                        'comment' => 'Started Time'
+                        'comment' => 'Started Time',
                     ],
                     'finished_at' => [
                         'type' => Table::TYPE_TIMESTAMP,
                         'nullable' => true,
                         'unsigned' => true,
                         'default' => '',
-                        'comment' => 'Finished Time'
-                    ]
+                        'comment' => 'Finished Time',
+                    ],
                 ],
                 $installer->getTable('unbxd_productfeed_feed_view') => [
                     'finished_at' => [
@@ -344,10 +342,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'nullable' => true,
                         'unsigned' => true,
                         'default' => '',
-                        'comment' => 'Finished Time'
-                    ]
+                        'comment' => 'Finished Time',
+                    ],
                 ],
             ];
+
             foreach ($affectedData as $tableName => $columns) {
                 if ($installer->tableExists($tableName)) {
                     foreach ($columns as $columnName => $definition) {
@@ -363,6 +362,21 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         }
                     }
                 }
+            }
+        }
+
+        if (version_compare($context->getVersion(), '1.0.63', '<')) {
+            if ($installer->getConnection()->tableColumnExists($installer->getTable('unbxd_productfeed_indexing_queue'), "queue_id")) {
+                $installer->getConnection()->modifyColumn(
+                    $installer->getTable('unbxd_productfeed_indexing_queue'),
+                    "queue_id",
+                    [
+                        'type' => Table::TYPE_BIGINT,
+                        'nullable' => false,
+                        'unsigned' => true,
+                        'comment' => 'Queue Id',
+                    ]
+                );
             }
         }
 

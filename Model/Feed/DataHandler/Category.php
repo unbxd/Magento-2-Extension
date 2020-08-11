@@ -27,6 +27,8 @@ class Category
      */
     private $categoryCacheList = [];
 
+    private $missingCategoryPath = [];
+
     /**
      * @var LoggerInterface
      */
@@ -38,8 +40,6 @@ class Category
      *
      */
     private $categoryFactory;
-
-   
 
     public function __construct(LoggerInterface $logger, CategoryFactory $categoryFactory)
     {
@@ -56,7 +56,7 @@ class Category
      * @param $categoryData
      * @return array
      */
-    public function buildCategoryList($categoryData, $store,$entity_id)
+    public function buildCategoryList($categoryData, $store, $entity_id)
     {
         $result = [];
         foreach ($categoryData as $data) {
@@ -66,7 +66,6 @@ class Category
                 $result[] = $this->categoryCacheList[$categoryId];
                 continue;
             }
-            $categoryPrintData = print_r($categoryData,true);
             $name = isset($data['name']) ? (string) trim($data['name']) : null;
             $urlPath = isset($data['url_path'])
             ? (string) trim($data['url_path'], '/')
@@ -99,18 +98,23 @@ class Category
                         $name = trim($categoryData[$key]['name']);
                     } else {
                         try {
-                            $category = $this->categoryFactory->create()->setStoreId($store)->loadByAttribute('url_path', $tempPath);
+                            if (!in_array($tempPath, $this->$missingCategoryPath)) {
+                                $category = $this->categoryFactory->create()->setStoreId($store)->loadByAttribute('url_path', $tempPath);
+                            } else {
+                                $category = [];
+                            }
                             if (!empty($category)) {
                                 $name = $category->getName();
-                                $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath." for entityID- ".$entity_id);
-                            }else{
-                                $this->logger->error("Unable to find category path -" . $tempPath." for entityID- ".$entity_id);
+                                $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
+                            } else {
+                                $this->logger->error("Unable to find category path -" . $tempPath . " for entityID- " . $entity_id);
+                                $this->$missingCategoryPath[] = $tempPath;
                                 $skipRecord = true;
                                 break;
                             }
 
                         } catch (\Exception $e) {
-                            $this->logger->error("Encountered exception while fetching category -" . $tempPath . " for entityID- ".$entity_id. " with error " . $e->getMessage() . " -stack-" . $e->getTraceAsString());
+                            $this->logger->error("Encountered exception while fetching category -" . $tempPath . " for entityID- " . $entity_id . " with error " . $e->getMessage() . " -stack-" . $e->getTraceAsString());
                             $skipRecord = true;
                             break;
 
@@ -121,11 +125,11 @@ class Category
                     $path .= sprintf('%s|%s>', $urlPart, $name);
                     $tempPath .= '/';
                 }
-                if (!$skipRecord){
-                $pathString = rtrim(trim($path, '>'), '/');
-                $result[] = $pathString;
+                if (!$skipRecord) {
+                    $pathString = rtrim(trim($path, '>'), '/');
+                    $result[] = $pathString;
 
-                $this->categoryCacheList[$categoryId] = $pathString;
+                    $this->categoryCacheList[$categoryId] = $pathString;
                 }
             }
         }
@@ -133,7 +137,8 @@ class Category
         return array_values(array_unique($result, SORT_REGULAR));
     }
 
-    public function reset(){
+    public function reset()
+    {
         $this->categoryCacheList = [];
     }
 }
