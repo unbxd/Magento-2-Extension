@@ -98,7 +98,7 @@ class Category
                         $name = trim($categoryData[$key]['name']);
                     } else {
                         try {
-                            if (!in_array($tempPath, $this->$missingCategoryPath)) {
+                            if (!in_array($tempPath, $this->missingCategoryPath)) {
                                 $category = $this->categoryFactory->create()->setStoreId($store)->loadByAttribute('url_path', $tempPath);
                             } else {
                                 $category = [];
@@ -108,7 +108,7 @@ class Category
                                 $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
                             } else {
                                 $this->logger->error("Unable to find category path -" . $tempPath . " for entityID- " . $entity_id);
-                                $this->$missingCategoryPath[] = $tempPath;
+                                $this->missingCategoryPath[] = $tempPath;
                                 $skipRecord = true;
                                 break;
                             }
