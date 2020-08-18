@@ -64,6 +64,7 @@ class Data extends AbstractHelper
      * product images settings
      */
     const XML_PATH_IMAGES_USE_CACHED_PRODUCT_IMAGES = 'unbxd_catalog/images/use_cached_product_images';
+    const XML_PATH_IMAGES_REMOVE_PUB_MEDIA_URL = 'unbxd_catalog/images/remove_pub_directory_in_mediaurl';
     const XML_PATH_IMAGES_BASE_IMAGE_ID = 'unbxd_catalog/images/base_image_id';
     const XML_PATH_IMAGES_SMALL_IMAGE_ID = 'unbxd_catalog/images/small_image_id';
     const XML_PATH_IMAGES_THUMBNAIL_ID = 'unbxd_catalog/images/thumbnail_id';
@@ -416,6 +417,19 @@ class Data extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_IMAGES_USE_CACHED_PRODUCT_IMAGES,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function removePubDirectoryFromUrl($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_IMAGES_REMOVE_PUB_MEDIA_URL,
             ScopeInterface::SCOPE_STORE,
             $store
         );

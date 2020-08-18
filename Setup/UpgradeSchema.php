@@ -39,7 +39,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $installer->getTable('unbxd_productfeed_indexing_queue')
             )->addColumn(
                 'queue_id',
-                Table::TYPE_BIGINT,
+                Table::TYPE_INTEGER,
                 null,
                 ['identity' => true, 'primary' => true, 'nullable' => false, 'unsigned' => true],
                 'Queue Id'
@@ -365,16 +365,17 @@ class UpgradeSchema implements UpgradeSchemaInterface
             }
         }
 
-        if (version_compare($context->getVersion(), '1.0.63', '<')) {
+        if (version_compare($context->getVersion(), '1.0.65', '<')) {
             if ($installer->getConnection()->tableColumnExists($installer->getTable('unbxd_productfeed_indexing_queue'), "queue_id")) {
                 $installer->getConnection()->modifyColumn(
                     $installer->getTable('unbxd_productfeed_indexing_queue'),
                     "queue_id",
                     [
-                        'type' => Table::TYPE_BIGINT,
+                        'type' => Table::TYPE_INTEGER,
                         'nullable' => false,
                         'unsigned' => true,
                         'comment' => 'Queue Id',
+                        'identity' => true
                     ]
                 );
             }

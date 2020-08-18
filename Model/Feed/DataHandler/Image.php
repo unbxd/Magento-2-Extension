@@ -302,11 +302,22 @@ class Image
             return $imagePath;
         }
         $url = $this->catalogProductMediaConfig->getMediaUrl($imagePath);
+        
         if ($this->helperData->useCachedProductImages($store)) {
             $cachedUrl = sprintf('%s%s', $this->getCachedUrl($imageType, $store), $imagePath);
             $cachedImageRealPath = $this->getCachedImageRealPath($cachedUrl);
             $url = file_exists($cachedImageRealPath) ? $cachedUrl : $url;
         }
+        if ($this->helperData->removePubDirectoryFromUrl($store)){
+            $url = removePubDirectory($url);
+        }
         return $url;
+    }
+
+   
+
+    public function removePubDirectory($url)
+    {
+        return str_replace('/pub/', '/', $url);
     }
 }
