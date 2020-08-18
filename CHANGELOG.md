@@ -1,4 +1,8 @@
 # Version 1.0.64
+## 1.0.65 - August 11, 2020
+### Fix
+- Updated the identity column for indexing queue view table
+- Updated the documentation links to that of v2
 ## 1.0.64 - August 11, 2020
 ### Fix
 - Extended support for php version 7.3.0
