@@ -309,7 +309,7 @@ class Image
             $url = file_exists($cachedImageRealPath) ? $cachedUrl : $url;
         }
         if ($this->helperData->removePubDirectoryFromUrl($store)){
-            $url = removePubDirectory($url);
+            $url = $this->removePubDirectory($url);
         }
         return $url;
     }

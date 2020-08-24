@@ -37,7 +37,7 @@
             </general>
             <images>
                 <use_cached_product_images>0</use_cached_product_images>
-                <remove_pub_directory>1</remove_pub_directory>
+                <remove_pub_directory_in_mediaurl>1</remove_pub_directory_in_mediaurl>
             </images>
             <indexing>
                 <enabled_queue>1</enabled_queue>
