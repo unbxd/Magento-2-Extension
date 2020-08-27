@@ -341,6 +341,31 @@
                     </depends>
                 </field>
             </group>
+            <group id="search_export_actions" translate="label" type="text" sortOrder="31" showInDefault="1" showInWebsite="0" showInStore="1">
+                <label>Search Data Generation</label>
+                <fieldset_css>unbxd-fieldset unbxd-fieldset-buttons</fieldset_css>
+                <field id="generate_search_button" translate="label comment" type="button" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Generate Search Data</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\Buttons\GenerateSearchData</frontend_model>
+                    <tooltip><![CDATA[Available only after Search data is generated.]]></tooltip>
+                </field>
+                <field id="download_search_data_button" translate="label comment" type="button" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Download Search Data</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\Buttons\DownloadSearchData</frontend_model>
+                    <tooltip><![CDATA[Available only after search data is generated.]]></tooltip>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="delete_search_data_button" translate="label comment" type="button" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Delete Search Data</label>
+                    <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Field\Buttons\DeleteSearchData</frontend_model>
+                    <tooltip><![CDATA[Available only after search data is generated.]]></tooltip>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
         </section>
     </system>
 </config>

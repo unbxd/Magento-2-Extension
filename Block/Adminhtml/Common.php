@@ -72,7 +72,8 @@ class Common extends Template
                 'cronJobs' => $this->getCronJobsActionUrl(),
                 'fullSync' => $this->getFullSyncActionUrl(),
                 'incrementalSync' => $this->getIncrementalSyncActionUrl(),
-                'generate' => $this->getGenerateProductFeedActionUrl()
+                'generate' => $this->getGenerateProductFeedActionUrl(),
+                'searchdata'=>$this->getGenerateSearchData(),
             ]
         ];
     }
@@ -173,6 +174,16 @@ class Common extends Template
     private function getGenerateProductFeedActionUrl()
     {
         return $this->getActionUrl('unbxd_productfeed/feed/generate');
+    }
+
+    /**
+     * Get url for generate csv data
+     *
+     * @return string
+     */
+    private function getGenerateSearchData()
+    {
+        return $this->getActionUrl('unbxd_productfeed/feed/generatesearch');
     }
 
     /**

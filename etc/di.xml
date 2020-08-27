@@ -223,6 +223,7 @@
                 <item name="unbxd_productfeed_upload_status" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\UploadStatus</item>
                 <item name="unbxd_productfeed_upload_size" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\UploadSize</item>
                 <item name="unbxd_productfeed_download" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\Download</item>
+                <item name="unbxd_search_download" xsi:type="object">Unbxd\ProductFeed\Console\Command\Feed\SearchDownload</item>
             </argument>
         </arguments>
     </type>
