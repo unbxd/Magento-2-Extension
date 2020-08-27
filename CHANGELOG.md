@@ -1,4 +1,7 @@
-# Version 1.0.64
+# Version 1.0.66
+## 1.0.66 - August 28, 2020
+### Fix
+- Added capability to download search data from Default Magento query log
 ## 1.0.65 - August 11, 2020
 ### Fix
 - Updated the identity column for indexing queue view table
