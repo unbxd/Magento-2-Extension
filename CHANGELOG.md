@@ -1,4 +1,7 @@
-# Version 1.0.66
+# Version 1.0.67
+## 1.0.67 - September 03, 2020
+### Feature
+- updated module helper function to be reused across unbxd extensions
 ## 1.0.66 - August 28, 2020
 ### Fix
 - Added capability to download search data from Default Magento query log
