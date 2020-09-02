@@ -59,7 +59,7 @@ class Module extends AbstractHelper
     /**
      * @var array|null
      */
-    private $moduleData = null;
+    private $moduleData = [];
 
     /**
      * @var string
@@ -140,9 +140,10 @@ class Module extends AbstractHelper
      */
     public function getModuleInfo($moduleName = null)
     {
-        if (!$this->moduleData) {
-            $moduleName = $moduleName ?: $this->getModuleName();
-            $this->moduleData = new DataObject();
+        $moduleName = $moduleName ?: $this->getModuleName();
+        if (!isset($this->moduleData[$moduleName])) {
+            
+            $moduleDataHolder = new DataObject();
             try {
                 $moduleDir = $this->getModuleDir($moduleName);
                 $composerPath = $moduleDir . DIRECTORY_SEPARATOR . self::COMPOSER_FILENAME;
@@ -150,16 +151,17 @@ class Module extends AbstractHelper
                     $composerJsonContent = $this->fileSystem->fileGetContents($composerPath);
                     $moduleData = $this->serializer->unserialize($composerJsonContent);
                     if ($moduleData) {
-                        $this->moduleData->addData($moduleData);
+                        $moduleDataHolder->addData($moduleData);
+                        $this->moduleData[$moduleName]=$moduleDataHolder;
                     }
                 }
             } catch (\LogicException $e) {
-                return $this->moduleData;
+                return $this->moduleData[$moduleName];
             } catch (FileSystemException $e) {
-                return $this->moduleData;
+                return $this->moduleData[$moduleName];
             }
         }
 
-        return $this->moduleData;
+        return $this->moduleData[$moduleName];
     }
 }
