@@ -17,7 +17,7 @@ use Unbxd\ProductFeed\Helper\Module as ModuleHelper;
 use Magento\Backend\Model\UrlInterface;
 use Magento\Composer\MagentoComposerApplication;
 use Magento\Framework\Composer\MagentoComposerApplicationFactory;
-use Magento\Setup\Model\PackagesData;
+use Magento\Framework\Composer\ComposerInformation;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\Filesystem;
 use Magento\Framework\App\Filesystem\DirectoryList;
@@ -267,11 +267,10 @@ class ModuleAvailabilityMessages implements MessageInterface
     public function runComposerCommand($package, $workingDir = null)
     {
         $commandParams = [
-            PackagesData::PARAM_COMMAND => PackagesData::COMPOSER_SHOW,
-            PackagesData::PARAM_PACKAGE => $package,
+            ComposerInformation::PARAM_COMMAND => ComposerInformation::COMPOSER_SHOW,
+            ComposerInformation::PARAM_PACKAGE => $package,
             self::PARAM_LATEST => true
         ];
-
         $output = null;
         try {
             $output = $this->magentoComposerApplication->runComposerCommand($commandParams, $workingDir);
