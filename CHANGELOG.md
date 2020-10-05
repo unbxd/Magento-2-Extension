@@ -1,4 +1,9 @@
-# Version 1.0.67
+# Version 1.0.68
+## 1.0.68 - October 05, 2020
+### Feature
+- Extended support for magento 2.4
+- Fixed the index queue cleanup process to limit the scope to the respective stores.
+
 ## 1.0.67 - September 03, 2020
 ### Feature
 - updated module helper function to be reused across unbxd extensions

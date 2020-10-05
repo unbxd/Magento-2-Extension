@@ -7,7 +7,7 @@
 
 This module provide possibility for synchronization product catalog with Unbxd service.
 
-Support Magento 2.1.\* || 2.2.\* || 2.3.\*
+Support Magento 2.1.\* || 2.2.\* || 2.3.\* || 2.4.\*
 
 # Installation Guide
 
@@ -23,7 +23,7 @@ php bin/magento cache:flush
 
 ### Manual installation
 
-1. Download this module [Link](https://github.com/unbxd/Magento-2-Extension/archive/1.0.67.zip)
+1. Download this module [Link](https://github.com/unbxd/Magento-2-Extension/archive/1.0.68.zip)
 3. Unzip module in the folder:
 
     app\code\Unbxd\ProductFeed
