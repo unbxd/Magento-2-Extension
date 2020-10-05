@@ -669,6 +669,7 @@ class CronManager
             $where = [
                 IndexingQueueInterface::STATUS . ' = ?' => IndexingQueue::STATUS_PENDING,
                 IndexingQueueInterface::QUEUE_ID . ' != ?' => $jobId,
+                IndexingQueueInterface::STORE_ID . '= ?' => $storeId
             ];
             $this->indexingQueueRepository->updateIndexQueueRecords($where, [IndexingQueueInterface::STATUS => IndexingQueue::STATUS_SKIPPED]);
             return $jobId;
