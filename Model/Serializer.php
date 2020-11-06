@@ -190,18 +190,23 @@ class Serializer
      */
     private function encodeString(&$string)
     {
-        // escape these characters with a backslash or unicode escape:
-        // " \ / \n \r \t \b \f
-        $search  = ['\\', "\n", "\t", "\r", "\b", "\f", '"', '\'', '&', '<', '>', '/'];
-        $replace = ['\\\\', '\\n', '\\t', '\\r', '\\b', '\\f', '\\u0022', '\\u0027', '\\u0026',  '\\u003C', '\\u003E', '\\/'];
-        $string  = str_replace($search, $replace, $string);
+        $output = json_encode($string);
+        if ($output) {
+            return $output;
+        } else {
+            // escape these characters with a backslash or unicode escape:
+            // " \ / \n \r \t \b \f
+            $search = ['\\', "\n", "\t", "\r", "\b", "\f", '"', '\'', '&', '<', '>', '/'];
+            $replace = ['\\\\', '\\n', '\\t', '\\r', '\\b', '\\f', '\\u0022', '\\u0027', '\\u0026', '\\u003C', '\\u003E', '\\/'];
+            $string = str_replace($search, $replace, $string);
 
-        // escape certain ASCII characters:
-        // 0x08 => \b
-        // 0x0c => \f
-        $string = str_replace([chr(0x08), chr(0x0C)], ['\b', '\f'], $string);
-        $this->encodeUnicodeString($string);
-        return self::JSON_DOUBLE_QUOTE . $string . self::JSON_DOUBLE_QUOTE;
+            // escape certain ASCII characters:
+            // 0x08 => \b
+            // 0x0c => \f
+            $string = str_replace([chr(0x08), chr(0x0C)], ['\b', '\f'], $string);
+            $this->encodeUnicodeString($string);
+            return self::JSON_DOUBLE_QUOTE . $string . self::JSON_DOUBLE_QUOTE;
+        }
     }
 
     public function encodeUnicodeString($value)
@@ -312,16 +317,16 @@ class Serializer
                 // return a UTF-16 character from a 2-byte UTF-8 char
                 // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
                 return chr(0x07 & (ord($utf8[0]) >> 2))
-                     . chr((0xC0 & (ord($utf8[0]) << 6))
-                         | (0x3F & ord($utf8[1])));
+                . chr((0xC0 & (ord($utf8[0]) << 6))
+                     | (0x3F & ord($utf8[1])));
 
             case 3:
                 // return a UTF-16 character from a 3-byte UTF-8 char
                 // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
                 return chr((0xF0 & (ord($utf8[0]) << 4))
-                         | (0x0F & (ord($utf8[1]) >> 2)))
-                     . chr((0xC0 & (ord($utf8[1]) << 6))
-                         | (0x7F & ord($utf8[2])));
+                     | (0x0F & (ord($utf8[1]) >> 2)))
+                . chr((0xC0 & (ord($utf8[1]) << 6))
+                     | (0x7F & ord($utf8[2])));
         }
 
         // ignoring UTF-32 for now, sorry
