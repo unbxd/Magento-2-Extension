@@ -1,4 +1,7 @@
-# Version 1.0.68
+# Version 1.0.69
+## 1.0.69 - November 05, 2020
+### Feature
+- Fixed encoding issue
 ## 1.0.68 - October 05, 2020
 ### Feature
 - Extended support for magento 2.4
