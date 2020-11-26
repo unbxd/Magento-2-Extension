@@ -21,6 +21,7 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Filesystem\Directory\Read as Directory;
 use Magento\Framework\Filesystem;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class Image
@@ -94,6 +95,11 @@ class Image
      */
     private $rootPath = null;
 
+     /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
     /**
      * Image constructor.
      * @param MediaConfig $catalogProductMediaConfig
@@ -106,6 +112,7 @@ class Image
      */
     public function __construct(
         MediaConfig $catalogProductMediaConfig,
+        StoreManagerInterface $storeManager,
         HelperData $helperData,
         ViewConfigInterface $viewConfig,
         MiscParamsBuilder $miscParamsBuilder,
@@ -114,6 +121,7 @@ class Image
         $cacheSubDir
     ) {
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
+        $this->storeManager = $storeManager;
         $this->helperData = $helperData;
         $this->viewConfig = $viewConfig;
         $this->miscParamsBuilder = $miscParamsBuilder;
@@ -122,6 +130,7 @@ class Image
         $this->cacheSubDir = $cacheSubDir;
     }
 
+    
     /**
      * @return array
      */
@@ -301,8 +310,10 @@ class Image
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
             return $imagePath;
         }
-        $url = $this->catalogProductMediaConfig->getMediaUrl($imagePath);
         
+        $currentStore = $this->storeManager->getStore();
+        $this->storeManager->setCurrentStore($store);
+        $url = $this->catalogProductMediaConfig->getMediaUrl($imagePath);
         if ($this->helperData->useCachedProductImages($store)) {
             $cachedUrl = sprintf('%s%s', $this->getCachedUrl($imageType, $store), $imagePath);
             $cachedImageRealPath = $this->getCachedImageRealPath($cachedUrl);
@@ -311,6 +322,7 @@ class Image
         if ($this->helperData->removePubDirectoryFromUrl($store)){
             $url = $this->removePubDirectory($url);
         }
+        $this->storeManager->setCurrentStore($currentStore);
         return $url;
     }
 
