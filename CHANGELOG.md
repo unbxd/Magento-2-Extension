@@ -1,4 +1,7 @@
-# Version 1.0.69
+# Version 1.0.70
+## 1.0.70 - November 26, 2020
+### Feature
+- Fixed media path to be store specific in a multistore setup.
 ## 1.0.69 - November 05, 2020
 ### Feature
 - Fixed encoding issue
