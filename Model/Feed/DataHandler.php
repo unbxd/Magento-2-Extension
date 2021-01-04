@@ -609,6 +609,7 @@ class DataHandler
                 case Config::FIELD_KEY_SMALL_IMAGE_PATH:
                 case Config::FIELD_KEY_THUMBNAIL_PATH:
                 case Config::FIELD_KEY_SWATCH_IMAGE_PATH:
+                    
                     $imageUrl = $this->imageDataHandler->getImageUrl($value, $productAttribute,  $store);
                     if ($imageUrl) {
                         $data[$unbxdField] = $imageUrl;
@@ -920,7 +921,7 @@ class DataHandler
     private function buildProductUrl($urlKey, $storeId)
     {
         $path = sprintf('%s%s', $urlKey, $this->getProductUrlSuffix($storeId));
-        $url = $this->getStore($storeId)->getBaseUrl() . $path;
+        $url = $this->getStore($storeId)->getBaseUrl(UrlInterface::URL_TYPE_WEB,true) . $path;
         //$url = $this->getFrontendUrl($path);
         // check if use category path for product url
         if ($this->helperData->isSetFlag(HelperProduct::XML_PATH_PRODUCT_URL_USE_CATEGORY)) {
