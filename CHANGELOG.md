@@ -1,4 +1,7 @@
-# Version 1.0.70
+# Version 1.0.71
+## 1.0.71 - January 04, 2021
+### Feature
+- Changed product url to be secure by default.
 ## 1.0.70 - November 26, 2020
 ### Feature
 - Fixed media path to be store specific in a multistore setup.
