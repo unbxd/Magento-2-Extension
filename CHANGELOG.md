@@ -1,8 +1,9 @@
-# Version 1.0.72
+# Version 1.0.73
+## 1.0.73 - February 17, 2021
+- Updated link attribute datatype in field schema
 ## 1.0.72 - February 10, 2021
 ### Feature
 - Updated the full job scheduler in multi site environment.
-- Updated link attribute datatype in field schema
 ## 1.0.71 - January 04, 2021
 ### Feature
 - Changed product url to be secure by default.
