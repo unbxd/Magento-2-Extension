@@ -56,6 +56,7 @@ class Full extends Indexer
      */
     private $entityType = null;
 
+
     /**
      * Full constructor.
      * @param ResourceConnection $resource
@@ -168,7 +169,16 @@ class Full extends Indexer
         $limit = 10000
     ) {
         $select = $this->getConnection()->select()
-            ->from(['e' => $this->getEntityTable()]);
+            ->from(['e' => $this->getEntityTable()])
+            ->join(['w' => $this->getTable('catalog_product_website') ],'e.entity_id = w.product_id',[]);
+
+        if ($storeId) {
+            try{
+                $select->where('w.website_id = ?',$this->storeManager->getStore($storeId)->getWebsite()->getId());
+            } catch (\Exception $exception) {
+                // to log exception
+            }
+        }
 
         if ($useFilters) {
             $this->addCollectionFilters($select, $storeId);

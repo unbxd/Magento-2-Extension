@@ -722,13 +722,13 @@ class CronManager
             // check authorization keys
             if (!$this->helperData->isAuthorizationCredentialsSetup($storeId)) {
                 $this->logger->error('Please check authorization credentials for store ' . $storeId . 'to perform this operation.');
-                return $this;
+                continue;
             }
 
             // check if cron is configured
             if (!$this->helperData->isFullFeedCronConfigured($storeId)) {
                 $this->logger->error('Full feed cron is not configured for store ' . $storeId . '. Please configure it to perform this operation.');
-                return $this;
+                continue;
             }
 
             /** @var \Unbxd\ProductFeed\Model\IndexingQueue $indexingQueue */

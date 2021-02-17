@@ -350,6 +350,7 @@ class DataHandler
 
         $additionalFields = $this->feedConfig->getAdditionalFields();
         $dataFieldsMapping = $this->buildDataFieldsMapping();
+        $urlAttributes = $this->feedConfig->getUrlAttributes();
         foreach ($indexedFields as $fieldCode => &$fieldData) {
             // process excluded fields
             if (in_array($fieldCode, $additionalFields)) {
@@ -360,6 +361,9 @@ class DataHandler
                 // include mapped field, leave the field from which it was mapped, as it can also be transferred
                 $mappedFieldKey = $dataFieldsMapping[$fieldCode];
                 $indexedFields[$mappedFieldKey] = array_replace($fieldData, ['fieldName' => $mappedFieldKey]);
+            }
+            if (in_array($fieldData['fieldName'], $urlAttributes)) {
+                $fieldData['dataType']='link';
             }
             // convert to needed format
             $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);

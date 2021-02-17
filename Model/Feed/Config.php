@@ -249,6 +249,24 @@ class Config
     }
 
     /**
+     * Default data fields mapping
+     *
+     * @return array
+     * @deprecated
+     */
+    public function getUrlAttributes()
+    {
+        return [
+            
+            self::SPECIFIC_FIELD_KEY_IMAGE_URL,
+            self::SPECIFIC_FIELD_KEY_PRODUCT_URL,
+            self::FIELD_KEY_SMALL_IMAGE_PATH,
+            self::FIELD_KEY_SWATCH_IMAGE_PATH,
+            self::FIELD_KEY_THUMBNAIL_PATH 
+        ];
+    }
+
+    /**
      * Available feed operation types
      *
      * @return array
