@@ -1,4 +1,6 @@
-# Version 1.0.73
+# Version 1.0.74
+## 1.0.74 - February 26, 2021
+- Updated link attribute datatype in field schema
 ## 1.0.73 - February 17, 2021
 - Updated link attribute datatype in field schema
 ## 1.0.72 - February 10, 2021
