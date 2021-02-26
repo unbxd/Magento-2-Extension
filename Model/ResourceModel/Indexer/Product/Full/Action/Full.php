@@ -143,7 +143,7 @@ class Full extends Indexer
             ->from(['e' => $this->getEntityTable()])
             ->where('e.entity_id = ?', $entityId)
             ->reset(\Magento\Framework\DB\Select::COLUMNS)
-            ->columns('sku');
+            ->columns('entity_id');
 
         return $this->getConnection()->fetchOne($select);
     }
@@ -303,7 +303,6 @@ class Full extends Indexer
         if (empty($filterAttributes)) {
             return $this;
         }
-
         foreach ($filterAttributes as $attribute) {
             /** @var FilterAttributeInterface $attributeCode */
             $attributeCode = $attribute->getAttributeCode();

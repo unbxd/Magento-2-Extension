@@ -456,7 +456,6 @@ class DataHandler
                     }else if (isset($data[Config::FIELD_KEY_VISIBILITY]) && !empty($data[Config::FIELD_KEY_VISIBILITY]) && ((is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == "Not Visible Individually" || $this->getVisibilityTypeLabel($data[Config::FIELD_KEY_VISIBILITY][0]) == "Not Visible Individually")) {
                         continue;
                     }
-
                     // prepare data fields for needed requirements
                     if (!isset($data[Config::getPreparedKey()])) {
                         $this->prepareFields($data, $store);
@@ -472,7 +471,6 @@ class DataHandler
                     if (isset($data[Config::PREPARED_FIELDS_KEY])) {
                         unset($data[Config::PREPARED_FIELDS_KEY]);
                     }
-
                     // combine data by type of operations
                     $operationKey = array_key_exists('action', $data)
                         ? trim($data['action'])
@@ -481,7 +479,7 @@ class DataHandler
                     // if operation type is 'delete' uniqueId is only one required field
                     if ($operationKey == Config::OPERATION_TYPE_DELETE) {
                         $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
-                        $data = [$key => $productId];
+                        $data = [$key => strval($productId)];
                     }
                     $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
                 }
