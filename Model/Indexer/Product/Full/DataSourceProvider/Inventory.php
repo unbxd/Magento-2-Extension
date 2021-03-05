@@ -79,6 +79,10 @@ class Inventory implements DataSourceProviderInterface
             if (!in_array('availabilityText', $indexedFields)) {
                 $indexedFields[] = 'availabilityText';
             }
+            $indexData[$productId]['availabilityLabel']= ($isInStock ? "In Stock" : "Out of Stock");
+            if (!in_array('availabilityLabel', $indexedFields)) {
+                $indexedFields[] = 'availabilityLabel';
+            }
         }
 
         $this->attributeHelper->appendSpecificIndexedFields($indexData, $indexedFields);
