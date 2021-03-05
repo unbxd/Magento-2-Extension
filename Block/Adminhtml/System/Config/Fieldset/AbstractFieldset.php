@@ -34,8 +34,8 @@ abstract class AbstractFieldset extends Template implements RendererInterface
      */
     protected static $unbxdReferenceUrls = [
         'base' => '//unbxd.com',
-        'intro' => '//unbxd.com/documentation/site-search/v2-search-how-it-works/',
-        'feed' => '//unbxd.com/documentation/site-search/v2-search-product-feed/'
+        'intro' => '//unbxd.com/docs/site-search/get-started-new/',
+        'feed' => '//unbxd.com/docs/site-search/integration-documentation/magento-integration/'
     ];
 
     /**

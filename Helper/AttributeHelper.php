@@ -11,15 +11,14 @@
  */
 namespace Unbxd\ProductFeed\Helper;
 
-use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Framework\App\Helper\Context;
+use Magento\Catalog\Api\Data\EavAttributeInterface;
 use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory as EavAttributeFactory;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory as AttributeCollectionFactory;
 use Magento\Eav\Model\Entity\Attribute\AttributeInterface;
-use Magento\Catalog\Api\Data\EavAttributeInterface;
-use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
+use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
 
 /**
  * Product feed attributes helper.
@@ -165,7 +164,7 @@ class AttributeHelper extends AbstractHelper
     {
         $specificStaticBoolAttributes = ['has_options', 'required_options'];
         return (bool) ($attribute->getSourceModel() == \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class)
-            || in_array($attribute->getAttributeCode(), $specificStaticBoolAttributes);
+        || in_array($attribute->getAttributeCode(), $specificStaticBoolAttributes);
     }
 
     /**
@@ -414,6 +413,9 @@ class AttributeHelper extends AbstractHelper
             $value = floatval($value);
         } elseif ($attribute->getBackendType() == 'int') {
             $value = intval($value);
+        } elseif (($attribute->getFrontendClass() == 'validate-digits')
+            || ($attribute->getFrontendClass() == 'validate-number')) {
+            $value = floatval(filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
         }
 
         return $value;
@@ -477,7 +479,7 @@ class AttributeHelper extends AbstractHelper
             'fieldName' => (string) $fieldName,
             'dataType' => (string) $fieldType,
             'multiValued' => (boolean) $isFieldMultivalued,
-            'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE
+            'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE,
         ];
 
         if ($includeAdditionalMapOptions) {
@@ -508,7 +510,7 @@ class AttributeHelper extends AbstractHelper
             'fieldName' => (string) $fieldName,
             'dataType' => (string) $fieldType,
             'multiValued' => $multiValued,
-            'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE
+            'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE,
         ];
 
         return $fieldOptions;
