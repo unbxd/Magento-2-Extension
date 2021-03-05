@@ -1,4 +1,7 @@
-# Version 1.0.74
+# Version 1.0.75
+## 1.0.75 - March 05, 2021
+- Added validation to handle data type mismatch with text attributes and decimal/number validation
+- Added a new attribute named availabilityLabel which indicates In Stock or Out of Stock
 ## 1.0.74 - February 26, 2021
 - Updated link attribute datatype in field schema
 ## 1.0.73 - February 17, 2021
