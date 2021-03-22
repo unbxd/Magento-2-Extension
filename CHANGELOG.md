@@ -1,4 +1,6 @@
-# Version 1.0.75
+# Version 1.0.76
+## 1.0.76 - March 22, 2021
+- Added conditional check for newer versions of the module.
 ## 1.0.75 - March 05, 2021
 - Added validation to handle data type mismatch with text attributes and decimal/number validation
 - Added a new attribute named availabilityLabel which indicates In Stock or Out of Stock
