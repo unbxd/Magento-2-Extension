@@ -18,7 +18,7 @@ use Unbxd\ProductFeed\Model\Feed\FileManagerFactory as FeedFileManagerFactory;
 use Magento\Backend\Model\UrlInterface;
 
 /**
- * Class ModuleAvailabilityMessages
+ * Class ProductFeedGeneratedMessages
  * @package Unbxd\ProductFeed\Model\Admin
  */
 class ProductFeedGeneratedMessages implements MessageInterface

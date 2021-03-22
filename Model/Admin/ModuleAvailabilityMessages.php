@@ -11,17 +11,18 @@
  */
 namespace Unbxd\ProductFeed\Model\Admin;
 
-use Magento\Framework\Notification\MessageInterface;
 use Magento\Backend\Model\Auth\Session;
-use Unbxd\ProductFeed\Helper\Module as ModuleHelper;
 use Magento\Backend\Model\UrlInterface;
 use Magento\Composer\MagentoComposerApplication;
-use Magento\Framework\Composer\MagentoComposerApplicationFactory;
-use Magento\Framework\Composer\ComposerInformation;
-use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
-use Magento\Framework\Filesystem;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Composer\ComposerInformation;
+use Magento\Framework\Composer\MagentoComposerApplicationFactory;
 use Magento\Framework\DataObject;
+use Magento\Framework\Filesystem;
+use Magento\Framework\Notification\MessageInterface;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Unbxd\ProductFeed\Helper\Module as ModuleHelper;
+use Unbxd\ProductFeed\Helper\Data as HelperData;
 
 /**
  * Class ModuleAvailabilityMessages
@@ -66,6 +67,11 @@ class ModuleAvailabilityMessages implements MessageInterface
     protected $timeZone;
 
     /**
+     * @var HelperData
+     */
+    private $helperData;
+
+    /**
      * @var string
      */
     private $documentationUrl = 'http://unbxd.com/documentation/site-search/v2-search-plugins-magento/';
@@ -78,6 +84,7 @@ class ModuleAvailabilityMessages implements MessageInterface
      * @param MagentoComposerApplicationFactory $composerAppFactory
      * @param Filesystem $filesystem
      * @param TimezoneInterface $timeZone
+     * @param HelperData $helperData
      */
     public function __construct(
         Session $authSession,
@@ -85,7 +92,8 @@ class ModuleAvailabilityMessages implements MessageInterface
         UrlInterface $url,
         MagentoComposerApplicationFactory $composerAppFactory,
         Filesystem $filesystem,
-        TimezoneInterface $timeZone
+        TimezoneInterface $timeZone,
+        HelperData $helperData
     ) {
         $this->authSession = $authSession;
         $this->moduleHelper = $moduleHelper;
@@ -93,6 +101,7 @@ class ModuleAvailabilityMessages implements MessageInterface
         $this->magentoComposerApplication = $composerAppFactory->create();
         $this->filesystem = $filesystem;
         $this->timeZone = $timeZone;
+        $this->helperData=$helperData;
     }
 
     /**
@@ -202,6 +211,11 @@ class ModuleAvailabilityMessages implements MessageInterface
             return false;
         }
 
+        $isLatestPackageCheckEnabled = $this->helperData->checkModuleVersionEnabled(null);
+        if (!$isLatestPackageCheckEnabled){
+            return false;
+        }
+
         $availableVersion = $this->runComposerCommand($packageName);
         if (!$availableVersion) {
             return false;
@@ -269,7 +283,7 @@ class ModuleAvailabilityMessages implements MessageInterface
         $commandParams = [
             ComposerInformation::PARAM_COMMAND => ComposerInformation::COMPOSER_SHOW,
             ComposerInformation::PARAM_PACKAGE => $package,
-            self::PARAM_LATEST => true
+            self::PARAM_LATEST => true,
         ];
         $output = null;
         try {

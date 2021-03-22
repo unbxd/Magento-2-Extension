@@ -60,6 +60,7 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS = 'unbxd_catalog/general/max_number_of_attempts';
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
+    const XML_PATH_CATALOG_VERSION_CHECK = 'unbxd_catalog/general/check_latest_version_update';
     /**
      * product images settings
      */
@@ -408,6 +409,20 @@ class Data extends AbstractHelper
         }
         return $attributes;
     }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function checkModuleVersionEnabled($scopeCode = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_CATALOG_VERSION_CHECK,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            $scopeCode
+        );
+    }
+    
 
     /**
      * @param null $store

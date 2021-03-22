@@ -96,6 +96,11 @@
                     out of stock, disabled, not visible individually, with no image, etc.<br/>
                     Don't choose any one if you want all products to be synchronized.]]></comment>
                 </field>
+                 <field id="check_latest_version_update" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable latest module version update check</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable Latest Module Version Update Check.]]></comment>
+                </field>
                 <field id="max_number_of_attempts" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Max Number Of Synchronization Attempts</label>
                     <validate>validate-number validate-number-range number-range-1-5</validate>
