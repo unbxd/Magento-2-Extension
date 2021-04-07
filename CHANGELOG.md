@@ -1,4 +1,6 @@
-# Version 1.0.76
+# Version 1.0.77
+## 1.0.77 - April 7, 2021
+- Depricated indexers
 ## 1.0.76 - March 22, 2021
 - Added conditional check for newer versions of the module.
 ## 1.0.75 - March 05, 2021
