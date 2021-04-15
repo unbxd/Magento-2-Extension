@@ -1,4 +1,6 @@
-# Version 1.0.76
+# Version 1.0.78
+## 1.0.78 - April 15, 2021
+- Added attribute typen overide
 ## 1.0.76 - March 22, 2021
 - Added conditional check for newer versions of the module.
 ## 1.0.75 - March 05, 2021
