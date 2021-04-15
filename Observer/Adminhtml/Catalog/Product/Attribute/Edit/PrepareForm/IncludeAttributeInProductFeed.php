@@ -15,6 +15,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Unbxd\ProductFeed\Helper\Module as ModuleHelper;
 use Magento\Config\Model\Config\Source\Yesno;
+use Unbxd\ProductFeed\Model\Config\Source\UnbxdFieldType;
 
 /**
  * Class IncludeAttributeInProductFeed
@@ -32,6 +33,12 @@ class IncludeAttributeInProductFeed implements ObserverInterface
      */
     protected $yesNo;
 
+
+    /**
+     * @var UnbxdFieldType
+     */
+    protected $unbxdFieldType;
+
     /**
      * IncludeAttributeInProductFeed constructor.
      * @param ModuleHelper $moduleHelper
@@ -39,10 +46,12 @@ class IncludeAttributeInProductFeed implements ObserverInterface
      */
     public function __construct(
         ModuleHelper $moduleHelper,
-        Yesno $yesNo
+        Yesno $yesNo,
+        UnbxdFieldType $unbxdFieldType
     ) {
         $this->moduleHelper = $moduleHelper;
         $this->yesNo = $yesNo;
+        $this->unbxdFieldType = $unbxdFieldType;
     }
 
     /**
@@ -60,6 +69,32 @@ class IncludeAttributeInProductFeed implements ObserverInterface
         $fieldset = $form->getElement('front_fieldset');
         if ($fieldset) {
             $fieldset->addField(
+                'unbxd_multiselect_override',
+                'select',
+                [
+                    'name'   => 'unbxd_multiselect_override',
+                    'label'  => __('Unbxd MultiSelect override'),
+                    'title'  => __('Unbxd MultiSelect override'),
+                    'note' => __('Inverse the value of the computed multiselect value'),
+                    'values' => $this->yesNo->toOptionArray(),
+                ],
+                '^'
+            );
+
+            $fieldset->addField(
+                'unbxd_field_type',
+                'select',
+                [
+                    'name'   => 'unbxd_field_type',
+                    'label'  => __('Unbxd Attribute Data Type'),
+                    'title'  => __('Unbxd Attribute Data Type'),
+                    'note' => __('Used to indicate special attribute types'),
+                    'values' => $this->unbxdFieldType->toOptionArray(),
+                ],
+                '^'
+            );
+
+            $fieldset->addField(
                 'include_in_unbxd_product_feed',
                 'select',
                 [
@@ -71,6 +106,7 @@ class IncludeAttributeInProductFeed implements ObserverInterface
                 ],
                 '^'
             );
+
         }
 
         return $this;

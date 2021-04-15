@@ -140,6 +140,9 @@ class AttributeHelper extends AbstractHelper
      */
     public function getFieldType(AttributeInterface $attribute)
     {
+        if ($type = $attribute->getData("unbxd_field_type")){
+            return $type;
+        }
         $type = FeedConfig::FIELD_TYPE_TEXT;
         if ($this->isFieldBool($attribute)) {
             $type = FeedConfig::FIELD_TYPE_BOOL;
@@ -235,8 +238,13 @@ class AttributeHelper extends AbstractHelper
      */
     public function isFieldMultivalued(AttributeInterface $attribute)
     {
-        return (bool) (in_array($attribute->getBackendType(), ['varchar', 'text'])
+        $value =  (bool) (in_array($attribute->getBackendType(), ['varchar', 'text'])
             && ($attribute->getFrontendInput() == 'multiselect'));
+        if ($attribute->getData('unbxd_multiselect_override',false)){
+            return !$value;
+        }else{
+            return $value;
+        }
     }
 
     /**

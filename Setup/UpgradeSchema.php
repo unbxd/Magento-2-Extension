@@ -281,6 +281,43 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 );
         }
 
+        if (
+            $installer->tableExists($catalogEavAttributeTable)
+            && !$installer->getConnection()->tableColumnExists(
+                $catalogEavAttributeTable, 'unbxd_field_type'
+            )
+        ) {
+            $installer->getConnection()
+                ->addColumn(
+                    $catalogEavAttributeTable,
+                    'unbxd_field_type',
+                    [
+                        'type' => Table::TYPE_TEXT,
+                        'nullable' => true,
+                        'length' => 255,
+                        'comment' => 'Special field type classification',
+                    ]
+                );
+        }
+
+        if (
+            $installer->tableExists($catalogEavAttributeTable)
+            && !$installer->getConnection()->tableColumnExists(
+                $catalogEavAttributeTable, 'unbxd_multiselect_override'
+            )
+        ) {
+            $installer->getConnection()
+                ->addColumn(
+                    $catalogEavAttributeTable,
+                    'unbxd_multiselect_override',
+                    [
+                        'type' => Table::TYPE_BOOLEAN,
+                        'nullable' => true,
+                        'comment' => 'When set to true will override the computed value',
+                    ]
+                );
+        }
+
         // add fields which link re-index operation with synchronization process and vice versa
         if (version_compare($context->getVersion(), '1.0.40', '<')) {
             $indexingQueueColumnName = 'feed_view_id';
