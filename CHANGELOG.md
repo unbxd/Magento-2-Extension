@@ -1,4 +1,6 @@
-# Version 1.0.78
+# Version 1.0.79
+## 1.0.79 - April 30, 2021
+- Validate site configuration for site to be integrated with unbxd
 ## 1.0.78 - April 15, 2021
 - Added attribute typen overide
 ## 1.0.76 - March 22, 2021
