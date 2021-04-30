@@ -143,7 +143,7 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
      */
     public function execute($ids = [])
     {
-        // check if authorization credentials were provided
+        /* // check if authorization credentials were provided
         if (!$this->helperData->isAuthorizationCredentialsSetup()) {
             $message = 'Please check authorization credentials to perform this operation.';
             $this->logger->error($message);
@@ -155,7 +155,7 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
             // for frontend action(s)
             $this->messageManager->addWarningMessage(__($message));
             return false;
-        }
+        } */
 
         // detect reindex action type
         $reindexType = IndexingQueue::TYPE_REINDEX_ROW;

@@ -27,10 +27,7 @@ class IndexingQueueListingNotice extends AbstractObserver implements ObserverInt
      */
     public function execute(Observer $observer)
     {
-        if (!$this->helperData->isAuthorizationCredentialsSetup()) {
-            $this->messageManager->addWarningMessage($this->getAuthorizationCredentialsAreNotSetupMessage());
-        }
-
+        
         if (!$this->helperData->isIndexingQueueEnabled()) {
             $this->messageManager->addWarningMessage($this->getIndexingQueueIsDisabledMessage());
         }
