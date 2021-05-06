@@ -29,6 +29,7 @@ use Unbxd\ProductFeed\Model\Feed\Api\ConnectorFactory;
 use Unbxd\ProductFeed\Model\Feed\Api\Connector as ApiConnector;
 use Unbxd\ProductFeed\Model\Feed\FileManagerFactory;
 use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
+use Magento\Framework\ObjectManagerInterface;
 
 /**
  * Class AbstractCommand
@@ -127,6 +128,11 @@ abstract class AbstractCommand extends Command
     private $feedFileManager = null;
 
     /**
+     * @var ObjectManagerInterface
+     */
+    private $objectManager;
+
+    /**
      * AbstractCommand constructor.
      * @param AppState $state
      * @param FeedHelper $feedHelper
@@ -140,7 +146,7 @@ abstract class AbstractCommand extends Command
      * @param FileManagerFactory $fileManagerFactory
      */
     public function __construct(
-        AppState $state,
+        ObjectManagerInterface $objectManager,
         FeedHelper $feedHelper,
         ProductHelper $productHelper,
         ReindexAction $reindexAction,
@@ -151,7 +157,6 @@ abstract class AbstractCommand extends Command
         ConnectorFactory $connectorFactory,
         FileManagerFactory $fileManagerFactory
     ) {
-        $this->appState = $state;
         $this->feedHelper = $feedHelper;
         $this->productHelper = $productHelper;
         $this->reindexAction = $reindexAction;
@@ -161,6 +166,7 @@ abstract class AbstractCommand extends Command
         $this->feedManagerFactory = $feedManagerFactory;
         $this->connectorFactory = $connectorFactory;
         $this->fileManagerFactory = $fileManagerFactory;
+        $this->objectManager = $objectManager;
         parent::__construct();
     }
 
@@ -205,6 +211,30 @@ abstract class AbstractCommand extends Command
 
         return $this->cronManager;
     }
+
+    protected function getState(){
+        if (!$this->appState){
+            $this->appState = $this->objectManager->get(\Magento\Framework\App\State::class);
+        }
+        return $this->appState;
+    }
+
+
+    /**
+    * Try to set area code in case if it was not set before
+    *
+    * @return $this
+    */
+    protected function initAreaCode()
+   {
+       try {
+           $this->getState()->setAreaCode(\Magento\Framework\App\Area::AREA_GLOBAL);
+       } catch (LocalizedException $e) {
+           // area code already set
+       }
+
+       return $this;
+   }
 
     /**
      * Retrieve feed manager instance. Init if needed

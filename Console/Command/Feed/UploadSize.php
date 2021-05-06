@@ -46,22 +46,6 @@ class UploadSize extends AbstractCommand
     }
 
     /**
-     * Try to set area code in case if it was not set before
-     *
-     * @return $this
-     */
-    private function initAreaCode()
-    {
-        try {
-            $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_GLOBAL);
-        } catch (LocalizedException $e) {
-            // area code already set
-        }
-
-        return $this;
-    }
-
-    /**
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return bool|int|null

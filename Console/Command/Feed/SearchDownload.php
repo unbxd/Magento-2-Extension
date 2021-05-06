@@ -18,6 +18,8 @@ use \Symfony\Component\Console\Input\InputInterface;
 use \Symfony\Component\Console\Output\OutputInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Store\Model\Store;
+use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\App\State;
 
 class SearchDownload extends Command
 {
@@ -28,14 +30,24 @@ class SearchDownload extends Command
     const STORE_PARAMETER = '_store';
     private $state;
 
+    /**
+     * @var ObjectManagerInterface
+     */
+    private $objectManager;
+
+
     public function __construct(
-        \Magento\Framework\App\State $state,
+        ObjectManagerInterface $objectManager,
         \Magento\Framework\Filesystem $filesystem
+        
     )
     {
-        $this->state = $state;
+        $this->objectManager = $objectManager;
         parent::__construct();
 	}
+
+
+
     protected function configure()
     {
         $this->setName(self::COMMAND)
@@ -49,18 +61,25 @@ class SearchDownload extends Command
         );
         parent::configure();
     }
+
+    private function getState(){
+        if (!$this->state){
+            $this->state = $this->objectManager->get(\Magento\Framework\App\State::class);
+        }
+        return $this->state;
+    }
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_GLOBAL);
+            $this->getState()->setAreaCode(\Magento\Framework\App\Area::AREA_GLOBAL);
             $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY);
             if (!$storeId) {
                 $storeId = $this->getDefaultStoreId();
             }
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $filesystem = $objectManager->get(\Magento\Framework\Filesystem::class);
+            
+            $filesystem = $this->objectManager->get(\Magento\Framework\Filesystem::class);
             $directory  =  $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
-            $resource   = $objectManager->get(\Magento\Framework\App\ResourceConnection::class);
+            $resource   = $this->objectManager->get(\Magento\Framework\App\ResourceConnection::class);
             $connection = $resource->getConnection();;
             $search_result 	  = $connection->select()->from(['sq' => 'search_query'],
                 ['query_text','num_results','popularity', 'updated_at']
@@ -90,8 +109,7 @@ class SearchDownload extends Command
 
     protected function getDefaultStoreId()
     {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager  = $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
+        $storeManager  = $this->objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
         return $storeManager->getStore()->getId();
     }
 }
