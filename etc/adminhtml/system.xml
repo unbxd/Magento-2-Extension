@@ -22,7 +22,7 @@
             <class>separator-top</class>
             <label>Setup</label>
             <tab>unbxd</tab>
-            <resource>Unbxd_ProductFeed::productfeed</resource>
+            <resource>Unbxd_ProductFeed::setup</resource>
             <group id="setup_header" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
                 <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Fieldset\Setup</frontend_model>
             </group>
@@ -78,7 +78,7 @@
             <class>separator-top</class>
             <label>Catalog</label>
             <tab>unbxd</tab>
-            <resource>Unbxd_ProductFeed::productfeed</resource>
+            <resource>Unbxd_ProductFeed::catalogconfig</resource>
             <group id="catalog_header" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
                 <frontend_model>Unbxd\ProductFeed\Block\Adminhtml\System\Config\Fieldset\Catalog</frontend_model>
             </group>

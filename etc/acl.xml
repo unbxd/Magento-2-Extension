@@ -17,9 +17,11 @@
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
-                <resource id="Magento_Backend::system">
-                    <resource id="Unbxd_ProductFeed::indexing_queue" title="Unbxd ProductFeed Indexing Queue" translate="title" />
-                    <resource id="Unbxd_ProductFeed::productfeed" title="Unbxd ProductFeed" translate="title" />
+                <resource id="Unbxd_ProductFeed::productfeed" title="Unbxd Section" translate="title">
+                    <resource id="Unbxd_ProductFeed::setup" title="Unbxd Site Setup" translate="title" />
+                    <resource id="Unbxd_ProductFeed::catalogconfig" title="Unbxd Catalog" translate="title" />
+                    <resource id="Unbxd_ProductFeed::productfeed_indexing_queue" title="Unbxd ProductFeed Indexing Queue" translate="title" />
+                    <resource id="Unbxd_ProductFeed::productfeed_feed_view" title="Unbxd Feed View" translate="title" /> 
                     <resource id="Unbxd_ProductFeed::cron" title="Unbxd Cron Tasks" translate="title" />
                 </resource>
             </resource>

@@ -28,7 +28,7 @@
              dependsOnModule="Unbxd_ProductFeed"
              parent="Unbxd_ProductFeed::productfeed"
              action="adminhtml/system_config/edit/section/unbxd_setup"
-             resource="Unbxd_ProductFeed::productfeed"/>
+             resource="Unbxd_ProductFeed::setup"/>
         <add id="Unbxd_ProductFeed::productfeed_catalog"
              title="Catalog"
              module="Unbxd_ProductFeed"
@@ -36,7 +36,7 @@
              dependsOnModule="Unbxd_ProductFeed"
              parent="Unbxd_ProductFeed::productfeed"
              action="adminhtml/system_config/edit/section/unbxd_catalog"
-             resource="Unbxd_ProductFeed::productfeed"/>
+             resource="Unbxd_ProductFeed::catalogconfig"/>
         <add id="Unbxd_ProductFeed::productfeed_indexing_queue"
              title="Indexing Queue View"
              module="Unbxd_ProductFeed"
