@@ -1,4 +1,7 @@
-# Version 1.0.79
+# Version 1.0.80
+## 1.0.80 - May 6, 2021
+- Updated ACL grouping for Unbxd Resources
+- Remove Appstate dependency for command line jobs
 ## 1.0.79 - April 30, 2021
 - Validate site configuration for site to be integrated with unbxd
 ## 1.0.78 - April 15, 2021
