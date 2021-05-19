@@ -22,11 +22,11 @@
                 <secret_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
              </general>
             <api_endpoints>
-                <full>http://feed.unbxd.io/api/%s/upload/catalog/full</full>
-                <incremental>http://feed.unbxd.io/api/%s/upload/catalog/delta</incremental>
-                <full_uploaded_status>http://feed.unbxd.io/api/%s/catalog/%s/status</full_uploaded_status>
-                <incremental_uploaded_status>http://feed.unbxd.io/api/%s/catalog/delta/%s/status</incremental_uploaded_status>
-                <uploaded_size>http://feed.unbxd.io/api/%s/catalog/size</uploaded_size>
+                <full>https://feed.unbxd.io/api/%s/upload/catalog/full</full>
+                <incremental>https://feed.unbxd.io/api/%s/upload/catalog/delta</incremental>
+                <full_uploaded_status>https://feed.unbxd.io/api/%s/catalog/%s/status</full_uploaded_status>
+                <incremental_uploaded_status>https://feed.unbxd.io/api/%s/catalog/delta/%s/status</incremental_uploaded_status>
+                <uploaded_size>https://feed.unbxd.io/api/%s/catalog/size</uploaded_size>
             </api_endpoints>
         </unbxd_setup>
         <unbxd_catalog>
