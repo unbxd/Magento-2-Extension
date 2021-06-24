@@ -132,7 +132,7 @@ class Category extends Indexer
                     unset($categoryData[$key]);
                     continue;
                 }
-
+                $categoryDataRow['id_path']= $storeCategoryData[$id]['path'];
                 $categoryDataRow['name'] = $storeCategoryData[$id]['name'];
                 $categoryDataRow['url_key'] = $storeCategoryData[$id]['url_key'];
                 $categoryDataRow['url_path'] = $storeCategoryData[$id]['url_path'];
@@ -325,6 +325,7 @@ class Category extends Indexer
         $this->categoryDataCache[$storeId][$rootCategoryId] = '';
 
         $entityIdField = $this->getEntityMetaData(CategoryInterface::class)->getIdentifierField();
+        $pathField = CategoryInterface::KEY_PATH;
         $linkField = $this->getEntityMetaData(CategoryInterface::class)->getLinkField();
         $nameAttr = $this->getCategoryNameAttribute();
         $urlKeyAttr = $this->getCategoryUrlKeyAttribute();
@@ -337,6 +338,7 @@ class Category extends Indexer
         $resultColumns = [];
         // prepend entity ID field to result columns
         $resultColumns[] = $entityIdField;
+        $resultColumns[] = $pathField;
         foreach ([$nameAttr, $urlKeyAttr, $urlPathAttr, $is_ActiveAttr] as $attribute) {
             // build join conditions
             $attributeCode = $attribute->getAttributeCode();
@@ -387,6 +389,7 @@ class Category extends Indexer
         $select->where("cat.$entityIdField != ?", $rootCategoryId)
             ->where("cat.$entityIdField IN (?)", $loadCategoryIds);
 
+            //print_r($select->__toString());
 
         return $select;
     }

@@ -61,6 +61,8 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     const XML_PATH_CATALOG_VERSION_CHECK = 'unbxd_catalog/general/check_latest_version_update';
+    const XML_PATH_USE_CATEGORY_ID = 'unbxd_catalog/general/use_categoryid_insteadof_path';
+
     /**
      * product images settings
      */
@@ -432,6 +434,19 @@ class Data extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_IMAGES_USE_CACHED_PRODUCT_IMAGES,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function useCategoryID($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_USE_CATEGORY_ID,
             ScopeInterface::SCOPE_STORE,
             $store
         );

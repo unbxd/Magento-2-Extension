@@ -35,6 +35,7 @@
                 <filter_attributes>status</filter_attributes>
                 <max_number_of_attempts>3</max_number_of_attempts>
                 <check_latest_version_update>0</check_latest_version_update>
+                <use_categoryid_insteadof_path>0</use_categoryid_insteadof_path>
             </general>
             <images>
                 <use_cached_product_images>0</use_cached_product_images>
