@@ -1,4 +1,6 @@
-# Version 1.0.80
+# Version 1.0.81
+## 1.0.81 - Jun 22, 2021
+- Added support to select between category ID | name (or) category Path | name value format for categorypath ID values in product feed.
 ## 1.0.80 - May 6, 2021
 - Updated ACL grouping for Unbxd Resources
 - Remove Appstate dependency for command line jobs
