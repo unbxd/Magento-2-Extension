@@ -1,4 +1,6 @@
-# Version 1.0.81
+# Version 1.0.82
+## 1.0.82 - Jun 28, 2021
+- Ability to send the boolean attribute as True|False instead of label.
 ## 1.0.81 - Jun 22, 2021
 - Added support to select between category ID | name (or) category Path | name value format for categorypath ID values in product feed.
 ## 1.0.80 - May 6, 2021
