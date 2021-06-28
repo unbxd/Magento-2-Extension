@@ -286,6 +286,14 @@ class AttributeHelper extends AbstractHelper
         }
 
         $value = array_map($this->attributeMappers[$mapperKey], $value);
+        if ($attribute->getData("unbxd_field_type") && $attribute->getData("unbxd_field_type") == "bool"){
+            if (($value && !is_array($value)) || (is_array($value) && $value[0])){ 
+                $values[$attributeCode] = "True";
+            }else{
+                $values[$attributeCode]="False";
+            }
+             return $values;
+        }
         $value = array_filter($value);
         $value = array_values($value);
         $values[$attributeCode] = $value;
