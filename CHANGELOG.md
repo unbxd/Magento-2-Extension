@@ -1,4 +1,6 @@
-# Version 1.0.82
+# Version 1.0.83
+## 1.0.83 - Jun 29, 2021
+- Resize missing cached image on demand.
 ## 1.0.82 - Jun 28, 2021
 - Ability to send the boolean attribute as True|False instead of label.
 ## 1.0.81 - Jun 22, 2021
