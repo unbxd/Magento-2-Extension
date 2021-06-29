@@ -119,6 +119,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Use cached product images in product feed instead of non-cached.]]></comment>
                 </field>
+                <field id="resize_image_when_not_found" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Generate resized cached image when not found</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Generate resized cached image when not found.]]></comment>
+                </field>           
                 <field id="remove_pub_directory_in_mediaurl" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Is pub not a part of media url</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

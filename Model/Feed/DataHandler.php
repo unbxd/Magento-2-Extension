@@ -276,7 +276,6 @@ class DataHandler
     {
         $this->prepareData($index, $store);
         $this->buildFeed();
-
         return $this->getFullFeed();
     }
 
@@ -303,7 +302,7 @@ class DataHandler
         unset($index['fields']);
         $this->buildCatalogData($index, $store);
         $this->buildSchemaFields();
-
+        
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_prepare_data_after.');
         $this->eventManager->dispatch(
             $this->eventPrefix . '_prepare_data_after',
@@ -449,7 +448,7 @@ class DataHandler
                     if (isset($data[Config::PARENT_ID_KEY])) {
                         unset($data[Config::PARENT_ID_KEY]);
                         if (!isset($data[Config::FIELD_KEY_VISIBILITY]) || empty($data[Config::FIELD_KEY_VISIBILITY]) || (is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == "Not Visible Individually" || $this->getVisibilityTypeLabel($data[Config::FIELD_KEY_VISIBILITY][0]) == "Not Visible Individually") {
-                            continue;   
+                            continue;
                         }
                         $this->relatedEntityPreparedDataList[]=$data['entity_id'];
 
@@ -584,6 +583,7 @@ class DataHandler
     private function applyDataFieldsMapping(array &$data, $store = null)
     {
         $dataFieldsMapping = $this->buildDataFieldsMapping();
+        $productId = $data["entity_id"];
         foreach ($dataFieldsMapping as $productAttribute => $unbxdField) {
             // apply only for fields that are present in the formed feed
             if (!array_key_exists($productAttribute, $data)) {
@@ -611,8 +611,8 @@ class DataHandler
                 case Config::FIELD_KEY_SMALL_IMAGE_PATH:
                 case Config::FIELD_KEY_THUMBNAIL_PATH:
                 case Config::FIELD_KEY_SWATCH_IMAGE_PATH:
-                    
-                    $imageUrl = $this->imageDataHandler->getImageUrl($value, $productAttribute,  $store);
+
+                    $imageUrl = $this->imageDataHandler->getImageUrl($productId,$value, $productAttribute,  $store);
                     if ($imageUrl) {
                         $data[$unbxdField] = $imageUrl;
                         unset($data[$productAttribute]);
@@ -682,10 +682,11 @@ class DataHandler
      */
     private function applyMediaAttributes(array &$data, $store = null)
     {
+        $productId = $data["entity_id"];
         foreach (ImageDataHandler::getMediaAttributes() as $attribute) {
             if (isset($data[$attribute]) && !in_array($attribute, $this->getProcessedImages())) {
                 $value = is_array($data[$attribute]) ? $data[$attribute][0] : $data[$attribute];
-                $data[$attribute] = $this->imageDataHandler->getImageUrl((string) $value, $attribute, $store);
+                $data[$attribute] = $this->imageDataHandler->getImageUrl($productId,(string) $value, $attribute, $store);
             }
         }
         // clear processed images for current product

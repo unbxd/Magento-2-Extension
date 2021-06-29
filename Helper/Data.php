@@ -67,6 +67,7 @@ class Data extends AbstractHelper
      * product images settings
      */
     const XML_PATH_IMAGES_USE_CACHED_PRODUCT_IMAGES = 'unbxd_catalog/images/use_cached_product_images';
+    const XML_PATH_IMAGES_RESIZE_IMAGE_WHEN_NOT_FOUND = 'unbxd_catalog/images/resize_image_when_not_found';
     const XML_PATH_IMAGES_REMOVE_PUB_MEDIA_URL = 'unbxd_catalog/images/remove_pub_directory_in_mediaurl';
     const XML_PATH_IMAGES_BASE_IMAGE_ID = 'unbxd_catalog/images/base_image_id';
     const XML_PATH_IMAGES_SMALL_IMAGE_ID = 'unbxd_catalog/images/small_image_id';
@@ -424,6 +425,20 @@ class Data extends AbstractHelper
             $scopeCode
         );
     }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function resizeImageOnDemand($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_IMAGES_RESIZE_IMAGE_WHEN_NOT_FOUND,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+    
     
 
     /**

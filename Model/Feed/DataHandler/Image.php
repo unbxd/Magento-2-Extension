@@ -11,6 +11,7 @@
  */
 namespace Unbxd\ProductFeed\Model\Feed\DataHandler;
 
+use Magento\Catalog\Api\ProductRepositoryInterface;;
 use Unbxd\ProductFeed\Model\Feed\DataHandler\Image\MiscParamsBuilder;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
@@ -22,6 +23,8 @@ use Magento\Framework\Filesystem\Directory\Read as Directory;
 use Magento\Framework\Filesystem;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Catalog\Helper\ImageFactory;
+use Unbxd\ProductFeed\Logger\LoggerInterface;
 
 /**
  * Class Image
@@ -40,9 +43,26 @@ class Image
     private $catalogProductMediaConfig;
 
     /**
+     * @var ProductRepositoryInterface
+     */
+    private $productRepository;
+
+    /**
      * @var HelperData
      */
     private $helperData;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var ImageFactory
+     */
+    private $imageFactory;
+
+
 
     /**
      * @var MiscParamsBuilder
@@ -111,6 +131,9 @@ class Image
      * @param $cacheSubDir
      */
     public function __construct(
+        LoggerInterface $logger,
+        ProductRepositoryInterface $productRepositoryInterface,
+        ImageFactory $imageFactory,
         MediaConfig $catalogProductMediaConfig,
         StoreManagerInterface $storeManager,
         HelperData $helperData,
@@ -120,6 +143,8 @@ class Image
         Filesystem $filesystem,
         $cacheSubDir
     ) {
+        $this->logger = $logger->create("feed");
+        $this->productRepository = $productRepositoryInterface;
         $this->catalogProductMediaConfig = $catalogProductMediaConfig;
         $this->storeManager = $storeManager;
         $this->helperData = $helperData;
@@ -128,9 +153,10 @@ class Image
         $this->encryptor = $encryptor;
         $this->directory = $filesystem->getDirectoryRead(DirectoryList::ROOT);
         $this->cacheSubDir = $cacheSubDir;
+        $this->imageFactory =$imageFactory;
     }
 
-    
+
     /**
      * @return array
      */
@@ -297,27 +323,27 @@ class Image
 
     /**
      * Retrieve product image url
-     *
+     * @param string $product
      * @param string $imagePath
      * @param string $imageType
      * @param null $store
      * @return string
      * @throws \Magento\Framework\Exception\ValidatorException
      */
-    public function getImageUrl($imagePath, $imageType, $store = null)
+    public function getImageUrl($product, $imagePath, $imageType, $store = null)
     {
         // check if provided value already as url
         if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
             return $imagePath;
         }
-        
+
         $currentStore = $this->storeManager->getStore();
         $this->storeManager->setCurrentStore($store);
         $url = $this->catalogProductMediaConfig->getMediaUrl($imagePath);
         if ($this->helperData->useCachedProductImages($store)) {
             $cachedUrl = sprintf('%s%s', $this->getCachedUrl($imageType, $store), $imagePath);
             $cachedImageRealPath = $this->getCachedImageRealPath($cachedUrl);
-            $url = file_exists($cachedImageRealPath) ? $cachedUrl : $url;
+            $url = file_exists($cachedImageRealPath) ? $cachedUrl : $this->resizeImageOnDemand($url,$imageType,$product,$store);
         }
         if ($this->helperData->removePubDirectoryFromUrl($store)){
             $url = $this->removePubDirectory($url);
@@ -326,10 +352,24 @@ class Image
         return $url;
     }
 
-   
+
 
     public function removePubDirectory($url)
     {
         return str_replace('/pub/', '/', $url);
+    }
+
+    private function resizeImageOnDemand(string $url, string $imageType, string $product,$store)
+    {
+        try {
+            if ($this->helperData->resizeImageOnDemand($store)){
+            $product = $this->productRepository->getById($product, false, $store);
+            $imageHelper = $this->imageFactory->create();
+            return $imageHelper->init($product,$imageType,$this->getMediaAttribute($imageType,$store))->getUrl();
+            }
+        }catch (Exception $e){
+            $this->logger->error(sprintf("Error generating image resize for %s %s",$product,$imageType),$e);
+        }
+        return $url;
     }
 }
