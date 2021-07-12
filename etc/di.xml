@@ -166,6 +166,8 @@
                 <item name="default" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Price\PriceDefault</item>
                 <item name="configurable" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Price\Configurable</item>
                 <item name="grouped" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Price\Grouped</item>
+                <item name="bundle" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Price\Grouped</item>
+
             </argument>
         </arguments>
     </type>
@@ -234,8 +236,6 @@
         <arguments>
             <argument name="cache" xsi:type="object">Magento\Framework\App\Cache\Type\Config</argument>
             <argument name="cacheTypes" xsi:type="array">
-                <item name="config" xsi:type="string">config</item>
-                <item name="layout" xsi:type="string">layout</item>
             </argument>
         </arguments>
     </type>
@@ -295,5 +295,6 @@
             <argument name="cacheSubDir" xsi:type="string">cache</argument>
         </arguments>
     </type>
-    <!-- END: feed images data handler -->
+
+    
 </config>
