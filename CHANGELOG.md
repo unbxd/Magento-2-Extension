@@ -1,4 +1,6 @@
-# Version 1.0.83
+# Version 1.0.84
+## 1.0.84 - Jul 12, 2021
+- Added bundle product price lookup
 ## 1.0.83 - Jun 29, 2021
 - Resize missing cached image on demand.
 ## 1.0.82 - Jun 28, 2021
