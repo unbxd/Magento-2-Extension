@@ -14,6 +14,7 @@ namespace Unbxd\ProductFeed\Model\Eav\Indexer\Full\DataSourceProvider;
 use Magento\Eav\Model\Entity\Attribute\AttributeInterface;
 use Unbxd\ProductFeed\Model\ResourceModel\Eav\Indexer\Full\DataSourceProvider\AbstractAttribute as ResourceModel;
 use Unbxd\ProductFeed\Helper\AttributeHelper as AttributeHelper;
+use Unbxd\ProductFeed\Logger\LoggerInterface;
 
 /**
  * Class AbstractAttribute
@@ -62,6 +63,8 @@ abstract class AbstractAttribute
      */
     protected $indexedFields = [];
 
+    private $logger;
+
     /**
      * @var array
      */
@@ -85,10 +88,12 @@ abstract class AbstractAttribute
     public function __construct(
         ResourceModel $resourceModel,
         AttributeHelper $attributeHelper,
+        LoggerInterface $logger,
         array $indexedBackendModels = []
     ) {
         $this->resourceModel = $resourceModel;
         $this->attributeHelper = $attributeHelper;
+        $this->logger=$logger;
 
         if (is_array($indexedBackendModels) && !empty($indexedBackendModels)) {
             $indexedBackendModels = array_values($indexedBackendModels);

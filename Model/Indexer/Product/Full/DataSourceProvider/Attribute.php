@@ -15,6 +15,8 @@ use Unbxd\ProductFeed\Model\Eav\Indexer\Full\DataSourceProvider\AbstractAttribut
 use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
+
+
 /**
  * Data source used to append attributes data to product during indexing.
  *
@@ -27,6 +29,7 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
      * Related data source code
      */
 	const DATA_SOURCE_CODE = 'attribute';
+    
 	
     /**
      * @var array
@@ -64,6 +67,7 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
 
             foreach ($relationsByChildId as $childId => $relations) {
                 foreach ($relations as $relation) {
+                    try{
                     $parentId = (int) $relation['parent_id'];
                     if (isset($indexData[$parentId]) && isset($childrenIndexData[$childId])) {
                         $indexData[$parentId]['children_ids'][] = $childId;
@@ -74,6 +78,9 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
                         );
                         $this->addChildData($indexData[$parentId], $childrenIndexData[$childId]);
                         $this->addChildSku($indexData[$parentId], $relation);
+                    }
+                    }catch(\Exception $e){
+                        $this->logger->error("Error while populating child product ".$childId." for parent ".$relation['parent_id']." :: " . $e->__toString());
                     }
                 }
             }
@@ -119,6 +126,7 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
             $attributesData = $this->loadAttributesRawData($storeId, $productIds, $backendTable, $attributeIds);
             if (!empty($attributesData)) {
                 foreach ($attributesData as $row) {
+                try{
                     $productId = (int) $row['entity_id'];
                     $attribute = $this->attributesById[$row['attribute_id']];
                     $indexValues = $this->attributeHelper->prepareIndexValue($attribute, $storeId, $row['value']);
@@ -133,6 +141,9 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
                     $indexData[$productId]['indexed_attributes'][] = $attribute->getAttributeCode();
 
                     $this->setIndexedField($attribute->getAttributeCode());
+                }catch(\Exception $e){
+                    $this->logger->error("Error while populating attribute ".$this->attributesById[$row['attribute_id']]->getAttributeCode()." for product ".$row['entity_id']." :: " . $e->__toString());
+                }
                 }
             }
         }
