@@ -1,4 +1,6 @@
-# Version 1.0.84
+# Version 1.0.85
+## 1.0.85 - Jul 28, 2021
+- Added Exception handling to skip incorrect data in the environment
 ## 1.0.84 - Jul 12, 2021
 - Added bundle product price lookup
 ## 1.0.83 - Jun 29, 2021
