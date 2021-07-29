@@ -63,7 +63,7 @@ abstract class AbstractAttribute
      */
     protected $indexedFields = [];
 
-    private $logger;
+    protected $logger;
 
     /**
      * @var array
