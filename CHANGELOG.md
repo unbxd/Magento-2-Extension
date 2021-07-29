@@ -1,4 +1,6 @@
-# Version 1.0.85
+# Version 1.0.86
+## 1.0.86 - Jul 29, 2021
+- Changed the scope of logger to be reused in child class
 ## 1.0.85 - Jul 28, 2021
 - Added Exception handling to skip incorrect data in the environment
 ## 1.0.84 - Jul 12, 2021
