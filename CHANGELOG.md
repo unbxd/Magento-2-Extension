@@ -1,4 +1,6 @@
-# Version 1.0.86
+# Version 1.0.87
+## 1.0.87 - Aug 18, 2021
+- Created config option to retain root category in category path attribute
 ## 1.0.86 - Jul 29, 2021
 - Changed the scope of logger to be reused in child class
 ## 1.0.85 - Jul 28, 2021
