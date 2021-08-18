@@ -98,7 +98,9 @@ class Category
             if (!$name ||  !$urlPath) {
                 continue;
             }
+            if (!$this->helperData->retainRootCategory($store)){
             $urlPath = substr(strstr($urlPath,'/'.$this->rootCategoryId.'/'),strlen('/'.$this->rootCategoryId.'/'));
+            }
             // remove double slashes from path if any
             $urlPath = preg_replace('#/+#', '/', $urlPath);
             if (!$urlPath) {
@@ -165,7 +167,6 @@ class Category
 
     private function buildCategoryPathList($categoryData,$store,$entity_id){
         $result = [];
-        $useCategoryId = $this->helperData->useCategoryID($store);
         foreach ($categoryData as $data) {
             $categoryId = isset($data['category_id']) ? (int) $data['category_id'] : null;
             // try to retrieve category list data from cache

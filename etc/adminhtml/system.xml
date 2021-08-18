@@ -111,6 +111,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Use Category ID in the feed instead of path (will result in 2|Root Category) ]]></comment>
                 </field>
+                <field id="retain_root_category" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Retain Root Category</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Retain Root Category in Category path]]></comment>
+                </field>
             </group>
             <group id="images" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Product Images Settings</label>
