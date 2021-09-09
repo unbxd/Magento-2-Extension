@@ -372,4 +372,8 @@ class Image
         }
         return $url;
     }
+
+    public function reset(){
+        $this->cachedUrl = [];
+    }
 }

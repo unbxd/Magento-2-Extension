@@ -68,6 +68,7 @@ class Full
         $this->resourceModel = $resourceModel;
         $this->dataSourceProvider = $dataSourceProvider;
         $this->logger = $logger;
+        $this->logger = $logger->create("feed");
         $this->helperData = $helperData;
         $this->batchRowsCount = $batchRowsCount;
     }
@@ -174,12 +175,15 @@ class Full
         $index = [];
         $fields = [];
         $batchSize = $this->batchRowsCount;
+        $processCount = 0;
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
 			if (!empty($batchIndex)) {
 				foreach ($this->dataSourceProvider->getList() as $dataSource) {
 					/** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
 					$batchIndex = $dataSource->appendData($storeId, $batchIndex);
 				}
+                $processCount += $batchSize;
+                $this->logger->info("Processed Products Count ::".$processCount);
             }
             if (isset($batchIndex["fields"])){
             $fields = array_merge($fields,$batchIndex["fields"]);

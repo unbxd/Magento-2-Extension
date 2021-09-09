@@ -387,11 +387,8 @@ class DataHandler
         foreach ($this->getChildrenSchemaFields() as $childField) {
             // add only fields that already exist in schema fields
             if (array_key_exists($childField, $fields)) {
-                $childKey = sprintf(
-                    '%s%s',
-                    FeedConfig::CHILD_PRODUCT_FIELD_PREFIX,
-                    ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField))
-                );
+                $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX.ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField));
+                
                 if (!array_key_exists($childKey, $fields)) {
                     $childFieldData = $fields[$childField];
                     if (!empty($childFieldData)) {
@@ -805,11 +802,8 @@ class DataHandler
                     $this->setChildrenSchemaFields($key);
                 }
 
-                $newKey = sprintf(
-                    '%s%s',
-                    Config::CHILD_PRODUCT_FIELD_PREFIX,
-                    ucfirst($camelCaseKey)
-                );
+                $newKey = Config::CHILD_PRODUCT_FIELD_PREFIX.ucfirst($camelCaseKey);
+                
 
                 if (
                     in_array($key, [
@@ -845,10 +839,10 @@ class DataHandler
      */
     private function prepareFieldValues(array &$data)
     {
-        $optionTextPrefix = sprintf('%s_', AttributeHelper::OPTION_TEXT_PREFIX);
+        $optionTextPrefix = AttributeHelper::OPTION_TEXT_PREFIX.'_';
         foreach ($data as $key => $value) {
             $pureKey = str_replace($optionTextPrefix, '', $key);
-            $optionTextKey = sprintf('%s%s', $optionTextPrefix, $pureKey);
+            $optionTextKey = $optionTextPrefix.$pureKey;
             if (strpos($key, $optionTextPrefix) !== false) {
                 // field with option labels
                 if (!array_key_exists($pureKey, $data)) {
@@ -923,7 +917,7 @@ class DataHandler
      */
     private function buildProductUrl($urlKey, $storeId)
     {
-        $path = sprintf('%s%s', $urlKey, $this->getProductUrlSuffix($storeId));
+        $path = $urlKey.$this->getProductUrlSuffix($storeId);
         $url = $this->getStore($storeId)->getBaseUrl(UrlInterface::URL_TYPE_WEB,true) . $path;
         //$url = $this->getFrontendUrl($path);
         // check if use category path for product url
@@ -1044,5 +1038,6 @@ class DataHandler
         $this->dataFieldsMapping = [];
         $this->relatedEntityPreparedDataList = [];
         $this->categoryDataHandler->reset();
+        $this->imageDataHandler->reset();
     }
 }

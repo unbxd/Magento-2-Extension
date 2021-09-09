@@ -341,7 +341,7 @@ class AttributeHelper extends AbstractHelper
      */
     public function getIndexOptionsText(AttributeInterface $attribute, $storeId, array $optionIds)
     {
-        $mapperKey = sprintf("options_%s_%s", $attribute->getId(), $storeId);
+        $mapperKey = "options_". $attribute->getId()."_". $storeId;
 
         if (!isset($this->attributeMappers[$mapperKey])) {
             $this->attributeMappers[$mapperKey] = function ($optionId) use ($attribute, $storeId) {
@@ -362,7 +362,7 @@ class AttributeHelper extends AbstractHelper
      */
     public function getOptionTextFieldName($fieldName)
     {
-        return sprintf("%s_%s", self::OPTION_TEXT_PREFIX, $fieldName);
+        return self::OPTION_TEXT_PREFIX."_".$fieldName;
     }
 
     /**

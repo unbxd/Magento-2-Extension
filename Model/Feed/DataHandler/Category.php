@@ -149,7 +149,7 @@ class Category
                     }
 
                     $urlPart =  $urlKey;
-                    $path .= sprintf('%s|%s>', $urlPart, $name);
+                    $path .= $urlPart.'|'. $name.'>';
                     $tempPath .= '/';
                 }
                 if (!$skipRecord) {
@@ -230,7 +230,7 @@ class Category
                     }
 
                     $urlPart .= '/' . $urlKey;
-                    $path .= sprintf('%s|%s>', $urlPart, $name);
+                    $path .=  $urlPart.'|'. $name . '>';
                     $tempPath .= '/';
                 }
                 if (!$skipRecord) {
