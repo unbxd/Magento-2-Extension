@@ -11,6 +11,7 @@
  */
 namespace Unbxd\ProductFeed\Model\Feed;
 
+use Unbxd\ProductFeed\Helper\Feed;
 use Unbxd\ProductFeed\Model\Feed\DataHandlerFactory;
 use Unbxd\ProductFeed\Api\Data\FeedViewInterface;
 use Unbxd\ProductFeed\Model\FeedView;
@@ -28,6 +29,8 @@ use Unbxd\ProductFeed\Helper\Feed as FeedHelper;
 use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
 use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Magento\Framework\Event\ManagerInterface as EventManager;
+use Unbxd\ProductFeed\Helper\Data as ConfigHelper;
+use Unbxd\ProductFeed\Model\Feed\JsonStreamWriter;
 
 /**
  * Class Manager
@@ -166,6 +169,18 @@ class Manager
     private $loggerType = null;
 
     /**
+     * @var ConfigHelper
+     */
+    private $configHelper;
+
+    /**
+     * 
+     *
+     * @var JsonStreamWriter
+     */
+    private $jsonStreamWriter;
+
+    /**
      * Manager constructor.
      * @param \Unbxd\ProductFeed\Model\Feed\DataHandlerFactory $dataHandlerFactory
      * @param Profiler $profiler
@@ -176,8 +191,11 @@ class Manager
      * @param ConnectorFactory $connectorFactory
      * @param Serializer $serializer
      * @param EventManager $eventManager
+     * @param ConfigHelper $configHelper
      * @param LoggerInterface $logger
+     * @param JsonStreamWriter $jsonStreamWriter
      * @param null $loggerType
+     * 
      */
     public function __construct(
         DataHandlerFactory $dataHandlerFactory,
@@ -189,7 +207,9 @@ class Manager
         ConnectorFactory $connectorFactory,
         Serializer $serializer,
         EventManager $eventManager,
+        ConfigHelper $configHelper,
         LoggerInterface $logger,
+        JsonStreamWriter $jsonStreamWriter,
         $loggerType = null
     ) {
         $this->dataHandlerFactory = $dataHandlerFactory;
@@ -203,6 +223,8 @@ class Manager
         $this->eventManager = $eventManager;
         $this->logger = $logger->create($loggerType);
         $this->loggerType = $loggerType;
+        $this->configHelper=$configHelper;
+        $this->jsonStreamWriter = $jsonStreamWriter;
         $this->setIsNeedToArchive(true);
     }
 
@@ -271,6 +293,7 @@ class Manager
         $this->setFeed($dataHandler->getFullFeed());
         $dataHandler->reset();
 
+        $index=[];
         return $this;
     }
 
@@ -286,8 +309,7 @@ class Manager
     public function executeForDownload($index, $store = null)
     {
         $this->initExecute($index, $store)
-            ->serializeFeed()
-            ->writeFeed(
+            ->serializeAndWriteFeed(
                 [
                     'subDir' => FeedFileManager::DEFAULT_SUB_DIR_FOR_DOWNLOAD,
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store)
@@ -332,8 +354,7 @@ class Manager
 
         $this->startProfiler()
             ->initExecute($index, $store)
-            ->serializeFeed()
-            ->writeFeed(
+            ->serializeAndWriteFeed(
                 [
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store)
                 ]
@@ -348,6 +369,111 @@ class Manager
     }
 
     /**
+     * @param array $fileParameters
+     * @return $this
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
+    public function serializeAndWriteFeed($fileParameters = []){
+
+        if($this->configHelper->getEnableSerialization()){
+            if (!empty($fileParameters)) {
+                $fileManager = $this->getFileManager($fileParameters);
+            } else {
+                $fileManager = $this->getFileManager();
+            }
+
+            // remove related old file(s) if exists
+            if ($fileManager->isExist()) {
+                $fileManager->deleteAffectedFiles();
+            }
+            try {
+                $feedObj = $this->getFeed();
+                $feed=$feedObj["feed"];
+                $fileManager->openStream();
+                $startMemory = memory_get_usage();
+                echo $startMemory."<br>\n";
+                $this->jsonStreamWriter->openJsonObject($fileManager)->setAttribute(FeedConfig::FEED_FIELD_KEY,$fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_FIELD_KEY,$fileManager)->openJsonObject($fileManager);
+                $firstItemInJSON = false;
+                if(array_key_exists(FeedConfig::SCHEMA_FIELD_KEY,$feed["catalog"])) {
+                    $this->jsonStreamWriter->setAttribute( FeedConfig::SCHEMA_FIELD_KEY,$fileManager)->openArray($fileManager);
+                    foreach ($feed["catalog"]["schema"] as $index => $value) {
+                        if ($index == 0) {
+                            $this->jsonStreamWriter->pushFirstItem($value,$fileManager);
+                        } else {
+                            $this->jsonStreamWriter->pushItem($value,$fileManager);
+                        }
+                    }
+                    $this->jsonStreamWriter->closeArray($fileManager);
+                    $firstItemInJSON=true;
+                }
+
+                if(array_key_exists(FeedConfig::OPERATION_TYPE_ADD,$feed["catalog"])){
+                    if($firstItemInJSON) {
+                        $this->jsonStreamWriter->nextItem($fileManager);
+                    }
+                    $this->jsonStreamWriter->setAttribute(FeedConfig::OPERATION_TYPE_ADD,$fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_ITEMS_FIELD_KEY,$fileManager)->openArray($fileManager);
+                    foreach ($feed["catalog"]["add"]["items"] as $index => $value) {
+                        if ($index == 0) {
+                            $this->jsonStreamWriter->pushFirstItem($value,$fileManager);
+                        } else {
+                            $this->jsonStreamWriter->pushItem($value,$fileManager);
+                        }
+                    }
+                    $this->jsonStreamWriter->closeArray($fileManager)->closeJsonObject($fileManager);
+                    $firstItemInJSON=true;
+                }
+                if(array_key_exists(FeedConfig::OPERATION_TYPE_UPDATE,$feed["catalog"])){
+                    if($firstItemInJSON) {
+                        $this->jsonStreamWriter->nextItem($fileManager);
+                    }
+                    $this->jsonStreamWriter->setAttribute(FeedConfig::OPERATION_TYPE_UPDATE,$fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_ITEMS_FIELD_KEY,$fileManager)->openArray($fileManager);
+                    foreach ($feed["catalog"]["update"]["items"] as $index => $value) {
+                        if ($index == 0) {
+                            $this->jsonStreamWriter->pushFirstItem($value,$fileManager);
+                        } else {
+                            $this->jsonStreamWriter->pushItem($value,$fileManager);
+                        }
+                    }
+                    $this->jsonStreamWriter->closeArray($fileManager)->closeJsonObject($fileManager);
+                    $firstItemInJSON=true;
+                }
+                if(array_key_exists(FeedConfig::OPERATION_TYPE_DELETE,$feed["catalog"])){
+                    if($firstItemInJSON) {
+                        $this->jsonStreamWriter->nextItem($fileManager);
+                    }
+                    $this->jsonStreamWriter->setAttribute(FeedConfig::OPERATION_TYPE_DELETE,$fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_ITEMS_FIELD_KEY,$fileManager)->openArray($fileManager);
+                    foreach ($feed["catalog"]["delete"]["items"] as $index => $value) {
+                        if ($index == 0) {
+                            $this->jsonStreamWriter->pushFirstItem($value,$fileManager);
+                        } else {
+                            $this->jsonStreamWriter->pushItem($value,$fileManager);
+                        }
+                    }
+                    $this->jsonStreamWriter->closeArray($fileManager)->closeJsonObject($fileManager);
+                    $firstItemInJSON=true;
+                }
+                $this->jsonStreamWriter->closeJsonObject($fileManager)->closeJsonObject($fileManager)->closeJsonObject($fileManager);
+                echo "Stream Serialise Feed Current Memory ::".memory_get_usage()." with difference ". (memory_get_usage() - $startMemory)."<br>\n";
+                
+            } catch (\Exception $e) {
+                $this->logger->critical($e);
+                $this->postProcessActions();
+                return $this;
+            }finally{
+                $fileManager->closeStream();
+            }
+            if ($this->getIsNeedToArchive()) {
+                $this->archiveFeedFile();
+            }
+        }else{
+            $this->serializeFeed()->writeFeed($fileParameters);
+        }
+            return $this;
+
+    }
+    
+
+    /**
      * Serialize formed feed content
      *
      * @return $this
@@ -359,7 +485,10 @@ class Manager
 
         if ($feed = $this->getFeed()) {
             try {
+                $startMemory = memory_get_usage();
+                echo $startMemory."<br>\n";
                 $serializedFeed = $this->serializer->serializeToJson($feed);
+                echo "Serialise Feed Current Memory ::".memory_get_usage()." with difference ". (memory_get_usage() - $startMemory)."<br>\n";
                 $this->setFeed($serializedFeed);
             } catch (\Exception $e) {
                 $this->logger->critical($e);

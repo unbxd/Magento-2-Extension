@@ -92,6 +92,9 @@ class FileManager
      */
     private $isConvertedToArchive = false;
 
+
+    private $stream;
+
     /**
      * FileManager constructor.
      * @param Filesystem $filesystem
@@ -127,6 +130,25 @@ class FileManager
             );
         $this->allowedMimeTypes = array_unique(array_merge($this->defaultMimeTypes, array_values($allowedMimeTypes)));
         $this->dir = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
+    }
+
+    public function openStream(){
+        $this->stream = $this->dir->openFile($this->getFilePath(), 'a');
+        $this->stream->lock();
+    }
+
+    public function closeStream(){
+        $this->stream->unlock();
+        $this->stream->close();
+    }
+
+    public function writeStream($string){
+        $splitString = str_split($string, 1024 * 4);
+		if (!empty($splitString)) {
+			foreach ($splitString as $partString) {
+				$this->stream->write($partString);
+			}
+		}
     }
 
     /**

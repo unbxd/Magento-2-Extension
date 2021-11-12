@@ -96,6 +96,11 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_MANUAL_SYNCHRONIZATION_ENABLED = 'unbxd_catalog/actions/enabled';
 
     /**
+     * Feed Settings
+     */
+    const XML_PATH_CATALOG_FEED_STREAMING_ENABLED = 'unbxd_catalog/feed/enable_stream_serialization';
+
+    /**
      * @var ConfigInterface
      */
     private $configInterface;
@@ -258,6 +263,20 @@ class Data extends AbstractHelper
     {
         return trim($this->scopeConfig->getValue(
             self::XML_PATH_SETUP_SECRET_KEY,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        ));
+    }
+
+    /**
+     *
+     * @param null $store
+     * @return mixed
+     */
+    public function getEnableSerialization($store = null){
+        
+        return trim($this->scopeConfig->getValue(
+            self::XML_PATH_CATALOG_FEED_STREAMING_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
         ));
