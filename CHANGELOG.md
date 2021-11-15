@@ -1,4 +1,6 @@
-# Version 1.0.87
+# Version 1.0.88
+## 1.0.88 - Nov 15, 2021
+- Created Stream serialization to json encode data in product feed.
 ## 1.0.87 - Aug 18, 2021
 - Created config option to retain root category in category path attribute
 ## 1.0.86 - Jul 29, 2021
