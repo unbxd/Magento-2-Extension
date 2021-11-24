@@ -1,4 +1,6 @@
-# Version 1.0.88
+# Version 1.0.89
+## 1.0.89 - Nov 24, 2021
+- Created config option at product attribute level to determine wheather to use value id or option value label. Default is to use option value label.
 ## 1.0.88 - Nov 15, 2021
 - Created Stream serialization to json encode data in product feed.
 ## 1.0.87 - Aug 18, 2021
