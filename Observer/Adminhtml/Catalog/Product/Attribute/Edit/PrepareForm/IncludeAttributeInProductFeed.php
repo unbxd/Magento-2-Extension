@@ -107,6 +107,20 @@ class IncludeAttributeInProductFeed implements ObserverInterface
                 '^'
             );
 
+            $fieldset->addField(
+                'use_value_id',
+                'select',
+                [
+                    'name'   => 'use_value_id',
+                    'label'  => __('Use value id instead of option value'),
+                    'title'  => __('Use value id instead of option value'),
+                    'note' => __('For attributes with option value , the value id will be sent in feed.'),
+                    'values' => $this->yesNo->toOptionArray(),
+                ],
+                '^'
+            );
+
+
         }
 
         return $this;

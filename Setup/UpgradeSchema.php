@@ -284,6 +284,27 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if (
             $installer->tableExists($catalogEavAttributeTable)
             && !$installer->getConnection()->tableColumnExists(
+                $catalogEavAttributeTable, 'use_value_id'
+            )
+        ) {
+            $installer->getConnection()
+                ->addColumn(
+                    $catalogEavAttributeTable,
+                    'use_value_id',
+                    [
+                        'type' => Table::TYPE_SMALLINT,
+                        'nullable' => true,
+                        'unsigned' => true,
+                        'length' => 1,
+                        'default' => 0,
+                        'comment' => 'Use value id instead of option value',
+                    ]
+                );
+        }
+
+        if (
+            $installer->tableExists($catalogEavAttributeTable)
+            && !$installer->getConnection()->tableColumnExists(
                 $catalogEavAttributeTable, 'unbxd_field_type'
             )
         ) {

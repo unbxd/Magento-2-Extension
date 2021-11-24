@@ -298,7 +298,8 @@ class AttributeHelper extends AbstractHelper
         $value = array_values($value);
         $values[$attributeCode] = $value;
 
-        if ($attribute->usesSource()) {
+        
+        if (!$attribute->getData("use_value_id",false) && $attribute->usesSource()) {
             $optionTextFieldName = $this->getOptionTextFieldName($attributeCode);
             $optionTextValues = $this->getIndexOptionsText($attribute, $storeId, $value);
             $this->normalizeOptionTextValues($optionTextValues);
