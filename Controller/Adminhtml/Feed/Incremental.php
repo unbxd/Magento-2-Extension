@@ -59,6 +59,9 @@ class Incremental extends FeedActionIndex
 
                 try {
                     $this->feedManager->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL);
+                    $responseContent = [
+                        'message' => __("Incremental indexing submitted Succesfully")
+                    ];
                 } catch (\Exception $e) {
                     $responseContent = [
                         'errors' => true,

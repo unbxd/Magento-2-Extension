@@ -391,7 +391,7 @@ class Manager
                 $feed=$feedObj["feed"];
                 $fileManager->openStream();
                 $startMemory = memory_get_usage();
-                echo $startMemory."<br>\n";
+                $this->logger->info("Start Memory Usuage".$startMemory."<br>\n");
                 $this->jsonStreamWriter->openJsonObject($fileManager)->setAttribute(FeedConfig::FEED_FIELD_KEY,$fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_FIELD_KEY,$fileManager)->openJsonObject($fileManager);
                 $firstItemInJSON = false;
                 if(array_key_exists(FeedConfig::SCHEMA_FIELD_KEY,$feed["catalog"])) {
@@ -453,7 +453,7 @@ class Manager
                     $firstItemInJSON=true;
                 }
                 $this->jsonStreamWriter->closeJsonObject($fileManager)->closeJsonObject($fileManager)->closeJsonObject($fileManager);
-                echo "Stream Serialise Feed Current Memory ::".memory_get_usage()." with difference ". (memory_get_usage() - $startMemory)."<br>\n";
+                $this->logger->info("Stream Serialise Feed Current Memory ::".memory_get_usage()." with difference ". (memory_get_usage() - $startMemory)."<br>\n");
                 
             } catch (\Exception $e) {
                 $this->logger->critical($e);
