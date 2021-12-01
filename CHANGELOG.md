@@ -1,4 +1,6 @@
-# Version 1.0.89
+# Version 1.0.90
+## 1.0.90 - Dec 1, 2021
+- Fixed the incremental indexing option from console.
 ## 1.0.89 - Nov 24, 2021
 - Created config option at product attribute level to determine wheather to use value id or option value label. Default is to use option value label.
 ## 1.0.88 - Nov 15, 2021
