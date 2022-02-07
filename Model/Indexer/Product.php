@@ -11,21 +11,21 @@
  */
 namespace Unbxd\ProductFeed\Model\Indexer;
 
+use Magento\Framework\Indexer\Dimension;
+use Magento\Framework\Indexer\DimensionFactory;
 use Magento\Framework\Indexer\IndexerRegistry;
-use Unbxd\ProductFeed\Model\Indexer\Product\Full\Action\Full as FullAction;
-use Unbxd\ProductFeed\Model\IndexingQueue;
-use Unbxd\ProductFeed\Model\IndexingQueue\Handler as QueueHandler;
-use Unbxd\ProductFeed\Model\Feed\Manager as FeedManager;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Helper\ProductHelper;
 use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Unbxd\ProductFeed\Logger\OptionsListConstants;
-use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\Message\ManagerInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Magento\Framework\Indexer\Dimension;
-use Magento\Framework\Indexer\DimensionFactory;
+use Unbxd\ProductFeed\Model\Feed\Manager as FeedManager;
+use Unbxd\ProductFeed\Model\Indexer\Product\Full\Action\Full as FullAction;
+use Unbxd\ProductFeed\Model\IndexingQueue;
+use Unbxd\ProductFeed\Model\IndexingQueue\Handler as QueueHandler;
 
 /**
  * Class Product
@@ -145,37 +145,63 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
     {
         /* // check if authorization credentials were provided
         if (!$this->helperData->isAuthorizationCredentialsSetup()) {
-            $message = 'Please check authorization credentials to perform this operation.';
-            $this->logger->error($message);
-            // for console action(s)
-            if (php_sapi_name() === 'cli') {
-                $this->consoleOutput->writeln("<error>{$message}</error>");
-                return false;
-            }
-            // for frontend action(s)
-            $this->messageManager->addWarningMessage(__($message));
-            return false;
+        $message = 'Please check authorization credentials to perform this operation.';
+        $this->logger->error($message);
+        // for console action(s)
+        if (php_sapi_name() === 'cli') {
+        $this->consoleOutput->writeln("<error>{$message}</error>");
+        return false;
+        }
+        // for frontend action(s)
+        $this->messageManager->addWarningMessage(__($message));
+        return false;
         } */
 
         // detect reindex action type
         $reindexType = IndexingQueue::TYPE_REINDEX_ROW;
-        if (empty($ids)) {
-            // full reindex (clean index, save new index)
-            $reindexType = IndexingQueue::TYPE_REINDEX_FULL;
-        }
-        if (count($ids) > 1) {
-            // list reindex (delete index record(s), save index record(s))
-            $reindexType = IndexingQueue::TYPE_REINDEX_LIST;
-        }
-
-        if ($reindexType == IndexingQueue::TYPE_REINDEX_FULL) {
-            $this->executeAction($ids, $reindexType, 1);
-        } else {
-            // for each store only in case if row or list reindex
-            foreach ($this->getDimensions() as $dimension) {
-                /** @var Dimension $dimension */
-                $this->executeAction($ids, $reindexType, $dimension->getValue());
+        if (!empty($ids)) {
+            if (count($ids) > 1) {
+                // list reindex (delete index record(s), save index record(s))
+                $reindexType = IndexingQueue::TYPE_REINDEX_LIST;
             }
+            $this->executePerDimension($ids, $reindexType);
+        } else {
+            $unbxdIndexer = $this->indexerRegistry->get('unbxd_products');
+            $unbxdIndexerView = $unbxdIndexer->getView();
+            $state = $unbxdIndexerView->getState();
+            $changelog = $unbxdIndexerView->getChangelog();
+            /** The state version would be same as that of chanelog version as executed from suspend method */
+            //$fromVersion = $state->getVersionId();
+            $toVersion = $changelog->getVersion();
+            $vsTo = $toVersion;
+            $vsFrom = max(1, $vsTo - 5000);
+            while ($vsFrom > 0) {
+
+                $ids = $changelog->getList($vsFrom, $vsTo);
+
+                // We run the actual indexer in batches.
+                // Chunked AFTER loading to avoid duplicates in separate chunks.
+                $chunks = array_chunk($ids, 1000);
+                foreach ($chunks as $ids) {
+                    $this->executePerDimension($ids, IndexingQueue::TYPE_REINDEX_LIST);
+                }
+                $vsTo = $vsFrom;
+                if ($vsFrom > 1 || !empty($ids)) {
+                    $vsFrom = max(1, $vsTo - 5000);
+                } else {
+                    $vsFrom = -1;
+                }
+            }
+            $changelog->clear($toVersion);
+        }
+    }
+
+    private function executePerDimension($ids, $reindexType)
+    {
+        // for each store only in case if row or list reindex
+        foreach ($this->getDimensions() as $dimension) {
+            /** @var Dimension $dimension */
+            $this->executeAction($ids, $reindexType, $dimension->getValue());
         }
     }
 
@@ -194,12 +220,13 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
         // or via separate cli command - php bin/magento unbxd:product-feed:full (or incremental if it's related
         // with separate products), so to prevent duplicate full catalog synchronization we just omit this operation.
         // NOTE*: empty ids means that the full catalog product must be reindex.
+        if (!$this->helperData->isAuthorizationCredentialsSetup($storeId)) {
+            return false;
+        }
         if (empty($ids) && (php_sapi_name() === 'cli')) {
             return true;
         }
-        if (!$this->helperData->isAuthorizationCredentialsSetup($storeId)){
-            return false;
-        }
+
         // check if in indexing queue enabled
         if (!$this->helperData->isIndexingQueueEnabled($storeId)) {
             try {
@@ -243,7 +270,9 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
      */
     public function executeList(array $ids)
     {
-        $this->execute($ids);
+        if (!empty($ids)) {
+            $this->execute($ids);
+        }
     }
 
     /**

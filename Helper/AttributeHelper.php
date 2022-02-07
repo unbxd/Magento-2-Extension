@@ -142,6 +142,8 @@ class AttributeHelper extends AbstractHelper
     {
         if ($type = $attribute->getData("unbxd_field_type")){
             return $type;
+        }else if($attribute->getData("use_value_id",false)){
+            return FeedConfig::FIELD_TYPE_NUMBER;
         }
         $type = FeedConfig::FIELD_TYPE_TEXT;
         if ($this->isFieldBool($attribute)) {

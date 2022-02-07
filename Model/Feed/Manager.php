@@ -387,9 +387,9 @@ class Manager
                 $fileManager->deleteAffectedFiles();
             }
             try {
+                $fileManager->openStream();
                 $feedObj = $this->getFeed();
                 $feed=$feedObj["feed"];
-                $fileManager->openStream();
                 $startMemory = memory_get_usage();
                 $this->logger->info("Start Memory Usuage".$startMemory."<br>\n");
                 $this->jsonStreamWriter->openJsonObject($fileManager)->setAttribute(FeedConfig::FEED_FIELD_KEY,$fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_FIELD_KEY,$fileManager)->openJsonObject($fileManager);
