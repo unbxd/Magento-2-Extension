@@ -1,4 +1,6 @@
-# Version 1.0.90
+# Version 1.0.91
+## 1.0.91 - Feb 7, 2022
+- Updated Unbxd magento indexer to pull products id which are updated  between sucessive runs
 ## 1.0.90 - Dec 1, 2021
 - Fixed the incremental indexing option from console.
 ## 1.0.89 - Nov 24, 2021
