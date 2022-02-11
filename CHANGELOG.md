@@ -1,4 +1,6 @@
-# Version 1.0.91
+# Version 1.0.92
+## 1.0.92 - Feb 7, 2022
+- Updated unbxd magento indexer options to remove duplicate listeners in mview definition.
 ## 1.0.91 - Feb 7, 2022
 - Updated Unbxd magento indexer to pull products id which are updated  between sucessive runs
 ## 1.0.90 - Dec 1, 2021

@@ -448,6 +448,7 @@ class CronManager
                 IndexingQueueInterface::STATUS . ' not in  (?)' => [IndexingQueue::STATUS_PENDING, IndexingQueue::STATUS_ERROR],
                 IndexingQueueInterface::FINISHED_AT . ' < ?' => $to,
             ];
+            
             $this->indexingQueueRepository->deleteIndexQueueRecords($where);
             $this->logger->info(sprintf('Completed archiving job queues older than 5 days'));
         } catch (\CouldNotDeleteException $e) {
