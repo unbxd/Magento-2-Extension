@@ -1,4 +1,6 @@
-# Version 1.0.93
+# Version 1.0.94
+## 1.0.94 - Feb 17, 2022
+- Experiement feature to fetch from Category Entity Tables launched as seperate tag
 ## 1.0.93 - Feb 17, 2022
 - Handle disabled category inclusion n product feed as a configurable option
 - Fix for Delete product action
