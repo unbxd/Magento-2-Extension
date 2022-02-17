@@ -452,8 +452,10 @@ class DataHandler
                     }else if (isset($data[Config::FIELD_KEY_VISIBILITY]) && !empty($data[Config::FIELD_KEY_VISIBILITY]) && ((is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == "Not Visible Individually" || $this->getVisibilityTypeLabel($data[Config::FIELD_KEY_VISIBILITY][0]) == "Not Visible Individually")) {
                         continue;
                     }
+
+                    echo isset($data[Config::getPreparedKey()]);
                     // prepare data fields for needed requirements
-                    if (!isset($data[Config::getPreparedKey()])) {
+                    if ((!array_key_exists('action', $data) || trim($data['action']) != Config::OPERATION_TYPE_DELETE) && !isset($data[Config::getPreparedKey()])) {
                         $this->prepareFields($data, $store);
                     }
 
