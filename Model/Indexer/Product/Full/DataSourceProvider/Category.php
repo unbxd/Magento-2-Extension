@@ -81,7 +81,7 @@ class Category implements DataSourceProviderInterface
                 $categoryDataRow['position'] = (int) $categoryDataRow['position'];
             }
 
-            $indexData[$productId]['category'][] = array_filter($categoryDataRow);
+            $indexData[$productId]['category'][] = array_filter($categoryDataRow,'Unbxd\\ProductFeed\\Helper\\HelperUtil::_nonNull');
 
             if (!in_array('category', $indexedFields)) {
                 $indexedFields[] = 'category';
@@ -92,4 +92,6 @@ class Category implements DataSourceProviderInterface
 
         return $indexData;
     }
+
+    
 }

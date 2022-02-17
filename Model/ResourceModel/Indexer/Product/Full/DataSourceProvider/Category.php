@@ -136,6 +136,7 @@ class Category extends Indexer
                 $categoryDataRow['name'] = $storeCategoryData[$id]['name'];
                 $categoryDataRow['url_key'] = $storeCategoryData[$id]['url_key'];
                 $categoryDataRow['url_path'] = $storeCategoryData[$id]['url_path'];
+                $categoryDataRow['is_active'] = $storeCategoryData[$id]['is_active'];
             }else{
                 unset($categoryData[$key]);
             }
@@ -299,11 +300,9 @@ class Category extends Indexer
                 if (!$categoryId) {
                     continue;
                 }
-                if (isset($row["is_active"]) && $row["is_active"]) {
+               
                     $this->categoryDataCache[$storeId][$categoryId] = $row;
-                } else {
-                    $this->logger->info($categoryId . "is disabled , hence will not be updated in product feed");
-                }
+                
             }
         }
 

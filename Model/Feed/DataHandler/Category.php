@@ -84,6 +84,7 @@ class Category
             $this->rootCategoryId = $this->storeManager->getStore($store)->getRootCategoryId();
         }
         $result = [];
+        $retainInactiveCategory = $this->helperData->retainInActiveCategories($store);
         foreach ($categoryData as $data) {
             $categoryId = isset($data['category_id']) ? (int) $data['category_id'] : null;
             // try to retrieve category list data from cache
@@ -118,11 +119,14 @@ class Category
                 $urlPart = '';
                 $tempPath = '';
                 foreach ($pathData as $urlKey) {
+                    $name=null;
                     $tempPath .= $urlKey;
                     $key = array_search($urlKey, array_column($categoryData, 'category_id'));
                     //$name = ucwords(trim(str_replace('-', ' ', strtolower($urlKey))));
-                    if ($key !== false && isset($categoryData[$key]['name'])) {
+                    if ($key !== false && isset($categoryData[$key]['name']) ) {
+                        if((isset($categoryData[$key]['is_active']) && $categoryData[$key]['is_active']) || $retainInactiveCategory){
                         $name = trim($categoryData[$key]['name']);
+                        }
                     } else {
                         try {
                             if (!in_array($tempPath, $this->missingCategoryPath)) {
@@ -131,8 +135,12 @@ class Category
                                 $category = [];
                             }
                             if (!empty($category)) {
-                                $name = $category->getName();
-                                $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
+                                if($category->getIsActive() || $retainInactiveCategory){
+                                    $name = $category->getName();
+                                    $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
+                                }else{
+                                    $this->logger->info("Skipping disabled category   with category ID " . $category->getId() . " for entityID- " . $entity_id);
+                                }
                             } else {
                                 $this->logger->error("Unable to find category path -" . $tempPath . " for entityID- " . $entity_id);
                                 $this->missingCategoryPath[] = $tempPath;
@@ -147,12 +155,13 @@ class Category
 
                         }
                     }
-
+                    if($name){
                     $urlPart =  $urlKey;
                     $path .= $urlPart.'|'. $name.'>';
+                    }
                     $tempPath .= '/';
                 }
-                if (!$skipRecord) {
+                if (!$skipRecord && $path) {
                     $pathString = rtrim(trim($path, '>'), '/');
                     $result[] = $pathString;
 
@@ -167,6 +176,7 @@ class Category
 
     private function buildCategoryPathList($categoryData,$store,$entity_id){
         $result = [];
+        $retainInactiveCategory = $this->helperData->retainInActiveCategories($store);
         foreach ($categoryData as $data) {
             $categoryId = isset($data['category_id']) ? (int) $data['category_id'] : null;
             // try to retrieve category list data from cache
@@ -202,8 +212,12 @@ class Category
                     $tempPath .= $urlKey;
                     $key = array_search($tempPath, array_column($categoryData, 'url_path'));
                     //$name = ucwords(trim(str_replace('-', ' ', strtolower($urlKey))));
-                    if ($key !== false && isset($categoryData[$key]['name'])) {
+                    if ($key !== false && isset($categoryData[$key]['name'])){
+                        if((isset($categoryData[$key]['is_active']) && $categoryData[$key]['is_active']) || $retainInactiveCategory){
                         $name = trim($categoryData[$key]['name']);
+                        }else{
+                            $name="";
+                        }
                     } else {
                         try {
                             if (!in_array($tempPath, $this->missingCategoryPath)) {
@@ -212,8 +226,13 @@ class Category
                                 $category = [];
                             }
                             if (!empty($category)) {
-                                $name = $category->getName();
-                                $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
+                                if($category->getIsActive() || $retainInactiveCategory){
+                                    $name = $category->getName();
+                                    $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
+                                }else{
+                                    $name="";
+                                    $this->logger->info("Skipping disabled category   with category ID " . $category->getId() . " for entityID- " . $entity_id);
+                                }
                             } else {
                                 $this->logger->error("Unable to find category path -" . $tempPath . " for entityID- " . $entity_id);
                                 $this->missingCategoryPath[] = $tempPath;
@@ -229,11 +248,13 @@ class Category
                         }
                     }
 
+                    if($name){
                     $urlPart .= '/' . $urlKey;
                     $path .=  $urlPart.'|'. $name . '>';
+                    }
                     $tempPath .= '/';
                 }
-                if (!$skipRecord) {
+                if (!$skipRecord && $path) {
                     $pathString = rtrim(trim($path, '>'), '/');
                     $result[] = $pathString;
 
