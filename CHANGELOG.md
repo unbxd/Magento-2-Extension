@@ -1,4 +1,7 @@
-# Version 1.0.92
+# Version 1.0.93
+## 1.0.93 - Feb 17, 2022
+- Handle disabled category inclusion n product feed as a configurable option
+- Fix for Delete product action
 ## 1.0.92 - Feb 7, 2022
 - Updated unbxd magento indexer options to remove duplicate listeners in mview definition.
 ## 1.0.91 - Feb 7, 2022
