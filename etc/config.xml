@@ -37,6 +37,7 @@
                 <check_latest_version_update>0</check_latest_version_update>
                 <use_categoryid_insteadof_path>0</use_categoryid_insteadof_path>
                 <retain_inactive_category>0</retain_inactive_category>
+                <fetch_from_category_tables>0</fetch_from_category_tables>
                 <retain_root_category>0</retain_root_category>
             </general>
             <images>

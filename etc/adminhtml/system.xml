@@ -111,15 +111,21 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Use Category ID in the feed instead of path (will result in 2|Root Category) ]]></comment>
                 </field>
+                
                  <field id="retain_inactive_category" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Retain Disabled Category</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Retain Disabled Category in the category path<]]></comment>
+                    <comment><![CDATA[Retain Disabled Category in the category path]]></comment>
                 </field>
                 <field id="retain_root_category" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Retain Root Category</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Retain Root Category in Category path]]></comment>
+                </field>
+                <field id="fetch_from_category_tables" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Fetch from Category Entity Tables</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Fetch from Category Entity Tables, instead of using the index tables, (experiemental for those customers where category index tables are not consistently updated.(Note:  enabling this feature could result in longer processing time v/s category data accuracy fetched from eav tables.)]]></comment>
                 </field>
             </group>
             <group id="images" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">

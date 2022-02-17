@@ -61,6 +61,7 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     const XML_PATH_CATALOG_VERSION_CHECK = 'unbxd_catalog/general/check_latest_version_update';
+    const XML_PATH_FETCH_FROM_CATEGORY_TABLES = 'unbxd_catalog/general/fetch_from_category_tables';
     const XML_PATH_USE_CATEGORY_ID = 'unbxd_catalog/general/use_categoryid_insteadof_path';
     const XML_PATH_RETAIN_INACTIVE_CATEGORY = 'unbxd_catalog/general/retain_inactive_category';
     const XML_PATH_RETAIN_ROOT_CATEGORY = 'unbxd_catalog/general/retain_root_category';
@@ -487,6 +488,21 @@ class Data extends AbstractHelper
             $store
         );
     }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function fetchFromCategoryTable($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_FETCH_FROM_CATEGORY_TABLES,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    
 
     /**
      * @param null $store
