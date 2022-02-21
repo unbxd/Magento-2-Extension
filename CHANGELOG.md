@@ -1,4 +1,6 @@
-# Version 1.0.94
+# Version 1.0.95
+## 1.0.95 - Feb 21, 2022
+- Customers in a multi site setup using  path for categories lookup results in incorrect category mapping when default store is not set properly.
 ## 1.0.94 - Feb 17, 2022
 - Experiement feature to fetch from Category Entity Tables launched as seperate tag
 ## 1.0.93 - Feb 17, 2022
