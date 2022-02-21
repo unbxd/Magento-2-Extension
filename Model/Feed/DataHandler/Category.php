@@ -208,7 +208,10 @@ class Category
                 $path = '';
                 $urlPart = '';
                 $tempPath = '';
+                $categoryLevels = count($pathData);
+                $categoryLevelIndex = 0;
                 foreach ($pathData as $urlKey) {
+                    $categoryLevelIndex++;
                     $tempPath .= $urlKey;
                     $key = array_search($tempPath, array_column($categoryData, 'url_path'));
                     //$name = ucwords(trim(str_replace('-', ' ', strtolower($urlKey))));
@@ -222,6 +225,11 @@ class Category
                         try {
                             if (!in_array($tempPath, $this->missingCategoryPath)) {
                                 $category = $this->categoryFactory->create()->setStoreId($store)->loadByAttribute('url_path', $tempPath);
+                                if(empty($category) && isset($data['id_path'])){
+                                    $urlKeyList = explode("/",trim($data['id_path']));
+                                    $categoryLookupPath = implode("/",array_slice($urlKeyList,0,(count($urlKeyList)-($categoryLevels-$categoryLevelIndex))));
+                                    $category = $this->categoryFactory->create()->setStoreId($store)->loadByAttribute('path', $categoryLookupPath);
+                                }
                             } else {
                                 $category = [];
                             }
