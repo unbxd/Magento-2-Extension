@@ -1,4 +1,6 @@
-# Version 1.0.92
+# Version 1.0.92.1
+## 1.0.92.1 - Mar 15, 2022
+- Updated indexer to support dynamic schema definition for attributes.
 ## 1.0.92 - Feb 7, 2022
 - Updated unbxd magento indexer options to remove duplicate listeners in mview definition.
 ## 1.0.91 - Feb 7, 2022
