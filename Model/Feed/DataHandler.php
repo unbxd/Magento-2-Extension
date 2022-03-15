@@ -365,7 +365,9 @@ class DataHandler
                 $fieldData['dataType']='link';
             }
             // convert to needed format
+            if(!strpos($fieldData['fieldName'],"*")){
             $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);
+            }
         }
         // process child fields
         $this->appendChildFieldsToSchema($indexedFields);
