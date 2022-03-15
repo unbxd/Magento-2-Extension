@@ -186,7 +186,7 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
                     $this->executePerDimension($ids, IndexingQueue::TYPE_REINDEX_LIST);
                 }
                 $vsTo = $vsFrom;
-                if ($vsFrom > 1 || !empty($ids)) {
+                if ($vsFrom > 1 && !empty($ids)) {
                     $vsFrom = max(1, $vsTo - 5000);
                 } else {
                     $vsFrom = -1;
