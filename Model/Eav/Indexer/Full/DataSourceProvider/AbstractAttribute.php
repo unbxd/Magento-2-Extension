@@ -61,6 +61,12 @@ abstract class AbstractAttribute
     /**
      * @var array
      */
+
+    protected $skipChildProductValuesForAttribute = [];
+
+    /**
+     * @var array
+     */
     protected $indexedFields = [];
 
     protected $logger;
@@ -221,6 +227,9 @@ abstract class AbstractAttribute
             if ($this->canIndexAttribute($attribute)) {
                 $attributeId = (int) $attribute->getId();
                 $this->attributesById[$attributeId] = $attribute;
+                if ($attribute->getData('consider_attribute_onlyat_parent',false)){
+                    $this->skipChildProductValuesForAttribute[] = $attribute->getAttributeCode();
+                }
                 $this->attributeIdsByTable[$attribute->getBackendTable()][] = $attributeId;
                 // collect attributes fields (use in feed operation)
                 $this->initFields($attribute);

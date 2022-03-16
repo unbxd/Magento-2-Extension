@@ -318,6 +318,24 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 );
         }
 
+        if (
+            $installer->tableExists($catalogEavAttributeTable)
+            && !$installer->getConnection()->tableColumnExists(
+                $catalogEavAttributeTable, 'consider_attribute_onlyat_parent'
+            )
+        ) {
+            $installer->getConnection()
+                ->addColumn(
+                    $catalogEavAttributeTable,
+                    'consider_attribute_onlyat_parent',
+                    [
+                        'type' => Table::TYPE_BOOLEAN,
+                        'nullable' => true,
+                        'comment' => 'Do not rollup child attribute values in composite product.',
+                    ]
+                );
+        }
+
         // add fields which link re-index operation with synchronization process and vice versa
         if (version_compare($context->getVersion(), '1.0.40', '<')) {
             $indexingQueueColumnName = 'feed_view_id';
