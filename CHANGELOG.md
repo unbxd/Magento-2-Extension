@@ -1,4 +1,6 @@
-# Version 1.0.87
+# Version 1.0.87.1
+## 1.0.87.1 - Mar 16, 2022
+- Introduced ability to turn of rolling up of attributes from child products to composite products
 ## 1.0.87 - Aug 18, 2021
 - Created config option to retain root category in category path attribute
 ## 1.0.86 - Jul 29, 2021
