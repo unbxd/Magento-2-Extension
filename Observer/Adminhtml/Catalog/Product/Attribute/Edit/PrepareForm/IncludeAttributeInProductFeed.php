@@ -69,6 +69,19 @@ class IncludeAttributeInProductFeed implements ObserverInterface
         $fieldset = $form->getElement('front_fieldset');
         if ($fieldset) {
             $fieldset->addField(
+                'consider_attribute_onlyat_parent',
+                'select',
+                [
+                    'name'   => 'consider_attribute_onlyat_parent',
+                    'label'  => __('Do not include child attribute values'),
+                    'title'  => __('Do not include child attribute values'),
+                    'note' => __('Do not rollup child attribute values in composite product.'),
+                    'values' => $this->yesNo->toOptionArray(),
+                ],
+                '^'
+            );
+            
+            $fieldset->addField(
                 'unbxd_multiselect_override',
                 'select',
                 [
@@ -119,7 +132,6 @@ class IncludeAttributeInProductFeed implements ObserverInterface
                 ],
                 '^'
             );
-
 
         }
 

@@ -14,6 +14,7 @@ namespace Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider;
 use Unbxd\ProductFeed\Model\Eav\Indexer\Full\DataSourceProvider\AbstractAttribute;
 use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Unbxd\ProductFeed\Helper\AttributeHelper;
 
 
 
@@ -169,11 +170,15 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
         );
 
         foreach ($addedChildAttributesData as $attributeCode => $value) {
+            $optionTextPrefix = sprintf('%s_', AttributeHelper::OPTION_TEXT_PREFIX);
+            $pureKey = str_replace($optionTextPrefix, '', $attributeCode);
+            if(is_array($value) && !in_array($attributeCode,$this->skipChildProductValuesForAttribute) && !in_array($pureKey,$this->skipChildProductValuesForAttribute)){
             if (!isset($parentData[$attributeCode])) {
                 $parentData[$attributeCode] = [];
             }
-
+            // Boolean type attributes are the possible non array value which is prevented from rolling up from child to parent
             $parentData[$attributeCode] = array_values(array_unique(array_merge($parentData[$attributeCode], $value)));
+            }
         }
     }
 
