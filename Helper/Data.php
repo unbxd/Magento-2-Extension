@@ -27,6 +27,7 @@ use Unbxd\ProductFeed\Model\FilterAttribute\FilterAttributeInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\App\ObjectManager;
 use Unbxd\ProductFeed\Model\Serializer;
+use Unbxd\ProductFeed\Logger\LoggerInterface;
 
 /**
  * Class Data
@@ -101,6 +102,11 @@ class Data extends AbstractHelper
     private $configInterface;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var ConfigWriter
      */
     private $configWriter;
@@ -150,6 +156,7 @@ class Data extends AbstractHelper
      * @param ProductTypes $productTypes
      * @param FilterAttributeProvider $filterAttributeProvider
      * @param TimezoneInterface $dateTime
+     * @param LoggerInterface $logger
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -160,7 +167,8 @@ class Data extends AbstractHelper
         ProductTypes $productTypes,
         FilterAttributeProvider $filterAttributeProvider,
         TimezoneInterface $dateTime,
-        Serializer $serializer
+        Serializer $serializer,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
         $this->configInterface = $configInterface;
@@ -171,6 +179,7 @@ class Data extends AbstractHelper
         $this->filterAttributeProvider = $filterAttributeProvider;
         $this->dateTime = $dateTime;
         $this->serializer = $serializer ?: ObjectManager::getInstance()->get(Serializer::class);
+        $this->logger = $logger->create("feed");
     }
 
     /**
@@ -514,9 +523,13 @@ class Data extends AbstractHelper
                     break;
                 case 'swatch_image':
                     $path = self::XML_PATH_IMAGES_SWATCH_IMAGE_ID;
-                    break;
+                    break;                    
             }
-            return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $store);
+            if($path){
+                return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $store);
+            }else{
+                $this->logger->warn("Image Type not mapped".$type );
+            }
         }
         return null;
     }
