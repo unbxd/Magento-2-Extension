@@ -1,4 +1,6 @@
-# Version 1.0.92.1
+# Version 1.0.92.2
+## 1.0.92.2 - Mar 26, 2022
+- Pending records in indexing queue will not be executed after a full index in the same job run.
 ## 1.0.92.1 - Mar 15, 2022
 - Updated indexer to support dynamic schema definition for attributes.
 ## 1.0.92 - Feb 7, 2022
