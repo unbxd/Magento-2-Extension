@@ -453,14 +453,10 @@ class DataHandler
                         continue;
                     }
 
-                    echo isset($data[Config::getPreparedKey()]);
                     // prepare data fields for needed requirements
                     if ((!array_key_exists('action', $data) || trim($data['action']) != Config::OPERATION_TYPE_DELETE) && !isset($data[Config::getPreparedKey()])) {
                         $this->prepareFields($data, $store);
                     }
-
-
-
 
                     // change array keys to needed format
                     $this->formatArrayKeysToCamelCase($data);
@@ -482,6 +478,7 @@ class DataHandler
                     $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
                 }
             } catch (\Exception $e) {
+                unset($index[$productId]);
                 $this->logger->error("Encountered exception while processing product -" . $data["sku"]." with error ".$e->getMessage()." -stack-".$e->getTraceAsString());
             }
         }
@@ -591,7 +588,11 @@ class DataHandler
 
             if (is_array($data[$productAttribute])) {
                 // retrieve only first required value
-                $value = $data[$productAttribute][0];
+                if(!empty($data[$productAttribute])){
+                    $value = $data[$productAttribute][0];
+                }else{
+                    continue;
+                }
             } else {
                 $value = (string) $data[$productAttribute];
             }

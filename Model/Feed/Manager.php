@@ -486,9 +486,8 @@ class Manager
         if ($feed = $this->getFeed()) {
             try {
                 $startMemory = memory_get_usage();
-                echo $startMemory."<br>\n";
                 $serializedFeed = $this->serializer->serializeToJson($feed);
-                echo "Serialise Feed Current Memory ::".memory_get_usage()." with difference ". (memory_get_usage() - $startMemory)."<br>\n";
+                $this->logger->info("Serialise Feed Current Memory ::".memory_get_usage()." with difference ". (memory_get_usage() - $startMemory));
                 $this->setFeed($serializedFeed);
             } catch (\Exception $e) {
                 $this->logger->critical($e);
