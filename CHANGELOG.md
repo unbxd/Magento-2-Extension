@@ -1,4 +1,7 @@
-# Version 1.0.95
+# Version 1.0.96
+## 1.0.96 - Apr 06, 2022
+-  Added handler to avoid empty categories exception on products which are also associated with other parent product
+- Ability to do partial update of product document through incrementals, with this you can choose to send only stock and price during incrementals
 ## 1.0.95 - Feb 21, 2022
 - Customers in a multi site setup using  path for categories lookup results in incorrect category mapping when default store is not set properly.
 ## 1.0.94 - Feb 17, 2022
