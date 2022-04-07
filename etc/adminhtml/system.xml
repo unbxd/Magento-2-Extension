@@ -190,6 +190,12 @@
                     <tooltip>Enabling this option is recommended in production mode or with a large product catalog.</tooltip>
                     <comment><![CDATA[If enabled, all indexing operations will be done asynchronously.]]></comment>
                 </field>
+                <field id="incremental_partial_update" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Partial Update on Incremental runs</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <tooltip>Enabling this option will exchange only price and stock details of the product during incremental runs.</tooltip>
+                    <comment><![CDATA[Enabling this option will exchange only price and stock details of the product during incremental runs.]]></comment>
+                </field>
             </group>
             <group id="data_fields_mapping" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Data Fields Mapping</label>

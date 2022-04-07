@@ -32,16 +32,25 @@ class DataSourceProvider
     private $dataSources = [];
 
     /**
+     * @var DataSourceProviderInterface[]
+     */
+    private $incrementalDataSources = [];
+
+
+
+    /**
      * DataSourceProvider constructor.
      * @param string $typeName
      * @param array $dataSources
      */
     public function __construct(
         $typeName = self::DATA_SOURCES_DEFAULT_TYPE,
-        $dataSources = []
+        $dataSources = [],
+        $incrementalDataSources = []
     ) {
         $this->typeName = $typeName;
         $this->dataSources = $dataSources;
+        $this->incrementalDataSources = $incrementalDataSources;
     }
 
     /**
@@ -62,6 +71,15 @@ class DataSourceProvider
     public function getList()
     {
         return $this->dataSources;
+    }
+
+    /** 
+    * Retrieves incremental data source list 
+    *
+    */
+    public function getIncrementList()
+    {
+        return $this->incrementalDataSources;
     }
 
     /**

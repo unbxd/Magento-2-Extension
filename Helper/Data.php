@@ -59,6 +59,8 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_EXCLUDE_PRODUCTS_FILTER_ATTRIBUTES = 'unbxd_catalog/general/filter_attributes';
     const XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS = 'unbxd_catalog/general/max_number_of_attempts';
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
+    const XML_PATH_CATALOG_INDEXING_PARTIAL_INCREMENTAL_ENABLED = 'unbxd_catalog/indexing/incremental_partial_update';
+
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     const XML_PATH_CATALOG_VERSION_CHECK = 'unbxd_catalog/general/check_latest_version_update';
     const XML_PATH_FETCH_FROM_CATEGORY_TABLES = 'unbxd_catalog/general/fetch_from_category_tables';
@@ -578,6 +580,21 @@ class Data extends AbstractHelper
     {
         return (int) $this->scopeConfig->getValue(
             self::XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function isPartialIncrementalEnabled($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_CATALOG_INDEXING_PARTIAL_INCREMENTAL_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
         );

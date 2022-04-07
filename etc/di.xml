@@ -184,6 +184,11 @@
                 <item name="category" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Category</item>
                 <item name="pricefallback" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\PriceIndexerFallback</item>
             </argument>
+            <argument name="incrementalDataSources" xsi:type="array">
+                <item name="partialOperationType" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\PartialUpdateIdentifier</item>
+                <item name="inventory" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Inventory</item>
+                <item name="price" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Price</item>
+            </argument>
         </arguments>
     </type>
     <!-- END: indexer -->

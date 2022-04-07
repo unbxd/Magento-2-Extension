@@ -47,6 +47,7 @@
             </images>
             <indexing>
                 <enabled_queue>1</enabled_queue>
+                <incremental_partial_update>0</incremental_partial_update>
             </indexing>
             <cron>
                 <general_settings>

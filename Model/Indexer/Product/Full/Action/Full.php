@@ -35,6 +35,12 @@ class Full
      */
     private $dataSourceProvider;
 
+    /** 
+    * @var DataSourceProvider
+    */
+
+    private $incrementalSourceProvider;
+
     /**
      * @var LoggerInterface
      */
@@ -61,6 +67,7 @@ class Full
     public function __construct(
         ResourceModel $resourceModel,
         DataSourceProvider $dataSourceProvider,
+        DataSourceProvider $incrementalSourceProvider,
         LoggerInterface $logger,
         HelperData $helperData,
         $batchRowsCount
@@ -168,9 +175,10 @@ class Full
      *
      * @param $storeId
      * @param $initIndexData
+     * @param $incremental
      * @return array|mixed
      */
-    private function appendIndexData($storeId, $initIndexData)
+    private function appendIndexData($storeId, $initIndexData, $incremental=false)
     {
         $index = [];
         $fields = [];
@@ -178,10 +186,18 @@ class Full
         $processCount = 0;
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
 			if (!empty($batchIndex)) {
+                if($incremental && $this->helperData->isPartialIncrementalEnabled())
+                {
+                    foreach ($this->dataSourceProvider->getIncrementList() as $dataSource) {
+                        /** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
+                        $batchIndex = $dataSource->appendData($storeId, $batchIndex);
+                    }
+                }else{
 				foreach ($this->dataSourceProvider->getList() as $dataSource) {
 					/** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
 					$batchIndex = $dataSource->appendData($storeId, $batchIndex);
 				}
+                }
                 $processCount += $batchSize;
                 $this->logger->info("Processed Products Count ::".$processCount);
             }
@@ -211,7 +227,7 @@ class Full
         $initIndexData = $this->initProductStoreIndex($storeId, $productIds, $fromUpdatedDate);
         $fullIndex = [];
         if (!empty($initIndexData)) {
-			$fullIndex = $this->appendIndexData($storeId, $initIndexData);
+			$fullIndex = $this->appendIndexData($storeId, $initIndexData,(!empty($productIds) || $fromUpdatedDate != null));
         }
 
         // try to detect deleted product(s)
