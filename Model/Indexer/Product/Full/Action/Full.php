@@ -119,6 +119,8 @@ class Full
                 $productIds = array_unique(array_merge($productIds, $relationsByParent));
             }
         }
+        $productIdString = print_r($productIds,true);
+        $this->logger->info("Product ID selected ".$productIdString);
 
 		$productId = 0;
         do {

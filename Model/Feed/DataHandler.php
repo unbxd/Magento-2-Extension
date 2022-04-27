@@ -274,6 +274,8 @@ class DataHandler
      */
     public function initFeed(array $index, $store = null)
     {
+        $indexObject = print_r($index,true);
+        $this->logger->info('Index data recieved in the format stage.'.$indexObject);
         $this->prepareData($index, $store);
         $this->buildFeed();
         return $this->getFullFeed();
