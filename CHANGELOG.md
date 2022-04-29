@@ -1,4 +1,6 @@
-# Version 1.0.96
+# Version 1.0.97
+## 1.0.97 - Apr 29, 2022
+- Fix the fall back price dataprovider edge case resulting in unhandled exception for product not found.
 ## 1.0.96 - Apr 06, 2022
 -  Added handler to avoid empty categories exception on products which are also associated with other parent product
 - Ability to do partial update of product document through incrementals, with this you can choose to send only stock and price during incrementals
