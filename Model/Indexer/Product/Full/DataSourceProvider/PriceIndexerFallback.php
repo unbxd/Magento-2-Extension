@@ -109,10 +109,12 @@ class PriceIndexerFallback implements DataSourceProviderInterface
                 $this->appendParentProductForRecheck($recheckProductsIds, $indexData);
                 $recheckProductsIds =array_unique($recheckProductsIds);
                 $recheckProductString = print_r($recheckProductsIds, true);
+                $pendingProductString = print_r($pendingProductIds, true);
+                $this->logger->debug("The following products are awaiting price changes ::" . $pendingProductString);
                 $this->logger->debug("The following products will be evaulavted for price changes ::" . $recheckProductString);
                 foreach ($recheckProductsIds as $productId) {
-                    $product = $this->productRepository->getById($productId, false, $storeId);
                     try {
+                        $product = $this->productRepository->getById($productId, false, $storeId);
                         if ($product->getTypeId() == 'configurable') {
                             $optionsPrice=$this->getCustomOptionsMinPrice($product);
                             $indexData[$productId]["price"] = $this->getMinPriceForConfigurableProduct($product)->getValue()+$optionsPrice;
