@@ -58,8 +58,14 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_AVAILABLE_PRODUCT_TYPES = 'unbxd_catalog/general/available_product_types';
     const XML_PATH_CATALOG_EXCLUDE_PRODUCTS_FILTER_ATTRIBUTES = 'unbxd_catalog/general/filter_attributes';
     const XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS = 'unbxd_catalog/general/max_number_of_attempts';
+    
+    /**
+     * Indexing Settings
+     */
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
     const XML_PATH_CATALOG_INDEXING_PARTIAL_INCREMENTAL_ENABLED = 'unbxd_catalog/indexing/incremental_partial_update';
+    const XML_PATH_INDEXING_QUEUE_ARCHIVAL_INMINUTES = 'unbxd_catalog/indexing/indexing_queue_archival_time';
+    const XML_PATH_FEED_VIEW_ARCHIVAL_INMINUTES = 'unbxd_catalog/indexing/feed_view_archival_time';
 
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     const XML_PATH_CATALOG_VERSION_CHECK = 'unbxd_catalog/general/check_latest_version_update';
@@ -606,8 +612,34 @@ class Data extends AbstractHelper
      */
     public function isIndexingQueueEnabled($store = null)
     {
-        return $this->scopeConfig->isSetFlag(
+        return (int)$this->scopeConfig->getValue(
             self::XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function getIndexingQueueArchivalTime($store = null)
+    {
+        return (int)$this->scopeConfig->getValue(
+            self::XML_PATH_INDEXING_QUEUE_ARCHIVAL_INMINUTES,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+     /**
+     * @param null $store
+     * @return mixed
+     */
+    public function getFeedViewArchivalTime($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_FEED_VIEW_ARCHIVAL_INMINUTES,
             ScopeInterface::SCOPE_STORE,
             $store
         );

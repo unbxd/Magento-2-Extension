@@ -196,6 +196,16 @@
                     <tooltip>Enabling this option will exchange only price and stock details of the product during incremental runs.</tooltip>
                     <comment><![CDATA[Enabling this option will exchange only price and stock details of the product during incremental runs.]]></comment>
                 </field>
+                <field id="indexing_queue_archival_time" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Time (in minutes) to archive records in Indexing Queue View</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[Time (in minutes) to archive records in Indexing Queue View]]></comment>
+                </field>
+                <field id="feed_view_archival_time" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Time (in minutes) to archive records in Feed View</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[Time (in minutes) to archive records in Feed View]]></comment>
+                </field>
             </group>
             <group id="data_fields_mapping" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Data Fields Mapping</label>
