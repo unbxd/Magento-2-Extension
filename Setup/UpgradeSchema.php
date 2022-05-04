@@ -121,10 +121,28 @@ class UpgradeSchema implements UpgradeSchemaInterface
             )->addIndex(
                 $installer->getIdxName('unbxd_productfeed_indexing_queue', ['status']),
                 ['status']
+            )->addIndex(
+                $installer->getIdxName('unbxd_productfeed_indexing_queue', ['status','action_type','store_id']),
+                ['status','action_type','store_id']
             );
 
             $installer->getConnection()->createTable($table);
         };
+
+        
+
+        if (version_compare($context->getVersion(), '1.0.98', '<')) {
+            $indexName =  $installer->getConnection()->getIndexName($installer->getTable('unbxd_productfeed_indexing_queue'), ['status','action_type','store_id']);
+            $indexList = $installer->getConnection()->getIndexList($installer->getTable('unbxd_productfeed_indexing_queue'));
+            $indexingQueueTable = $installer->getTable('unbxd_productfeed_indexing_queue');
+            if (
+                $installer->tableExists($indexingQueueTable)
+                && (empty($indexList) || !array_key_exists($indexName,$indexList))
+            ) {
+                $installer->getConnection()->addIndex($indexingQueueTable,$installer->getIdxName('unbxd_productfeed_indexing_queue', ['status','action_type','store_id']),
+                    ['status','action_type','store_id']);
+            }
+        }
 
         /**
          * Create table 'unbxd_productfeed_feed_view'
