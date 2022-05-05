@@ -1,4 +1,8 @@
-# Version 1.0.97
+# Version 1.0.98
+## 1.0.98 - May 5, 2022
+- Added index on indexing queue view table
+- Added archival interval as configurable value
+- Fixed the incremental feed index for parent product to include child product for environment which is 2.4+
 ## 1.0.97 - Apr 29, 2022
 - Fix the fall back price dataprovider edge case resulting in unhandled exception for product not found.
 ## 1.0.96 - Apr 06, 2022
