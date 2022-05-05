@@ -234,12 +234,12 @@ class Full extends Indexer
         $metadata = $this->getEntityMetaData($this->getEntityType());
         $entityTable = $this->getEntityTable();
         $relationTable = $this->getTable('catalog_product_relation');
-        $joinCondition = sprintf('relation.child_id = entity.%s', $metadata->getLinkField());
+        $joinCondition = sprintf('relation.parent_id = entity.%s', $metadata->getLinkField());
 
         $select = $this->getConnection()->select()
-            ->from(['relation' => $relationTable], [])
-            ->join(['entity' => $entityTable], $joinCondition, [$metadata->getIdentifierField()])
-            ->where('parent_id IN (?)', array_map('intval', $parentIds));
+            ->from(['relation' => $relationTable], ["child_id"])
+            ->join(['entity' => $entityTable], $joinCondition, [])
+            ->where('entity.entity_id IN (?)', array_map('intval', $parentIds));
         return $this->getConnection()->fetchCol($select);
     }
 
@@ -255,13 +255,12 @@ class Full extends Indexer
         $metadata = $this->getEntityMetaData($this->getEntityType());
         $entityTable = $this->getEntityTable();
         $relationTable = $this->getTable('catalog_product_relation');
-        $joinCondition = sprintf('relation.child_id = entity.%s', $metadata->getLinkField());
+        $joinCondition = sprintf('relation.parent_id = entity.%s', $metadata->getLinkField());
 
         $select = $this->getConnection()->select()
-            ->from(['relation' => $relationTable], ['parent_id'])
-            ->join(['entity' => $entityTable], $joinCondition, [$metadata->getIdentifierField()])
-            ->where('child_id IN (?)', array_map('intval', $childIds))
-            ->where ('parent_id NOT in (?)',array_map('intval', $childIds));
+            ->from(['relation' => $relationTable], [])
+            ->join(['entity' => $entityTable], $joinCondition, ['entity_id'])
+            ->where('child_id IN (?)', array_map('intval', $childIds));
         return $this->getConnection()->fetchCol($select);
     }
 
@@ -280,8 +279,8 @@ class Full extends Indexer
         $joinCondition = sprintf('relation.parent_id = entity.%s', $metadata->getLinkField());
 
         $select = $this->getConnection()->select()
-            ->from(['relation' => $relationTable], ['parent_id'])
-            ->join(['entity' => $entityTable], $joinCondition, [$metadata->getIdentifierField()])
+            ->from(['relation' => $relationTable],[])
+            ->join(['entity' => $entityTable], $joinCondition, ['entity_id'])
             ->where('child_id = ?', $childrenId)
             ->where('entity.type_id IN (?)', $this->getSupportedProductTypes());
 
