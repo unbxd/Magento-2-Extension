@@ -1,4 +1,6 @@
-# Version 1.0.98
+# Version 1.0.98.1
+## 1.0.98.1 - May 16, 2022
+- Delete disabled products in incremental feed.
 ## 1.0.98 - May 5, 2022
 - Added index on indexing queue view table
 - Added archival interval as configurable value
