@@ -233,8 +233,9 @@ class Full
         // try to detect deleted product(s)
         if (!empty($productIds)) {
             foreach ($productIds as $id) {
-                if (!$this->resourceModel->getProductSkuById($id)) {
+                if (!array_key_exists($id,$fullIndex)) {
                     $fullIndex[$id]['action'] = FeedConfig::OPERATION_TYPE_DELETE;
+                    $this->logger->info("Following product will be deleted from index - ".$id);
                 }
             }
         }
