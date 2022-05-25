@@ -130,10 +130,10 @@
     <type name="Unbxd\ProductFeed\Logger\File">
         <arguments>
             <argument name="types" xsi:type="array">
-                <item name="default" xsi:type="string">default.log</item>
-                <item name="indexing" xsi:type="string">indexing.log</item>
-                <item name="feed" xsi:type="string">feed.log</item>
-                <item name="analytics" xsi:type="string">analytics.log</item>
+                <item name="default" xsi:type="string">default</item>
+                <item name="indexing" xsi:type="string">indexing</item>
+                <item name="feed" xsi:type="string">feed</item>
+                <item name="analytics" xsi:type="string">analytics</item>
             </argument>
         </arguments>
     </type>

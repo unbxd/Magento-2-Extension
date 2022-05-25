@@ -225,11 +225,21 @@ class File extends LoggerAbstract
      */
     public function getFileName($type)
     {
-        $fileName = $this->types['default'];
+        $fileName = $this->types['default']."_".$this->getDateSuffix().".log";
         if (isset($this->types[$type])) {
-            $fileName = $this->types[$type];
+            $fileName = $this->types[$type]."_".$this->getDateSuffix().".log";
         }
 
         return $fileName;
+    }
+
+    /**
+     * Returns Date format in string 
+     *
+     * @return string
+     */
+    private function getDateSuffix(): string
+    {
+            return date('W_Y');
     }
 }
