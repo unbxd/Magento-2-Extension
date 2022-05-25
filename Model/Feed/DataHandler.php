@@ -301,7 +301,9 @@ class DataHandler
         $this->setIndexedFields($indexedFields);
         unset($index['fields']);
         $this->buildCatalogData($index, $store);
-        $this->buildSchemaFields();
+        if(array_key_exists("add",$this->catalog)){
+           $this->buildSchemaFields();
+        }
         
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_prepare_data_after.');
         $this->eventManager->dispatch(
@@ -469,11 +471,17 @@ class DataHandler
                     $operationKey = array_key_exists('action', $data)
                         ? trim($data['action'])
                         : Config::OPERATION_TYPE_ADD;
+                    
+                    
 
                     // if operation type is 'delete' uniqueId is only one required field
                     if ($operationKey == Config::OPERATION_TYPE_DELETE) {
                         $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
                         $data = [$key => strval($productId)];
+                    }
+
+                    if(array_key_exists('action', $data)){
+                        unset($data['action']);
                     }
                     $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
                 }
