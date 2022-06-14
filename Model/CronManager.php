@@ -446,8 +446,8 @@ class CronManager
             $lastTime = $time - ($archivalTime ? ($archivalTime * 60) : 432000); //Delete records older than 5 days
             $to = date('Y-m-d H:i:s', $lastTime);
             $where = [
-                IndexingQueueInterface::STATUS . ' not in  (?)' => [IndexingQueue::STATUS_PENDING, IndexingQueue::STATUS_ERROR],
-                IndexingQueueInterface::FINISHED_AT . ' < ?' => $to,
+                IndexingQueueInterface::STATUS . ' not in  (?)' => [IndexingQueue::STATUS_PENDING],
+                IndexingQueueInterface::CREATED_AT . ' < ?' => $to,
             ];
             $this->indexingQueueRepository->deleteIndexQueueRecords($where);
             $this->logger->info(sprintf('Completed archiving job queues older than 5 days'));
@@ -465,8 +465,8 @@ class CronManager
             $lastTime = $time - ($archivalTime ? ($archivalTime * 60) : 432000); //Delete records older than 5 days
             $to = date('Y-m-d H:i:s', $lastTime);
             $where = [
-                //FeedViewInterface::STATUS . ' not in  (?)' => [FeedView::STATUS_RUNNING],
-                FeedViewInterface::FINISHED_AT . ' < ?' => $to,
+                FeedViewInterface::STATUS . ' not in  (?)' => [FeedView::STATUS_RUNNING],
+                FeedViewInterface::CREATED_AT . ' < ?' => $to,
             ];
             $this->feedViewRepository->deleteFeedViewRecords($where);
             $this->logger->info(sprintf('Completed archiving feedviews older than 5 days'));
