@@ -1,4 +1,6 @@
-# Version 1.0.98.2
+# Version 1.0.98.3
+## 1.0.98.3 - June 14, 2022
+- Archival of data entries in Indexing Queue and Feed View
 ## 1.0.98.2 - May 25, 2022
 - Rotate logs weekly
 - Remove action attribute in partial incremental job
