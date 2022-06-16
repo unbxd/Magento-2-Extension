@@ -105,7 +105,7 @@ class AffectedEntities extends Column
             // grab links for separate products
             $entityIds = array_map(function($item) {
                 return trim($item, '#');
-            }, explode(', ', $value));
+            }, explode(', ', $value??''));
 
             $links = [];
             foreach ($entityIds as $id) {

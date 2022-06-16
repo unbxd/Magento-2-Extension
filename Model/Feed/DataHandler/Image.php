@@ -197,7 +197,7 @@ class Image
     public function getMediaAttribute($type, $store = null, $attributeName = null, $default = null)
     {
         $imageType = $this->helperData->getImageByType($type, $store);
-        $imageType = explode('|', strtolower($imageType), 2);
+        $imageType = explode('|', strtolower($imageType??""), 2);
 
         $attributes = $this->getConfigView()->getMediaAttributes(
                 'Magento_Catalog',
