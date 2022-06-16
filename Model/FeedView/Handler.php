@@ -332,7 +332,7 @@ class Handler extends \Magento\Framework\DataObject
     public function convertIdsToString(array $entitiesIds)
     {
         $entitiesIds = array_map(function($id) {
-            return sprintf('#%s', trim($id));
+            return sprintf('#%s', trim($id?? ''));
         }, $entitiesIds);
 
         return implode(', ', $entitiesIds);
@@ -345,7 +345,7 @@ class Handler extends \Magento\Framework\DataObject
     public function convertStringToIds($string)
     {
         $entityIds = array_map(function($item) {
-            return trim($item, '#');
+            return trim($item?? '', '#');
         }, explode(', ', $string));
 
         return $entityIds;

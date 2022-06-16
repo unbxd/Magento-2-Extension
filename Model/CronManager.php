@@ -786,8 +786,8 @@ class CronManager
             /** @var \Unbxd\ProductFeed\Model\FeedView $job */
             $jobId = $job->getId();
             $storeId = $job->getStoreId();
-            $uploadId = trim($job->getUploadId());
-            $jobType = trim($job->getOperationTypes());
+            $uploadId = trim($job->getUploadId()?? '');
+            $jobType = trim($job->getOperationTypes()?? '');
             if (!$jobId || !$uploadId) {
                 continue;
             }

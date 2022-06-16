@@ -386,7 +386,7 @@ class Response extends DataObject
                 $bodyData = $this->getResponseBodyAsArray();
                 if (is_array($bodyData)) {
                     $status = array_key_exists(self::RESPONSE_FIELD_STATUS, $bodyData)
-                        ? trim($bodyData[self::RESPONSE_FIELD_STATUS])
+                        ? trim($bodyData[self::RESPONSE_FIELD_STATUS]?? '')
                         : null;
 
                     $flag = ($status == self::RESPONSE_FIELD_STATUS_VALUE_FAILED);
@@ -416,7 +416,7 @@ class Response extends DataObject
         if (null === $flag) {
             $bodyData = $this->getResponseBodyAsArray();
             $status = array_key_exists(self::RESPONSE_FIELD_STATUS, $bodyData)
-                ? trim($bodyData[self::RESPONSE_FIELD_STATUS])
+                ? trim($bodyData[self::RESPONSE_FIELD_STATUS]?? '')
                 : null;
 
             $flag = ($status == self::RESPONSE_FIELD_STATUS_VALUE_INDEXING);

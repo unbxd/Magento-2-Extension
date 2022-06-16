@@ -198,7 +198,7 @@ class Data extends AbstractHelper
      */
     public function getConfigValue($path, $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeCode = null)
     {
-        return trim($this->scopeConfig->getValue($path, $scopeType, $scopeCode));
+        return trim($this->scopeConfig->getValue($path, $scopeType, $scopeCode)?? '');
     }
 
     /**
@@ -211,7 +211,7 @@ class Data extends AbstractHelper
      */
     public function updateConfigValue($path, $value, $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeId = 0)
     {
-        $this->configWriter->save($path, trim($value), $scope, $scopeId);
+        $this->configWriter->save($path, trim($value?? ''), $scope, $scopeId);
     }
 
     /**
@@ -262,7 +262,7 @@ class Data extends AbstractHelper
             self::XML_PATH_SETUP_SITE_KEY,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        ) ?? '');
     }
 
     /**
@@ -275,7 +275,7 @@ class Data extends AbstractHelper
             self::XML_PATH_SETUP_SECRET_KEY,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
@@ -289,7 +289,7 @@ class Data extends AbstractHelper
             self::XML_PATH_CATALOG_FEED_STREAMING_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
@@ -302,7 +302,7 @@ class Data extends AbstractHelper
             self::XML_PATH_SETUP_API_KEY,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
@@ -315,7 +315,7 @@ class Data extends AbstractHelper
             self::XML_PATH_FULL_FEED_API_ENDPOINT,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
@@ -328,7 +328,7 @@ class Data extends AbstractHelper
             self::XML_PATH_INCREMENTAL_FEED_API_ENDPOINT,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
@@ -341,7 +341,7 @@ class Data extends AbstractHelper
             self::XML_PATH_FULL_UPLOADED_STATUS,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
@@ -354,7 +354,7 @@ class Data extends AbstractHelper
             self::XML_PATH_INCREMENTAL_UPLOADED_STATUS,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
@@ -367,7 +367,7 @@ class Data extends AbstractHelper
             self::XML_PATH_UPLOADED_SIZE,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
+        )?? '');
     }
 
     /**
