@@ -83,6 +83,13 @@ class FileManager
     private $store = null;
 
     /**
+     * 
+     *
+     * @var null
+     */
+    private $feedId = null;
+
+    /**
      * @var array
      */
     private $allowedMimeTypes = [];
@@ -113,6 +120,7 @@ class FileManager
         $archiveFormat = null,
         $subDir = null,
         $store = null,
+        $feedId = null,
         array $allowedMimeTypes = []
     ) {
         $this->fileName = $fileName;
@@ -120,16 +128,22 @@ class FileManager
         $this->archiveFormat = $archiveFormat;
         $this->subDir = $subDir ?: self::DEFAULT_SUB_DIR;
         $this->store = $store;
+        $this->feedId = $feedId ?: getDatePrefix();
         $this->filePath = sprintf(
-            '%s%s%s%s.%s',
+            '%s%s%s%s%s.%s',
             $this->subDir,
             DIRECTORY_SEPARATOR,
             $this->fileName,
             $this->store,
+            $this->feedId,
             $this->contentFormat
             );
         $this->allowedMimeTypes = array_unique(array_merge($this->defaultMimeTypes, array_values($allowedMimeTypes)));
         $this->dir = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
+    }
+
+    private function getDatePrefix(){
+        return "_".date('dmHis');
     }
 
     public function openStream(){

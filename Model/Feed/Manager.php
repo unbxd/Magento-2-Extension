@@ -356,7 +356,8 @@ class Manager
             ->initExecute($index, $store)
             ->serializeAndWriteFeed(
                 [
-                    'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store)
+                    'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
+                    'feedId' => sprintf('_%s', $this->feedViewId)
                 ]
             )
             ->sendFeed($store)
