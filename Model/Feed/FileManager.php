@@ -128,7 +128,7 @@ class FileManager
         $this->archiveFormat = $archiveFormat;
         $this->subDir = $subDir ?: self::DEFAULT_SUB_DIR;
         $this->store = $store;
-        $this->feedId = $feedId ?: getDatePrefix();
+        $this->feedId = $feedId ?: $this->getDatePrefix();
         $this->filePath = sprintf(
             '%s%s%s%s%s.%s',
             $this->subDir,
