@@ -1,4 +1,6 @@
-# Version 1.0.98.3
+# Version 2.0.0
+## 2.0.0 - June 20, 2022
+- Extended compatibility to php8 & Magento 2.4.4
 ## 1.0.98.3 - June 14, 2022
 - Archival of data entries in Indexing Queue and Feed View
 ## 1.0.98.2 - May 25, 2022
