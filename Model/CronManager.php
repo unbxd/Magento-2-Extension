@@ -428,10 +428,10 @@ class CronManager
             }
             if ($this->isFullJobForStorePending($storeId)) {
                 $this->removeAllButOneFullJobForStore($storeId);
-            }
-
-            $this->processFullJobForStore($storeId);
-            $this->processIncrementalJobForStore($storeId);
+                $this->processFullJobForStore($storeId);
+            }else{
+                $this->processIncrementalJobForStore($storeId);
+            }   
         }
         $this->cleanupQueue();
         $this->cleanupFeedViewRecord();
