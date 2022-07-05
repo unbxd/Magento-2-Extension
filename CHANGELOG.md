@@ -1,5 +1,7 @@
-# Version 1.0.98.2
-## 1.0.98.2 - May 25, 2022
+# Version 1.0.98.4
+## 1.0.98.4 - Jul 04, 2022
+- Fixed scenario in which the price fall back data provider could index incomplete data
+## 1.0.98.4 - May 25, 2022
 - Rotate logs weekly
 - Remove action attribute in partial incremental job
 ## 1.0.98.1 - May 16, 2022
