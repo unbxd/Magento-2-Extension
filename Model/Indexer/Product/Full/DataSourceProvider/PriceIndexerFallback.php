@@ -114,6 +114,7 @@ class PriceIndexerFallback implements DataSourceProviderInterface
                 $this->logger->debug("The following products will be evaulavted for price changes ::" . $recheckProductString);
                 foreach ($recheckProductsIds as $productId) {
                     try {
+                        if(isset($indexData[$productId])){
                         $product = $this->productRepository->getById($productId, false, $storeId);
                         if ($product->getTypeId() == 'configurable') {
                             $optionsPrice=$this->getCustomOptionsMinPrice($product);
@@ -137,6 +138,9 @@ class PriceIndexerFallback implements DataSourceProviderInterface
                                 $indexData[$productId]["price"] = $product->getPrice()+$optionsPrice;
                             }
                         }
+                    }else{
+                        $this->logger->info("Attempt to set price for a product which is not in the index :" . $productId);
+                    }
                     } catch (\Exception $e) {
                         $this->logger->error("Error while processing price for product " . $productId . "with error - " . $e->__toString());
                     } catch (\Error $er) {
