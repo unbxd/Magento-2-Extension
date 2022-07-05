@@ -430,6 +430,11 @@ class DataHandler
             try {
                 // schema fields has key 'fields', do only for products
                 if (is_int($productId)) {
+                    if(!isset($data["entity_id"])){
+                        $this->logger->info("In-complete data detected for product -".$productId);
+                        unset($index[$productId]);
+                        continue;
+                    }
                     // append child data to parent
                     if (
                         isset($data[Config::CHILD_PRODUCT_IDS_FIELD_KEY])
