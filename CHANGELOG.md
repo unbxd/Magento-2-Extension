@@ -1,4 +1,6 @@
-# Version 1.0.98.4
+# Version 1.0.98.5
+## 1.0.98.5 - Jul 18, 2022
+- Added lookup price logic for simple products when it's listed in price indexer backlog queue.
 ## 1.0.98.4 - Jul 04, 2022
 - Fixed scenario in which the price fall back data provider could index incomplete data
 ## 1.0.98.4 - May 25, 2022
