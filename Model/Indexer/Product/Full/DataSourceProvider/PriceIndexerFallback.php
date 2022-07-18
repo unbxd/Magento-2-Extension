@@ -131,11 +131,14 @@ class PriceIndexerFallback implements DataSourceProviderInterface
                             }
                         } else {
                             $optionsPrice=$this->getCustomOptionsMinPrice($product);
-                            if ($product->getFinalPrice() && $product->getFinalPrice() < $product->getPrice()) {
-                                $indexData[$productId]["price"] = $product->getFinalPrice()+$optionsPrice;
-                                $indexData[$productId]["original_price"] = $product->getPrice()+$optionsPrice;
+                            $priceInfo = $product->getPriceInfo();
+                            $finalPrice = $priceInfo->getPrice("final_price")->getValue();
+                            $price = $priceInfo->getPrice("regular_price")->getValue();
+                            if ( $finalPrice && $finalPrice < $price) {
+                                $indexData[$productId]["price"] = $finalPrice+$optionsPrice;
+                                $indexData[$productId]["original_price"] = $price+$optionsPrice;
                             } else {
-                                $indexData[$productId]["price"] = $product->getPrice()+$optionsPrice;
+                                $indexData[$productId]["price"] = $price+$optionsPrice;
                             }
                         }
                     }else{
@@ -152,6 +155,7 @@ class PriceIndexerFallback implements DataSourceProviderInterface
                 }
             }
         }
+        
         return $indexData;
     }
 
