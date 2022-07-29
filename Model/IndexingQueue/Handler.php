@@ -357,7 +357,7 @@ class Handler extends \Magento\Framework\DataObject
     {
         $entityIds = array_map(function($item) {
             return trim($item, '#');
-        }, explode(', ', $string));
+        }, explode(', ', $string?? ''));
 
         return $entityIds;
     }

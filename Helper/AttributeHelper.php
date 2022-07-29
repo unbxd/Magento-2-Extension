@@ -280,7 +280,7 @@ class AttributeHelper extends AbstractHelper
         }
 
         if ($attribute->usesSource() && !is_array($value)) {
-            $value = explode(',', $value);
+            $value = explode(',', $value??'');
         }
 
         if (!is_array($value)) {

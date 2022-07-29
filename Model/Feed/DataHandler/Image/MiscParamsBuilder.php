@@ -195,7 +195,7 @@ class MiscParamsBuilder
      */
     private function parseSize($string)
     {
-        $size = explode('x', strtolower($string));
+        $size = explode('x', strtolower($string??''));
         if (sizeof($size) == 2) {
             return ['width' => $size[0] > 0 ? $size[0] : null, 'height' => $size[1] > 0 ? $size[1] : null];
         }
