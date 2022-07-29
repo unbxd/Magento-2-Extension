@@ -1,3 +1,7 @@
+# Version 2.0.1
+## 2.0.1 - July 29, 2022
+- Extended compatibility to php8.1 
+- Updated fallback price provider for simple products to lookup special price
 # Version 2.0.0
 ## 2.0.0 - June 20, 2022
 - Extended compatibility to php8 & Magento 2.4.4
