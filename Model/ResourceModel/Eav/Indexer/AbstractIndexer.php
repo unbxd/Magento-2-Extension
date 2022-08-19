@@ -15,7 +15,8 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Indexer\Table\StrategyInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Unbxd\ProductFeed\Helper\Data as ConfigHelper;
+use Unbxd\ProductFeed\Helper\Data;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * Class provides util methods used by Eav indexer related resource models.
@@ -46,7 +47,7 @@ abstract class AbstractIndexer
     protected $storeManager;
 
     /**
-     * @var ConfigHelper;
+     * @var Data;
      */
     protected $configHelper;
 
@@ -60,12 +61,11 @@ abstract class AbstractIndexer
     public function __construct(
         ResourceConnection $resource,
         StrategyInterface $tableStrategy,
-        StoreManagerInterface $storeManager,
-        ConfigHelper $configHelper
+        StoreManagerInterface $storeManager
     ) {
         $this->resource = $resource;
-        $this->configHelper=$configHelper;
-        $this->connection = $resource->getConnection($configHelper->getReaderConnectionName());
+        $this->configHelper=ObjectManager::getInstance()->get(Data::class);;
+        $this->connection = $resource->getConnection($this->configHelper->getReaderConnectionName());
         $this->tableStrategy = $tableStrategy;
         $this->storeManager = $storeManager;
     }
