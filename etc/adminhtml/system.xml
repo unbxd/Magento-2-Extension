@@ -355,6 +355,10 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Enable stream parser for serialization of data (Memory efficent processing) ]]></comment>
                 </field>
+                <field id="reader_db_connection" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Reader database connection name</label>
+                    <comment><![CDATA[To split the reader queries to a replica, configure the corresponding connection name from env.php. If left empty will use default connection]]></comment>
+                </field>
             </group>
             <group id="product_feed_actions" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
                 <label>Product Feed Generation</label>
