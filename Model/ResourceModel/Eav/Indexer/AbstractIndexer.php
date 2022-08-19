@@ -65,7 +65,7 @@ abstract class AbstractIndexer
     ) {
         $this->resource = $resource;
         $this->configHelper=ObjectManager::getInstance()->get(Data::class);;
-        $this->connection = $resource->getConnection($this->configHelper->getReaderConnectionName());
+        $this->connection = $resource->getConnectionByName($this->configHelper->getReaderConnectionName());
         $this->tableStrategy = $tableStrategy;
         $this->storeManager = $storeManager;
     }
