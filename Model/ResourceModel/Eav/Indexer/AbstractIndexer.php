@@ -59,9 +59,9 @@ abstract class AbstractIndexer
      */
     public function __construct(
         ResourceConnection $resource,
-        ConfigHelper $configHelper,
         StrategyInterface $tableStrategy,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        ConfigHelper $configHelper
     ) {
         $this->resource = $resource;
         $this->configHelper=$configHelper;
