@@ -261,12 +261,12 @@ class Data extends AbstractHelper
      * @return mixed
      */
     public function getReaderConnectionName($store = null){
-        $connectionName =  trim($this->scopeConfig->getValue(
+        return trim($this->scopeConfig->getValue(
             self::XML_PATH_CATALOG_FEED_READER_DB_CONNECTION_NAME,
             ScopeInterface::SCOPE_STORE,
             $store
-        ));
-        return $connectionName ?? ResourceConnection::DEFAULT_CONNECTION;
+        )??ResourceConnection::DEFAULT_CONNECTION);
+        
     }
 
     /**
