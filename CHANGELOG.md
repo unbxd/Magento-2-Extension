@@ -1,4 +1,6 @@
-# Version 2.0.1
+# Version 2.0.2
+## 2.0.2 - August 20, 2022
+- Support for Spliting read operations to different connection 
 ## 2.0.1 - July 29, 2022
 - Extended compatibility to php8.1 
 - Updated fallback price provider for simple products to lookup special price
