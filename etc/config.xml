@@ -63,6 +63,7 @@
             </cron>
             <feed>
                 <enable_stream_serialization>0</enable_stream_serialization>
+                <reader_db_connection></reader_db_connection>
                 <full_state_flag></full_state_flag>
                 <incremental_state_flag></incremental_state_flag>
                 <full_lock_flag></full_lock_flag>

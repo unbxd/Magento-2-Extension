@@ -27,6 +27,7 @@ use Unbxd\ProductFeed\Model\FilterAttribute\FilterAttributeInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\App\ObjectManager;
 use Unbxd\ProductFeed\Model\Serializer;
+use Magento\Framework\App\ResourceConnection;
 
 /**
  * Class Data
@@ -109,6 +110,9 @@ class Data extends AbstractHelper
      * Feed Settings
      */
     const XML_PATH_CATALOG_FEED_STREAMING_ENABLED = 'unbxd_catalog/feed/enable_stream_serialization';
+
+    const XML_PATH_CATALOG_FEED_READER_DB_CONNECTION_NAME = 'unbxd_catalog/feed/reader_db_connection';
+
 
     /**
      * @var ConfigInterface
@@ -250,6 +254,19 @@ class Data extends AbstractHelper
     public function isSetFlag($path, $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeCode = null)
     {
         return $this->scopeConfig->isSetFlag($path, $scopeType, $scopeCode);
+    }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function getReaderConnectionName($store = null){
+        return trim($this->scopeConfig->getValue(
+            self::XML_PATH_CATALOG_FEED_READER_DB_CONNECTION_NAME,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        )??ResourceConnection::DEFAULT_CONNECTION);
+        
     }
 
     /**
