@@ -1,4 +1,6 @@
-# Version 2.0.2
+# Version 2.0.3
+## 2.0.3 - September 20, 2022
+- Created an attribute to indicate the date since the product was actually created in customers system 
 ## 2.0.2 - August 20, 2022
 - Support for Spliting read operations to different connection 
 ## 2.0.1 - July 29, 2022
