@@ -183,6 +183,7 @@
                 <item name="categorylookup" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\CategoryLookup</item>
                 <item name="category" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Category</item>
                 <item name="pricefallback" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\PriceIndexerFallback</item>
+                <item name="createdSince" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\CreatedSinceProvider</item>
             </argument>
             <argument name="incrementalDataSources" xsi:type="array">
                 <item name="partialOperationType" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\PartialUpdateIdentifier</item>
