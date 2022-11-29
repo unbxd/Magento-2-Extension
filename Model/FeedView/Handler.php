@@ -212,6 +212,36 @@ class Handler extends \Magento\Framework\DataObject
      * @param array $arguments
      * @return $this
      */
+    public function updateAffectedEntities($id, $entitiesIds)
+    {
+        try {
+            /** @var \Unbxd\ProductFeed\Api\Data\FeedViewInterface $model */
+            $model = $this->init($id);
+            if ($model->getId() && !empty($arguments)) {
+                if($model->getAffectedEntities()){
+                    $model->setAffectedEntities($model->getAffectedEntities().",".$this->convertIdsToString($entitiesIds));
+                }else{
+                    $model->setAffectedEntities($entitiesIds);
+                }
+                $this->save($model);
+                $this->logger->info('Updated feed view record with #' . $model->getId());
+            }
+        } catch (LocalizedException $e) {
+            $this->logger->critical($e);
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Update feed view record from related list
+     *
+     * @param $id
+     * @param array $arguments
+     * @return $this
+     */
     public function update($id, $arguments)
     {
         try {

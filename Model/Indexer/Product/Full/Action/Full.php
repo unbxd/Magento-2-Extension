@@ -16,6 +16,8 @@ use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider;
 use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
+use Unbxd\ProductFeed\Model\Feed\Manager as FeedManager;
+
 
 /**
  * Unbxd product feed full indexer.
@@ -55,6 +57,8 @@ class Full
      * @var integer
      */
     private $batchRowsCount;
+
+
 
     /**
      * Full constructor.
@@ -176,9 +180,10 @@ class Full
      * @param $storeId
      * @param $initIndexData
      * @param $incremental
+     * @param FeedManager $feedManager
      * @return array|mixed
      */
-    private function appendIndexData($storeId, $initIndexData, $incremental=false)
+    private function appendIndexData($storeId, $initIndexData, $incremental=false,$feedManager = null)
     {
         $index = [];
         $fields = [];
@@ -198,6 +203,7 @@ class Full
 					$batchIndex = $dataSource->appendData($storeId, $batchIndex);
 				}
                 }
+
                 $processCount += $batchSize;
                 $this->logger->info("Processed Products Count ::".$processCount);
             }
@@ -205,8 +211,12 @@ class Full
             $fields = array_merge($fields,$batchIndex["fields"]);
             unset($batchIndex["fields"]);
             }
-			if (!empty($batchIndex)) {
+			if (!empty($batchIndex) ) {
+                if($incremental || !$feedManager){
 				$index += $batchIndex;
+                }else{
+                    $feedManager->batchExecute($batchIndex,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$batchIndex,$storeId);
+                }
 			}
         }
 		$index["fields"]=$fields;
@@ -219,15 +229,16 @@ class Full
      * @param $storeId
      * @param array $productIds
      * @param null $fromUpdatedDate
+     * @param FeedManager $feedManager
      * @return array|mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function rebuildProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null)
+    public function rebuildProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null,$feedManager = null)
     {
         $initIndexData = $this->initProductStoreIndex($storeId, $productIds, $fromUpdatedDate);
         $fullIndex = [];
         if (!empty($initIndexData)) {
-			$fullIndex = $this->appendIndexData($storeId, $initIndexData,(!empty($productIds) || $fromUpdatedDate != null));
+			$fullIndex = $this->appendIndexData($storeId, $initIndexData,(!empty($productIds) || $fromUpdatedDate != null),$feedManager);
         }
 
         // try to detect deleted product(s)
