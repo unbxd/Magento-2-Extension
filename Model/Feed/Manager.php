@@ -351,7 +351,7 @@ class Manager
                 [
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
                     'feedId' => sprintf('_%s_%s', $this->feedViewId, $partCount)
-                ]
+                ],true
             )
             ->stopProfiler();
     }
@@ -411,7 +411,7 @@ class Manager
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function serializeAndWriteFeed($fileParameters = [])
+    public function serializeAndWriteFeed($fileParameters = [],$batchUpdate = false)
     {
 
         if ($this->configHelper->getEnableSerialization()) {
@@ -500,7 +500,7 @@ class Manager
             } finally {
                 $fileManager->closeStream();
             }
-            if ($this->getIsNeedToArchive()) {
+            if ($this->getIsNeedToArchive() && !$batchUpdate) {
                 $this->archiveFeedFile();
             }
         } else {
