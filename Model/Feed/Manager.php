@@ -1006,7 +1006,7 @@ class Manager
             $this->updateFeedView($response);
         }
 
-        $this->cleanupFeedFiles();
+        //$this->cleanupFeedFiles();
 
         // reset local cache to initial state
         $this->reset();
