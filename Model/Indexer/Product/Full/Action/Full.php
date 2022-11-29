@@ -215,7 +215,7 @@ class Full
                 if($incremental || !$feedManager){
 				$index += $batchIndex;
                 }else{
-                    $feedManager->batchExecute($batchIndex,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$batchIndex,$storeId);
+                    $feedManager->batchExecute($batchIndex,$batchIndex,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
                 }
 			}
         }

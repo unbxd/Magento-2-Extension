@@ -336,7 +336,7 @@ class Manager
         return $this;
     }
 
-    public function batchExecute($index, $type = FeedConfig::FEED_TYPE_FULL, $partCount, $store = null)
+    public function batchExecute($index, $partCount, $type = FeedConfig::FEED_TYPE_FULL,$store = null)
     {
         if (empty($index)) {
             $this->logger->error('Unable to execute feed. Index data are empty.');
