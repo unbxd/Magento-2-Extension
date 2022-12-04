@@ -219,18 +219,11 @@ class Full
                 $index["fields"]=$fields;
             }
 			if (!empty($batchIndex) ) {
-                if($incremental || !$this->helperData->isMultiPartUploadEnabled()){
 				$index += $batchIndex;
-                }else{
-                    if($multiPartBatchCount >= $multiPartBatchSize){
-                        
+                if($this->helperData->isMultiPartUploadEnabled() && $multiPartBatchCount >= $multiPartBatchSize){                        
                         $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
                         $multiPartBatchCount = 0;
                         $index = [];
-                    }else{
-                        $index += $batchIndex;
-                        $index["fields"]=$fields;
-                    }
                 }
 			}
         }
