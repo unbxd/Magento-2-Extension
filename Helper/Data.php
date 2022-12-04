@@ -631,7 +631,7 @@ class Data extends AbstractHelper
      */
     public function getMultiPartBatchSize($store = null)
     {
-        return $this->scopeConfig->isSetFlag(
+        return $this->scopeConfig->getValue(
             self::XML_PATH_CATALOG_MULTI_PART_BATCH_SIZE,
             ScopeInterface::SCOPE_STORE,
             $store
