@@ -188,7 +188,9 @@ class Full
         $index = [];
         $fields = [];
         $batchSize = $this->batchRowsCount;
+        $multiPartBatchSize = $this->helperData->getMultiPartBatchSize() ?? $batchSize;
         $processCount = 0;
+        $multiPartBatchCount = 0;
         if(!$incremental && $this->helperData->isMultiPartUploadEnabled()){
             $feedManager->startMultiUpload($storeId);
         }
@@ -208,17 +210,27 @@ class Full
                 }
 
                 $processCount += $batchSize;
+                $multiPartBatchCount +=$batchSize;
                 $this->logger->info("Processed Products Count ::".$processCount);
             }
             if (isset($batchIndex["fields"])){
-            $fields = array_merge($fields,$batchIndex["fields"]);
-            //unset($batchIndex["fields"]);
+                $fields = array_merge($fields,$batchIndex["fields"]);
+                unset($batchIndex["fields"]);
+                $index["fields"]=$fields;
             }
 			if (!empty($batchIndex) ) {
                 if($incremental || !$this->helperData->isMultiPartUploadEnabled()){
 				$index += $batchIndex;
                 }else{
-                    $feedManager->batchExecute($batchIndex,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
+                    if($multiPartBatchCount >= $multiPartBatchSize){
+                        
+                        $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
+                        $multiPartBatchCount = 0;
+                        $index = [];
+                    }else{
+                        $index += $batchIndex;
+                        $index["fields"]=$fields;
+                    }
                 }
 			}
         }
