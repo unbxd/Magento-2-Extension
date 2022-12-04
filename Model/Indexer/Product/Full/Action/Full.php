@@ -235,6 +235,9 @@ class Full
 			}
         }
         if(!$incremental && $this->helperData->isMultiPartUploadEnabled()){
+            if (!empty($index) ) {
+                $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
+            }
             $feedManager->endMultiUpload($storeId);
         }
 		$index["fields"]=$fields;
