@@ -794,6 +794,7 @@ class Manager
             }else{
                 $this->logger->error("Error submitting feed".$response->getResponseBody());
                 if($batchUpload){
+                $this->postProcessActions();
                 throw new \Exception("Failed to start multi part upload");
                 }
             }
