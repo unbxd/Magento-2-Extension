@@ -327,8 +327,17 @@ class Connector
 
         if ($type == FeedConfig::FEED_TYPE_FULL) {
             $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store);
+            if($this->helperData->isMultiPartUploadEnabled()){
+                $apiEndpoint = $apiEndpoint."/write";
+            }
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
-        } else if ($type == FeedConfig::FEED_TYPE_INCREMENTAL) {
+        } else if ($type == FeedConfig::FEED_TYPE_FULL_MULTI_START) {
+            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store)."/start";
+            $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
+        }else if ($type == FeedConfig::FEED_TYPE_FULL_MULTI_END) {
+            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store)."/end";
+            $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
+        }else if ($type == FeedConfig::FEED_TYPE_INCREMENTAL) {
             $apiEndpoint = $this->helperData->getIncrementalFeedApiEndpoint($store);
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
         } else if ($type == FeedConfig::FEED_TYPE_FULL_UPLOADED_STATUS) {

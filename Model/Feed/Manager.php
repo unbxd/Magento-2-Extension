@@ -305,7 +305,6 @@ class Manager
         if (!$feedObj) {
             return;
         }
-       
         if (array_key_exists(FeedConfig::FEED_FIELD_KEY, $feedObj) && array_key_exists(FeedConfig::CATALOG_FIELD_KEY, $feedObj[FeedConfig::FEED_FIELD_KEY]) && array_key_exists(FeedConfig::SCHEMA_FIELD_KEY, $feedObj[FeedConfig::FEED_FIELD_KEY][FeedConfig::CATALOG_FIELD_KEY])) {
             $feed = $feedObj["feed"];
             unset($feed["catalog"]["schema"]);
@@ -336,7 +335,7 @@ class Manager
         return $this;
     }
 
-    public function batchExecute($index, $partCount, $type = FeedConfig::FEED_TYPE_FULL,$store = null)
+    public function batchExecute($index, $partCount, $type = FeedConfig::FEED_TYPE_FULL, $store = null)
     {
         if (empty($index)) {
             $this->logger->error('Unable to execute feed. Index data are empty.');
@@ -346,13 +345,14 @@ class Manager
         $this->preProcessActions($ids, $type, $store, []);
         $this->startProfiler()
             ->initExecute($index, $store)
-            ->removeSchema()
             ->serializeAndWriteFeed(
                 [
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
                     'feedId' => sprintf('_%s_%s', $this->feedViewId, $partCount)
-                ],true
+                ],
+                true
             )
+            ->sendFeed($store,true)
             ->stopProfiler();
     }
 
@@ -411,7 +411,7 @@ class Manager
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function serializeAndWriteFeed($fileParameters = [],$batchUpdate = false)
+    public function serializeAndWriteFeed($fileParameters = [], $batchUpdate = false)
     {
 
         if ($this->configHelper->getEnableSerialization()) {
@@ -734,9 +734,10 @@ class Manager
      * Send feed data through Unbxd API
      *
      * @param null $store
+     * @param null $batchUpload
      * @return $this
      */
-    private function sendFeed($store = null)
+    private function sendFeed($store = null,$batchUpload = false)
     {
         $this->logger->info('Send feed to service.');
 
@@ -759,19 +760,24 @@ class Manager
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
+            if($batchUpload){
+                throw $e;
+            }
             return $this;
         }
 
+        if(!$batchUpload){
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_after.');
         $this->eventManager->dispatch(
             $this->eventPrefix . '_send_after',
             ['file_params' => $params, 'feed_manager' => $this]
         );
+    }
 
         /** @var FeedResponse $response */
         $response = $connectorManager->getResponse();
         if ($response instanceof FeedResponse) {
-            if (!$response->getIsError()) {
+            if (!$response->getIsError() && !$batchUpload) {
                 // additional API calls
                 if (FeedConfig::VALIDATE_STATUS_FOR_UPLOADED_FEED) {
                     $this->checkUploadedFeedStatus($connectorManager, $response, $store);
@@ -783,6 +789,59 @@ class Manager
         }
 
         return $this;
+    }
+
+    public function startMultiUpload($store)
+    {
+        $this->preProcessActions([], Config::FEED_TYPE_FULL, $store);
+        /** @var \Unbxd\ProductFeed\Model\Feed\Api\Connector $connectorManager */
+        $connectorManager = $this->getConnectorManager();
+        try {
+            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_START, \Zend_Http_Client::POST, [], [], $store);
+
+            /** @var FeedResponse $response */
+            $response = $connectorManager->getResponse();
+            if ($response instanceof FeedResponse) {
+                if ($response->getUploadId()) {
+
+                    $this->getFeedViewManager()->updateUploadId($this->feedViewId, $response->getUploadId());
+                } else {
+                    $this->logger->error("Upload ID missing");
+                    throw new \Exception("Failed to start multi part upload ".$response->getResponseBody());
+                }
+            }
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
+            $this->postProcessActions();
+            return $this;
+        }
+    }
+
+    public function endMultiUpload($store)
+    {
+
+        /** @var \Unbxd\ProductFeed\Model\Feed\Api\Connector $connectorManager */
+        $connectorManager = $this->getConnectorManager();
+        try {
+            $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
+            $params = [];
+            $params["feedId"] = $feedViewEntity->getUploadId();
+            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Zend_Http_Client::POST, [], $params, $store);
+
+            /** @var FeedResponse $response */
+            $response = $connectorManager->getResponse();
+            if ($response instanceof FeedResponse) {
+                if ($response->getIsError()) {
+                    $this->logger->error("Error calling end multi part ".$response->getResponseBody());
+                    throw new \Exception("Failed to start multi part upload");
+                }
+            }
+            $this->postProcessActions();
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
+            $this->postProcessActions();
+            throw $e;
+        }
     }
 
     /**

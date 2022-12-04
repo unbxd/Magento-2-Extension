@@ -196,6 +196,12 @@
                     <tooltip>Enabling this option will exchange only price and stock details of the product during incremental runs.</tooltip>
                     <comment><![CDATA[Enabling this option will exchange only price and stock details of the product during incremental runs.]]></comment>
                 </field>
+                <field id="multi_part_upload" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable multi part upload for Full Feed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <tooltip>Enabling this option will submit records in batches which helps in reducing the memory footprint for the job</tooltip>
+                    <comment><![CDATA[Enabling this option will submit records in batches which helps in reducing the memory footprint for the job]]></comment>
+                </field>
                 <field id="indexing_queue_archival_time" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Time (in minutes) to archive records in Indexing Queue View</label>
                     <validate>validate-number</validate>

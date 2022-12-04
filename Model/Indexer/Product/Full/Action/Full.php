@@ -189,6 +189,9 @@ class Full
         $fields = [];
         $batchSize = $this->batchRowsCount;
         $processCount = 0;
+        if(!$incremental && $this->helperData->isMultiPartUploadEnabled()){
+            $feedManager->startMultiUpload($storeId);
+        }
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
 			if (!empty($batchIndex)) {
                 if($incremental && $this->helperData->isPartialIncrementalEnabled())
@@ -209,7 +212,7 @@ class Full
             }
             if (isset($batchIndex["fields"])){
             $fields = array_merge($fields,$batchIndex["fields"]);
-            unset($batchIndex["fields"]);
+            //unset($batchIndex["fields"]);
             }
 			if (!empty($batchIndex) ) {
                 if($incremental || !$feedManager){
@@ -218,6 +221,9 @@ class Full
                     $feedManager->batchExecute($batchIndex,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
                 }
 			}
+        }
+        if(!$incremental && $this->helperData->isMultiPartUploadEnabled()){
+            $feedManager->endMultiUpload($storeId);
         }
 		$index["fields"]=$fields;
         return $index;

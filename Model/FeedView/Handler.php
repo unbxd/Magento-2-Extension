@@ -206,6 +206,32 @@ class Handler extends \Magento\Framework\DataObject
     }
 
     /**
+     * Update upload ID
+     *
+     * @param $id
+     * @param $uploadId
+     * @return $this
+     */
+    public function updateUploadId($id, $uploadId)
+    {
+        try {
+            /** @var \Unbxd\ProductFeed\Api\Data\FeedViewInterface $model */
+            $model = $this->init($id);
+            if ($model->getId() && !$uploadId) {
+                $model->setUploadId($uploadId);
+                $this->save($model);
+                $this->logger->info('Updated feed view record with #' . $model->getId());
+            }
+        } catch (LocalizedException $e) {
+            $this->logger->critical($e);
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
+        }
+
+        return $this;
+    }
+
+    /**
      * Update feed view record from related list
      *
      * @param $id

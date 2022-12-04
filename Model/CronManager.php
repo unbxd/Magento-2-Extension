@@ -634,6 +634,7 @@ class CronManager
 
             // perform synchronization on reindex success with no empty index data
             if ($isReindexSuccess) {
+                if(!$this->helperData->isMultiPartUploadEnabled()){
                 $type = $isFullReindex ? FeedConfig::FEED_TYPE_FULL : FeedConfig::FEED_TYPE_INCREMENTAL;
                 
                 $feedViewId = $feedManager->execute($jobIndex, $type, $storeId,
@@ -642,6 +643,7 @@ class CronManager
                         IndexingQueueInterface::NUMBER_OF_ATTEMPTS => $numberOfAttempts,
                     ]
                 );
+            }
                 // set feed view ID, related to current reindex process
                 if ($feedViewId) {
                     $this->queueHandler->update($jobId,
