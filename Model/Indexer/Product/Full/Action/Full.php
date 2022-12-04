@@ -215,7 +215,7 @@ class Full
             //unset($batchIndex["fields"]);
             }
 			if (!empty($batchIndex) ) {
-                if($incremental || !$feedManager){
+                if($incremental || !$this->helperData->isMultiPartUploadEnabled()){
 				$index += $batchIndex;
                 }else{
                     $feedManager->batchExecute($batchIndex,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
