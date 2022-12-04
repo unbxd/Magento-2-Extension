@@ -342,6 +342,7 @@ class Manager
             return false;
         }
         $ids = ($type == FeedConfig::FEED_TYPE_FULL) ? [] : array_keys($index);
+        $this->type = $type;
         $this->preProcessActions($ids, $type, $store, []);
         $this->startProfiler()
             ->initExecute($index, $store)
