@@ -341,6 +341,10 @@ class Manager
             $this->logger->error('Unable to execute feed. Index data are empty.');
             return false;
         }
+        if(!$this->logger->isTimerStarted()){
+            $this->logger->startTimer();
+        }
+        
         $ids = ($type == FeedConfig::FEED_TYPE_FULL) ? [] : array_keys($index);
         $this->type = $type;
         $this->preProcessActions($ids, $type, $store, []);
@@ -1078,7 +1082,7 @@ class Manager
             $this->updateFeedView($response);
         }
 
-        //$this->cleanupFeedFiles();
+        $this->cleanupFeedFiles();
 
         // reset local cache to initial state
         $this->reset();
