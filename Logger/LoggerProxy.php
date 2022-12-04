@@ -179,6 +179,13 @@ class LoggerProxy implements LoggerInterface
     }
 
     /**
+     * @return bool
+     */
+    public function isTimerStarted(){
+        $this->getLogger()->isTimerStarted();
+    }
+
+    /**
      * @return string
      */
     public function getTime()
