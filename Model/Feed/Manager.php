@@ -747,7 +747,10 @@ class Manager
             $this->logger->error('File parameters for request are empty.');
             return $this;
         }
-
+        if($batchUpload){
+            $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
+            $params["feedId"] = $feedViewEntity->getUploadId();
+        }
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_before.');
         $this->eventManager->dispatch(
             $this->eventPrefix . '_send_before',
@@ -778,7 +781,8 @@ class Manager
         /** @var FeedResponse $response */
         $response = $connectorManager->getResponse();
         if ($response instanceof FeedResponse) {
-            if (!$response->getIsError() && !$batchUpload) {
+            if (!$response->getIsError()) {
+                if(!$batchUpload){
                 // additional API calls
                 if (FeedConfig::VALIDATE_STATUS_FOR_UPLOADED_FEED) {
                     $this->checkUploadedFeedStatus($connectorManager, $response, $store);
@@ -787,6 +791,13 @@ class Manager
                     $this->retrieveUploadedSize($connectorManager, $response, $store);
                 }
             }
+            }else{
+                $this->logger->error("Error submitting feed".$response->getResponseBody());
+                if($batchUpload){
+                throw new \Exception("Failed to start multi part upload");
+                }
+            }
+
         }
 
         return $this;

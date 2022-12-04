@@ -276,7 +276,7 @@ class Connector
         if (!$secretKey || !$siteKey) {
             return false;
         }
-
+        $this->resetHeaders();
         $this->setHeaders([
             "Authorization: {$secretKey}"
         ]);

@@ -615,12 +615,11 @@ class Data extends AbstractHelper
      */
     public function isMultiPartUploadEnabled($store = null)
     {
-        /**return $this->scopeConfig->isSetFlag(
+        return $this->scopeConfig->isSetFlag(
             self::XML_PATH_CATALOG_MULTI_PART_UPLOAD_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
-        );*/
-        return true;
+        );
     }
     
 
