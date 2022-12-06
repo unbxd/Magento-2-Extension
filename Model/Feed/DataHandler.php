@@ -428,6 +428,9 @@ class DataHandler
             return $this;
         }
 
+        $availableProductTypes = $this->helperData->getAvailableProductTypes($store);
+        $isOnlySimpleProduct = (count($availableProductTypes) == 1 && $availableProductTypes[0] == "simple");
+
         foreach ($index as $productId => &$data) {
             try {
                 // schema fields has key 'fields', do only for products
@@ -444,7 +447,7 @@ class DataHandler
                     ) {
                         $currentChildIds = $data[Config::CHILD_PRODUCT_IDS_FIELD_KEY];
                         $this->appendChildDataToParent($index, $data, $currentChildIds, $store);
-                    } else {
+                    } else if(!$isOnlySimpleProduct){
                         // if product doesn't have children - add empty variants data
                         $data[Config::CHILD_PRODUCTS_FIELD_KEY] = [];
                     }
