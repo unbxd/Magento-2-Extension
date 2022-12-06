@@ -1,4 +1,6 @@
-# Version 2.0.3
+# Version 2.0.4
+## 2.0.4 - December 6, 2022
+- For Customers with simple product catalog variants attributes are not sent in the feed. 
 ## 2.0.3 - September 20, 2022
 - Created an attribute to indicate the date since the product was actually created in customers system 
 ## 2.0.2 - August 20, 2022
