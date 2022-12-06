@@ -220,14 +220,14 @@ class Full
             }
 			if (!empty($batchIndex) ) {
 				$index += $batchIndex;
-                if($this->helperData->isMultiPartUploadEnabled() && $multiPartBatchCount >= $multiPartBatchSize){                        
+                if($this->helperData->isMultiPartUploadEnabled() && $multiPartBatchCount >= $multiPartBatchSize && $feedManager){                        
                         $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
                         $multiPartBatchCount = 0;
                         $index = [];
                 }
 			}
         }
-        if(!$incremental && $this->helperData->isMultiPartUploadEnabled()){
+        if(!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager){
             if (!empty($index) ) {
                 $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
             }
