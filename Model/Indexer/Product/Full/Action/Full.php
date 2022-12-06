@@ -191,7 +191,7 @@ class Full
         $multiPartBatchSize = $this->helperData->getMultiPartBatchSize() ?? $batchSize;
         $processCount = 0;
         $multiPartBatchCount = 0;
-        if(!$incremental && $this->helperData->isMultiPartUploadEnabled()){
+        if(!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager){
             $feedManager->startMultiUpload($storeId);
         }
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
