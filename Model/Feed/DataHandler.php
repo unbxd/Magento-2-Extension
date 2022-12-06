@@ -429,7 +429,7 @@ class DataHandler
         }
 
         $availableProductTypes = $this->helperData->getAvailableProductTypes($store);
-        $isOnlySimpleProduct = (count($availableProductTypes) == 1 && array_keys($availableProductTypes)[0] == "simple");
+        $isOnlySimpleProduct = (count($availableProductTypes) == 1 && $availableProductTypes[0] == "simple");
 
         foreach ($index as $productId => &$data) {
             try {
