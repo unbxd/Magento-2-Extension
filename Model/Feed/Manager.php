@@ -843,9 +843,8 @@ class Manager
         $connectorManager = $this->getConnectorManager();
         try {
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
-            $params = [];
-            $params["feedId"] = $feedViewEntity->getUploadId();
-            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Zend_Http_Client::POST, [], $params, $store);
+            $queryParameter = "?feedId=".$feedViewEntity->getUploadId();
+            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Zend_Http_Client::POST, [], $params, $store,$queryParameter);
 
             /** @var FeedResponse $response */
             $response = $connectorManager->getResponse();
