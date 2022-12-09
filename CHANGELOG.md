@@ -1,4 +1,4 @@
-# Version 2.0.4.1
+# Version 2.0.4
 ## 2.0.4.1 - December 11, 2022
 - Support for multi part feed upload option. This is not enabled by default but can be enabled through unbxd > catalog > indexing section
 ## 2.0.4 - December 6, 2022
