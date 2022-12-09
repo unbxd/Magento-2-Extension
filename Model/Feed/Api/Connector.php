@@ -443,7 +443,6 @@ class Connector
             /** @var \Magento\Framework\HTTP\Adapter\Curl $httpAdapter */
             $httpAdapter = $this->curlFactory->create();
             $body = !empty($this->getParams()) ? $this->getParams() : '';
-            echo $this->getApiUrl();
             $httpAdapter->write(
                 $this->getRequestMethod(),
                 $this->getApiUrl(),
