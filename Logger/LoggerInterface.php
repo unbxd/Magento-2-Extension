@@ -64,6 +64,11 @@ interface LoggerInterface
     public function startTimer();
 
     /**
+     * @return bool
+     */
+    public function isTimerStarted();
+
+    /**
      * @return string
      */
     public function getTime();

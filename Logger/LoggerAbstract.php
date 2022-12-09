@@ -57,6 +57,10 @@ abstract class LoggerAbstract implements LoggerInterface
         $this->timer = microtime(true);
     }
 
+    public function isTimerStarted(){
+        return ($this->timer  && $this->timer > 0);
+    }
+
     /**
      * @return string
      */
