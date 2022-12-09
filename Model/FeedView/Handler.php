@@ -217,7 +217,7 @@ class Handler extends \Magento\Framework\DataObject
         try {
             /** @var \Unbxd\ProductFeed\Api\Data\FeedViewInterface $model */
             $model = $this->init($id);
-            if ($model->getId() && !$uploadId) {
+            if ($model->getId() && $uploadId) {
                 $model->setUploadId($uploadId);
                 $this->save($model);
                 $this->logger->info('Updated feed view record with #' . $model->getId());

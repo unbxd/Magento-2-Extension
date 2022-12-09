@@ -754,6 +754,7 @@ class Manager
         $queryParameter = '';
         if($batchUpload){
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
+            echo $feedViewEntity->getUploadId();
             $queryParameter = "?feedId=".$feedViewEntity->getUploadId();
         }
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_before.');
