@@ -307,9 +307,10 @@ class Connector
      *
      * @param $type
      * @param null $store
+     * @param null $queryParameter
      * @return bool
      */
-    private function prepareApiUrl($type, $store = null)
+    private function prepareApiUrl($type, $store = null,$queryParameter = "")
     {
         if (!$siteKey = $this->getSiteKey()) {
             return false;
@@ -328,14 +329,14 @@ class Connector
         if ($type == FeedConfig::FEED_TYPE_FULL) {
             $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store);
             if($this->helperData->isMultiPartUploadEnabled()){
-                $apiEndpoint = $apiEndpoint."/write";
+                $apiEndpoint = $apiEndpoint."/write".$queryParameter;
             }
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
         } else if ($type == FeedConfig::FEED_TYPE_FULL_MULTI_START) {
-            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store)."/start";
+            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store)."/start".$queryParameter;
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
         }else if ($type == FeedConfig::FEED_TYPE_FULL_MULTI_END) {
-            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store)."/end";
+            $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store)."/end".$queryParameter;
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
         }else if ($type == FeedConfig::FEED_TYPE_INCREMENTAL) {
             $apiEndpoint = $this->helperData->getIncrementalFeedApiEndpoint($store);
@@ -413,13 +414,14 @@ class Connector
         $method = \Zend_Http_Client::POST,
         $headers = [],
         $params = [],
-        $store = null
+        $store = null,
+        $queryParameter = ""
     ) {
         if (!$this->prepareAuthorizationParams($store)) {
             $this->doError(__('Please provide API credentials to perform this operation.'));
         }
 
-        if (!$this->prepareApiUrl($type, $store)) {
+        if (!$this->prepareApiUrl($type, $store,$queryParameter)) {
             $this->doError(__('API url must be set up before using API calls.'));
         }
 

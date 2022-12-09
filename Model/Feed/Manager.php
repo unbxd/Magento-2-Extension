@@ -751,9 +751,10 @@ class Manager
             $this->logger->error('File parameters for request are empty.');
             return $this;
         }
+        $queryParameter = '';
         if($batchUpload){
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
-            $params["feedId"] = $feedViewEntity->getUploadId();
+            $queryParameter = "?feedId=".$feedViewEntity->getUploadId();
         }
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_before.');
         $this->eventManager->dispatch(
@@ -764,7 +765,7 @@ class Manager
         /** @var \Unbxd\ProductFeed\Model\Feed\Api\Connector $connectorManager */
         $connectorManager = $this->getConnectorManager();
         try {
-            $connectorManager->execute($this->type, \Zend_Http_Client::POST, [], $params, $store);
+            $connectorManager->execute($this->type, \Zend_Http_Client::POST, [], $params, $store,$queryParameter);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
