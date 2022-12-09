@@ -390,9 +390,10 @@ class Connector
         $method = \Zend_Http_Client::POST,
         $headers = [],
         $params = [],
-        $store = null
+        $store = null,
+        $queryParameter = ""
     ) {
-        $this->buildRequest($type, $method, $headers, $params, $store);
+        $this->buildRequest($type, $method, $headers, $params, $store,$queryParameter);
         $this->call();
 
         return $this;
