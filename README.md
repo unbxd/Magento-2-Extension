@@ -1,5 +1,4 @@
 # Unbxd Product Feed Module For Magento 2
-
 [![Latest Stable Version](https://poser.pugx.org/unbxd/magento2-product-feed/v/stable)](https://packagist.org/packages/unbxd/magento2-product-feed)
 [![Total Downloads](https://poser.pugx.org/unbxd/magento2-product-feed/downloads)](https://packagist.org/packages/unbxd/magento2-product-feed)
 [![License](https://poser.pugx.org/unbxd/magento2-product-feed/license)](https://packagist.org/packages/unbxd/magento2-product-feed)
@@ -23,7 +22,7 @@ php bin/magento cache:flush
 
 ### Manual installation
 
-1. Download this module [Link](https://github.com/unbxd/Magento-2-Extension/archive/2.0.4.zip)
+1. Download this module [Link](https://github.com/unbxd/Magento-2-Extension/archive/2.0.5.zip)
 3. Unzip module in the folder:
 
     app\code\Unbxd\ProductFeed

@@ -1,4 +1,6 @@
-# Version 2.0.4
+# Version 2.0.5
+## 2.0.5 - Jan 6, 2022
+- Support for multi part feed upload option. This is not enabled by default but can be enabled through unbxd > catalog > indexing section
 ## 2.0.4 - December 6, 2022
 - For Customers with simple product catalog variants attributes are not sent in the feed. 
 ## 2.0.3 - September 20, 2022
