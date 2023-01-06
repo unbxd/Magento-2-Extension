@@ -82,7 +82,7 @@ class Download extends AbstractCommand
         $start = microtime(true);
         try {
             $output->writeln("<info>Rebuild index...</info>");
-            $index = $this->reindexAction->rebuildProductStoreIndex($storeId, []);
+            $index = $this->reindexAction->rebuildProductStoreIndex($storeId, [],null,$this->getFeedManager());
         } catch (\Exception $e) {
             $output->writeln("<error>Indexing error: {$e->getMessage()}</error>");
             return false;

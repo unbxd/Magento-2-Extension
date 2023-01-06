@@ -316,6 +316,20 @@ class Manager
     /**
      * Performing operations related to build and write feed data to a file
      *
+     * @param $feedViewId
+     * @return $this
+     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function executeForMultiPartDownload($feedViewId)
+    {
+       
+        return $this;
+    }
+
+    /**
+     * Performing operations related to build and write feed data to a file
+     *
      * @param $index
      * @param null $store
      * @return $this
@@ -421,7 +435,7 @@ class Manager
 
         if ($this->configHelper->getEnableSerialization()) {
             if (!empty($fileParameters)) {
-                $fileManager = $this->getFileManager($fileParameters);
+                $fileManager = $this->getFileManager($fileParameters,$batchUpdate);
             } else {
                 $fileManager = $this->getFileManager();
             }
@@ -1126,11 +1140,12 @@ class Manager
      * Retrieve file manager instance. Init if needed
      *
      * @param array $data
+     * @param bool $newInstance
      * @return FileManager|null
      */
-    private function getFileManager($data = [])
+    private function getFileManager($data = [],$newInstance = false)
     {
-        if (null == $this->fileManager) {
+        if (null == $this->fileManager || $newInstance) {
             /** @var FeedFileManager */
             $this->fileManager = $this->fileManagerFactory->create($data);
         }
