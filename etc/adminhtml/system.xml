@@ -202,8 +202,13 @@
                     <tooltip>Enabling this option will submit records in batches which helps in reducing the memory footprint for the job</tooltip>
                     <comment><![CDATA[Enabling this option will submit records in batches which helps in reducing the memory footprint for the job]]></comment>
                 </field>
+                <field id="batch_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch Size to query DB(product#)</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[Product Count to be queried from database.]]></comment>
+                </field>
                 <field id="multi_part_batch_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Batch Size (product#)</label>
+                    <label>Multipart Batch Size (product#)</label>
                     <validate>validate-number</validate>
                     <comment><![CDATA[Product Count to be split into chunks while processing full feed.]]></comment>
                 </field>

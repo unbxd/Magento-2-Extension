@@ -421,7 +421,6 @@ class Manager
      */
     public function serializeAndWriteFeed($fileParameters = [],$batchUpdate = false, $useNewFileInstance = false)
     {
-        echo "Use New Fil Instance ".$useNewFileInstance;
         if ($this->configHelper->getEnableSerialization()) {
             if (!empty($fileParameters) || $useNewFileInstance) {
                 $fileManager = $this->getFileManager($fileParameters,$useNewFileInstance);
@@ -1067,7 +1066,7 @@ class Manager
      */
     public function postProcessActions()
     {
-        $this->logger->info('Post-process execution actions. - '.$this->feedHelper->isCleanupFileOnCompletion());
+        $this->logger->info('Post-process execution actions.');
 
         /** @var ApiConnector $connectorManager */
         $connectorManager = $this->getConnectorManager();

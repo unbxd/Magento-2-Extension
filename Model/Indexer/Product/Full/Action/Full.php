@@ -187,7 +187,7 @@ class Full
     {
         $index = [];
         $fields = [];
-        $batchSize = $this->batchRowsCount;
+        $batchSize = $this->helperData->getBatchSize() ?? $this->batchRowsCount;
         $multiPartBatchSize = $this->helperData->getMultiPartBatchSize() ?? $batchSize;
         $processCount = 0;
         $multiPartBatchCount = 0;
