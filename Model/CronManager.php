@@ -587,7 +587,7 @@ class CronManager
                 $feedManager = $this->feedManagerFactory->create();
                 /** @var FullReindexAction $fullReindexAction */
                 $fullReindexAction = $this->fullReindexActionFactory->create();
-                $jobIndex = $fullReindexAction->rebuildProductStoreIndex($storeId, $jobData,$feedManager);
+                $jobIndex = $fullReindexAction->rebuildProductStoreIndex($storeId, $jobData,null,$feedManager);
                 $this->logger->info(sprintf('Finished reindex for job with #%s. Stats:', $jobId))->logStats();
                 $isReindexSuccess = true;
             } catch (\Exception $e) {
