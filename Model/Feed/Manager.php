@@ -312,7 +312,7 @@ class Manager
 
         return $this;
     }
-    
+
     /**
      * Performing operations related to build and write feed data to a file
      *
@@ -355,7 +355,8 @@ class Manager
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
                     'feedId' => sprintf('_%s_%s', $this->feedViewId, $partCount)
                 ],
-                true
+                true,
+                !$this->feedHelper->isCleanupFileOnCompletion()
             )
             ->sendFeed($store,true)
             ->stopProfiler();
@@ -413,15 +414,17 @@ class Manager
 
     /**
      * @param array $fileParameters
+     * @param bool $batchUpdate
+     * @param bool $useNewFileInstance
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function serializeAndWriteFeed($fileParameters = [], $batchUpdate = false)
+    public function serializeAndWriteFeed($fileParameters = [],$batchUpdate = false, $useNewFileInstance = false)
     {
-
+        echo "Use New Fil Instance ".$useNewFileInstance;
         if ($this->configHelper->getEnableSerialization()) {
-            if (!empty($fileParameters)) {
-                $fileManager = $this->getFileManager($fileParameters,$batchUpdate);
+            if (!empty($fileParameters) || $useNewFileInstance) {
+                $fileManager = $this->getFileManager($fileParameters,$useNewFileInstance);
             } else {
                 $fileManager = $this->getFileManager();
             }
@@ -1064,7 +1067,7 @@ class Manager
      */
     public function postProcessActions()
     {
-        $this->logger->info('Post-process execution actions.');
+        $this->logger->info('Post-process execution actions. - '.$this->feedHelper->isCleanupFileOnCompletion());
 
         /** @var ApiConnector $connectorManager */
         $connectorManager = $this->getConnectorManager();
