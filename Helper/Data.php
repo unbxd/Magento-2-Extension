@@ -69,6 +69,7 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_MULTI_PART_BATCH_SIZE = 'unbxd_catalog/indexing/multi_part_batch_size';
     const XML_PATH_INDEXING_QUEUE_ARCHIVAL_INMINUTES = 'unbxd_catalog/indexing/indexing_queue_archival_time';
     const XML_PATH_FEED_VIEW_ARCHIVAL_INMINUTES = 'unbxd_catalog/indexing/feed_view_archival_time';
+    const XML_PATH_FEED_FILE_CLEANUP = 'unbxd_catalog/indexing/feed_file_cleanup_enabled';
 
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     const XML_PATH_CATALOG_VERSION_CHECK = 'unbxd_catalog/general/check_latest_version_update';
@@ -673,6 +674,16 @@ class Data extends AbstractHelper
     {
         return (int)$this->scopeConfig->getValue(
             self::XML_PATH_INDEXING_QUEUE_ARCHIVAL_INMINUTES,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    public function isCleanupFileOnCompletion($store = null)
+    {
+        
+        return (int)$this->scopeConfig->getValue(
+            self::XML_PATH_FEED_FILE_CLEANUP,
             ScopeInterface::SCOPE_STORE,
             $store
         );

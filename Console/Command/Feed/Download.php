@@ -69,6 +69,12 @@ class Download extends AbstractCommand
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
             return false;
         }
+
+        if($this->feedHelper->isMultiPartUploadEnabled($storeId)){
+            $output->writeln("<error>Feed download option is not support when multi part upload is enabled.</error>");
+            return false;
+        }
+
         // check if catalog product not empty
         $productIds = $this->productHelper->getAllProductsIds();
         if (!count($productIds)) {

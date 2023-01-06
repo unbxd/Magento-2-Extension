@@ -312,21 +312,7 @@ class Manager
 
         return $this;
     }
-
-    /**
-     * Performing operations related to build and write feed data to a file
-     *
-     * @param $feedViewId
-     * @return $this
-     * @throws \Magento\Framework\Exception\FileSystemException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function executeForMultiPartDownload($feedViewId)
-    {
-       
-        return $this;
-    }
-
+    
     /**
      * Performing operations related to build and write feed data to a file
      *
@@ -768,7 +754,6 @@ class Manager
         $queryParameter = '';
         if($batchUpload){
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
-            echo $feedViewEntity->getUploadId();
             $queryParameter = "?feedId=".$feedViewEntity->getUploadId();
         }
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_before.');
@@ -1097,7 +1082,9 @@ class Manager
             $this->updateFeedView($response);
         }
 
-        $this->cleanupFeedFiles();
+        if($this->feedHelper->isCleanupFileOnCompletion()){
+             $this->cleanupFeedFiles();
+        }
 
         // reset local cache to initial state
         $this->reset();
