@@ -69,6 +69,12 @@ class Download extends AbstractCommand
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
             return false;
         }
+
+        if($this->feedHelper->isMultiPartUploadEnabled($storeId)){
+            $output->writeln("<error>Feed download option is not support when multi part upload is enabled.</error>");
+            return false;
+        }
+
         // check if catalog product not empty
         $productIds = $this->productHelper->getAllProductsIds();
         if (!count($productIds)) {
@@ -82,7 +88,7 @@ class Download extends AbstractCommand
         $start = microtime(true);
         try {
             $output->writeln("<info>Rebuild index...</info>");
-            $index = $this->reindexAction->rebuildProductStoreIndex($storeId, []);
+            $index = $this->reindexAction->rebuildProductStoreIndex($storeId, [],null,$this->getFeedManager());
         } catch (\Exception $e) {
             $output->writeln("<error>Indexing error: {$e->getMessage()}</error>");
             return false;

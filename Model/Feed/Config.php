@@ -52,6 +52,9 @@ class Config
      *  uploaded_size - the number of records present.
      */
     const FEED_TYPE_FULL = 'full';
+    const FEED_TYPE_FULL_MULTI_START = 'multi_part_start';
+    const FEED_TYPE_FULL_MULTI_WRITE = 'multi_part_write';
+    const FEED_TYPE_FULL_MULTI_END = 'multi_part_end';
     const FEED_TYPE_INCREMENTAL = 'incremental';
     const FEED_TYPE_FULL_UPLOADED_STATUS = 'full_uploaded_status';
     const FEED_TYPE_INCREMENTAL_UPLOADED_STATUS = 'incremental_uploaded_status';

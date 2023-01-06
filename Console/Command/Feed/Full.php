@@ -99,13 +99,14 @@ class Full extends AbstractCommand
                 /** @var \Magento\Store\Model\Store $store */
                 try {
                     $output->writeln("<info>Rebuild index...</info>");
-                    $index = $this->reindexAction->rebuildProductStoreIndex($storeId, []);
+                    $index = $this->reindexAction->rebuildProductStoreIndex($storeId, [],null,$this->getFeedManager());
                 } catch (\Exception $e) {
                     $output->writeln("<error>Indexing error: {$e->getMessage()}</error>");
                     $errors[$storeId] = $e->getMessage();
                     break;
                 }
 
+                if(!$this->feedHelper->isMultiPartUploadEnabled()){
                 if (empty($index)) {
                     $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
                     return false;
@@ -119,6 +120,7 @@ class Full extends AbstractCommand
                     $errors[$storeId] = $e->getMessage();
                     break;
                 }
+            }
             }
         }
 

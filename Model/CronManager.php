@@ -583,9 +583,11 @@ class CronManager
             $storeId = $job->getStoreId();
             $this->logger->info(sprintf('Start reindex for job with #%d', $jobId))->startTimer();
             try {
+                /** @var FeedManager $feedManager */
+                $feedManager = $this->feedManagerFactory->create();
                 /** @var FullReindexAction $fullReindexAction */
                 $fullReindexAction = $this->fullReindexActionFactory->create();
-                $jobIndex = $fullReindexAction->rebuildProductStoreIndex($storeId, $jobData);
+                $jobIndex = $fullReindexAction->rebuildProductStoreIndex($storeId, $jobData,null,$feedManager);
                 $this->logger->info(sprintf('Finished reindex for job with #%s. Stats:', $jobId))->logStats();
                 $isReindexSuccess = true;
             } catch (\Exception $e) {
@@ -632,15 +634,16 @@ class CronManager
 
             // perform synchronization on reindex success with no empty index data
             if ($isReindexSuccess) {
+                if(!$this->helperData->isMultiPartUploadEnabled()){
                 $type = $isFullReindex ? FeedConfig::FEED_TYPE_FULL : FeedConfig::FEED_TYPE_INCREMENTAL;
-                /** @var FeedManager $feedManager */
-                $feedManager = $this->feedManagerFactory->create();
+                
                 $feedViewId = $feedManager->execute($jobIndex, $type, $storeId,
                     [
                         FeedViewInterface::REINDEX_JOB_ID => $jobId,
                         IndexingQueueInterface::NUMBER_OF_ATTEMPTS => $numberOfAttempts,
                     ]
                 );
+            }
                 // set feed view ID, related to current reindex process
                 if ($feedViewId) {
                     $this->queueHandler->update($jobId,

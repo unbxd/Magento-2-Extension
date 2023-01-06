@@ -16,6 +16,8 @@ use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider;
 use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
+use Unbxd\ProductFeed\Model\Feed\Manager as FeedManager;
+
 
 /**
  * Unbxd product feed full indexer.
@@ -55,6 +57,8 @@ class Full
      * @var integer
      */
     private $batchRowsCount;
+
+
 
     /**
      * Full constructor.
@@ -176,14 +180,20 @@ class Full
      * @param $storeId
      * @param $initIndexData
      * @param $incremental
+     * @param FeedManager $feedManager
      * @return array|mixed
      */
-    private function appendIndexData($storeId, $initIndexData, $incremental=false)
+    private function appendIndexData($storeId, $initIndexData, $incremental=false,$feedManager = null)
     {
         $index = [];
         $fields = [];
-        $batchSize = $this->batchRowsCount;
+        $batchSize = $this->helperData->getBatchSize() ?? $this->batchRowsCount;
+        $multiPartBatchSize = $this->helperData->getMultiPartBatchSize() ?? $batchSize;
         $processCount = 0;
+        $multiPartBatchCount = 0;
+        if(!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager){
+            $feedManager->startMultiUpload($storeId);
+        }
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
 			if (!empty($batchIndex)) {
                 if($incremental && $this->helperData->isPartialIncrementalEnabled())
@@ -198,16 +208,30 @@ class Full
 					$batchIndex = $dataSource->appendData($storeId, $batchIndex);
 				}
                 }
+
                 $processCount += $batchSize;
+                $multiPartBatchCount +=$batchSize;
                 $this->logger->info("Processed Products Count ::".$processCount);
             }
             if (isset($batchIndex["fields"])){
-            $fields = array_merge($fields,$batchIndex["fields"]);
-            unset($batchIndex["fields"]);
+                $fields = array_merge($fields,$batchIndex["fields"]);
+                unset($batchIndex["fields"]);
+                $index["fields"]=$fields;
             }
-			if (!empty($batchIndex)) {
+			if (!empty($batchIndex) ) {
 				$index += $batchIndex;
+                if($this->helperData->isMultiPartUploadEnabled() && $multiPartBatchCount >= $multiPartBatchSize && $feedManager){                        
+                        $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
+                        $multiPartBatchCount = 0;
+                        $index = [];
+                }
 			}
+        }
+        if(!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager){
+            if (!empty($index) ) {
+                $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
+            }
+            $feedManager->endMultiUpload($storeId);
         }
 		$index["fields"]=$fields;
         return $index;
@@ -219,15 +243,16 @@ class Full
      * @param $storeId
      * @param array $productIds
      * @param null $fromUpdatedDate
+     * @param FeedManager $feedManager
      * @return array|mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function rebuildProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null)
+    public function rebuildProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null,$feedManager = null)
     {
         $initIndexData = $this->initProductStoreIndex($storeId, $productIds, $fromUpdatedDate);
         $fullIndex = [];
         if (!empty($initIndexData)) {
-			$fullIndex = $this->appendIndexData($storeId, $initIndexData,(!empty($productIds) || $fromUpdatedDate != null));
+			$fullIndex = $this->appendIndexData($storeId, $initIndexData,(!empty($productIds) || $fromUpdatedDate != null),$feedManager);
         }
 
         // try to detect deleted product(s)

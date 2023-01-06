@@ -196,6 +196,22 @@
                     <tooltip>Enabling this option will exchange only price and stock details of the product during incremental runs.</tooltip>
                     <comment><![CDATA[Enabling this option will exchange only price and stock details of the product during incremental runs.]]></comment>
                 </field>
+                <field id="multi_part_upload" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable multi part upload for Full Feed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <tooltip>Enabling this option will submit records in batches which helps in reducing the memory footprint for the job</tooltip>
+                    <comment><![CDATA[Enabling this option will submit records in batches which helps in reducing the memory footprint for the job]]></comment>
+                </field>
+                <field id="batch_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch Size to query DB(product#)</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[Product Count to be queried from database.]]></comment>
+                </field>
+                <field id="multi_part_batch_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Multipart Batch Size (product#)</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[Product Count to be split into chunks while processing full feed.]]></comment>
+                </field>
                 <field id="indexing_queue_archival_time" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Time (in minutes) to archive records in Indexing Queue View</label>
                     <validate>validate-number</validate>
@@ -205,6 +221,12 @@
                     <label>Time (in minutes) to archive records in Feed View</label>
                     <validate>validate-number</validate>
                     <comment><![CDATA[Time (in minutes) to archive records in Feed View]]></comment>
+                </field>
+                 <field id="feed_file_cleanup_enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Delete files on sucessful operation</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <tooltip>Delete files on sucessful operation</tooltip>
+                    <comment><![CDATA[Delete files on succesful operation.If cleanup is disabled customers are recommended to have their own archival process for the files under (magentodirectory)/var/unbxd directory]]></comment>
                 </field>
             </group>
             <group id="data_fields_mapping" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
