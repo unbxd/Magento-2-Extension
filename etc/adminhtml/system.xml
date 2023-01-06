@@ -226,7 +226,7 @@
                     <label>Delete files on sucessful operation</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <tooltip>Delete files on sucessful operation</tooltip>
-                    <comment><![CDATA[Delete files on succesful operation.]]></comment>
+                    <comment><![CDATA[Delete files on succesful operation.If cleanup is disabled customers are recommended to have their own archival process for the files under (magentodirectory)/var/unbxd directory]]></comment>
                 </field>
             </group>
             <group id="data_fields_mapping" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
