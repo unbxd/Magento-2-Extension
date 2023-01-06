@@ -106,6 +106,7 @@ class Full extends AbstractCommand
                     break;
                 }
 
+                if(!$this->feedHelper->isMultiPartUploadEnabled()){
                 if (empty($index)) {
                     $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
                     return false;
@@ -119,6 +120,7 @@ class Full extends AbstractCommand
                     $errors[$storeId] = $e->getMessage();
                     break;
                 }
+            }
             }
         }
 
