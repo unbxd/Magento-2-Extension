@@ -97,6 +97,9 @@ class CategoryLookup implements DataSourceProviderInterface
                     $product = $this->productRepository->getById($productId,false,$storeId);
                     if ($product){
                         $categoryCollection = $product->getCategoryCollection();
+                        if($storeId){
+                            $categoryCollection->setStoreId($storeId);
+                        }
                         $categoryCollection->addFieldToSelect("name")->addFieldToSelect("is_active")->addFieldToSelect("url_path")->addFieldToSelect("is_parent");
                         $categoryDataList = array();
                         /** @var \Magento\Catalog\Model\Category $category */
