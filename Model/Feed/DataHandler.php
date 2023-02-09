@@ -668,7 +668,7 @@ class DataHandler
         if ($categoryData){
             $sanitizedCategoryData = [];
             foreach($categoryData as $categoryPath){
-                $sanitizedCategoryData[] = preg_replace('/&/i', '', $categoryPath);
+                $sanitizedCategoryData[] = preg_replace('/& {0,}/i', '', $categoryPath);
             }
             return $sanitizedCategoryData;
         }
