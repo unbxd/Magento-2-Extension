@@ -1,4 +1,6 @@
-# Version 2.0.6
+# Version 2.0.7
+## 2.0.7 - Feb 9, 2022
+- Sanitize category names and copy the values to unbxdCategoryPathId (based on relevancy team request)
 ## 2.0.6 - Jan 11, 2022
 - Select category names with specific to store ID
 ## 2.0.5 - Jan 6, 2022
