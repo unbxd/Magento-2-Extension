@@ -852,7 +852,7 @@ class Manager
             if ($response instanceof FeedResponse) {
                 if ($response->getIsError()) {
                     $this->logger->error("Error calling end multi part ".$response->getResponseBody());
-                    throw new \Exception("Failed to start multi part upload");
+                    throw new \Exception("Failed to end multi part upload");
                 }
             }
             $this->postProcessActions();

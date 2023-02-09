@@ -196,6 +196,7 @@ class Config
     const FIELD_KEY_STOCK_STATUS        = 'quantity_and_stock_status';
     const FIELD_KEY_CATEGORY_DATA       = 'category';
     const FIELD_KEY_VISIBILITY          = ProductInterface::VISIBILITY;
+    const FIELD_UNBXD_CATEGORY_PATH     = "unbxdCategoryPathId";
 
     /**
      * Specific fields declaration

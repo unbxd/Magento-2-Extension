@@ -524,7 +524,7 @@ class AttributeHelper extends AbstractHelper
             $fieldType = FeedConfig::FIELD_TYPE_BOOL;
         }
 
-        $multiValued = ($fieldName != 'category') ? false : true;
+        $multiValued = ($fieldName != 'category' && $fieldName != FeedConfig::FIELD_UNBXD_CATEGORY_PATH) ? false : true;
         $fieldOptions = [
             'fieldName' => (string) $fieldName,
             'dataType' => (string) $fieldType,

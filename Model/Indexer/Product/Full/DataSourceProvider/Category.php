@@ -15,6 +15,7 @@ use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface;
 use Unbxd\ProductFeed\Model\ResourceModel\Indexer\Product\Full\DataSourceProvider\Category as ResourceModel;
 use Unbxd\ProductFeed\Helper\AttributeHelper;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
+use Unbxd\ProductFeed\Model\Feed\Config;
 
 /**
  * Data source used to append categories data to product during indexing.
@@ -94,12 +95,10 @@ class Category implements DataSourceProviderInterface
             }
 
             $indexData[$productId]['category'][] = array_filter($categoryDataRow,'Unbxd\\ProductFeed\\Helper\\HelperUtil::_nonNull');
-            if (!in_array('category', $indexedFields)) {
-                $indexedFields[] = 'category';
-            }
+            
         }
 
-        $this->attributeHelper->appendSpecificIndexedFields($indexData, $indexedFields);
+        $this->attributeHelper->appendSpecificIndexedFields($indexData, ['category',Config::FIELD_UNBXD_CATEGORY_PATH]);
 
         return $indexData;
     }

@@ -19,6 +19,7 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Exception;
+use Unbxd\ProductFeed\Model\Feed\Config;
 
 /**
  * Data source used to append categories data to product whe category indexer is not working in ur environment.
@@ -122,7 +123,7 @@ class CategoryLookup implements DataSourceProviderInterface
             }
         }
 
-        $this->attributeHelper->appendSpecificIndexedFields($indexData, ['category']);
+        $this->attributeHelper->appendSpecificIndexedFields($indexData, ['category',Config::FIELD_UNBXD_CATEGORY_PATH]);
 
         return $indexData;
     }

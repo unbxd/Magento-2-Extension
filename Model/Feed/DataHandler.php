@@ -641,6 +641,7 @@ class DataHandler
                     $categoryData = $this->categoryDataHandler->buildCategoryList($data[Config::FIELD_KEY_CATEGORY_DATA],$store,$data["entity_id"]);
                     if (!empty($categoryData)) {
                         $data[$unbxdField] = $categoryData;
+                        $data[Config::FIELD_UNBXD_CATEGORY_PATH] = $this->sanitizeCategoryInformation($categoryData);
                     }
                     // to prevent send not valid category data, if category list in required format was not formed
                     unset($data[$productAttribute]);
@@ -662,6 +663,18 @@ class DataHandler
     }
 
 
+    private function sanitizeCategoryInformation($categoryData)
+    {
+        if ($categoryData){
+            $sanitizedCategoryData = [];
+            foreach($categoryData as $categoryPath){
+                $sanitizedCategoryData[] = preg_replace('/&/i', '', $categoryPath);
+            }
+            return $sanitizedCategoryData;
+        }
+
+        return $categoryData;
+    }
 
     /**
      * @param $imageType
