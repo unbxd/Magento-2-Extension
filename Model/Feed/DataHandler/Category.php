@@ -126,6 +126,10 @@ class Category
                     if ($key !== false && isset($categoryData[$key]['name']) ) {
                         if((isset($categoryData[$key]['is_active']) && $categoryData[$key]['is_active']) || $retainInactiveCategory){
                         $name = trim($categoryData[$key]['name']);
+                        }else{
+                            $this->logger->info("Skipping disabled category   with category ID " . $key . " for entityID- " . $entity_id);
+                            $skipRecord = true;
+                            break;
                         }
                     } else {
                         try {
@@ -221,7 +225,10 @@ class Category
                         if((isset($categoryData[$key]['is_active']) && $categoryData[$key]['is_active']) || $retainInactiveCategory){
                         $name = trim($categoryData[$key]['name']);
                         }else{
-                            $name="";
+                            $this->logger->info("Skipping disabled category   with category ID " . $key . " for entityID- " . $entity_id);
+                                $skipRecord = true;
+                                break;
+
                         }
                     } else {
                         try {
