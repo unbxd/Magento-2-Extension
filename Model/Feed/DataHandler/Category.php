@@ -140,6 +140,8 @@ class Category
                                     $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
                                 }else{
                                     $this->logger->info("Skipping disabled category   with category ID " . $category->getId() . " for entityID- " . $entity_id);
+                                    $skipRecord = true;
+                                    break;
                                 }
                             } else {
                                 $this->logger->error("Unable to find category path -" . $tempPath . " for entityID- " . $entity_id);
@@ -239,6 +241,8 @@ class Category
                                     $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
                                 }else{
                                     $name="";
+                                    $skipRecord = true;
+                                    break;
                                     $this->logger->info("Skipping disabled category   with category ID " . $category->getId() . " for entityID- " . $entity_id);
                                 }
                             } else {
