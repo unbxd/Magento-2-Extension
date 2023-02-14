@@ -1,4 +1,6 @@
-# Version 2.0.7
+# Version 2.0.8
+## 2.0.8 - Feb 14, 2022
+- Exclude disabled categories from being exported
 ## 2.0.7 - Feb 9, 2022
 - Sanitize category names and copy the values to unbxdCategoryPathId (based on relevancy team request)
 ## 2.0.6 - Jan 11, 2022
