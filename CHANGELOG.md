@@ -1,11 +1,15 @@
-# Version 2.0.8
-## 2.0.8 - Feb 14, 2022
+# Version 2.0.9
+## 2.0.9 - Mar 2, 2023
+- Memory optimization of providers
+- Optional support for urlRewrite module
+- Support to export swatch image url and configure it by attribute  
+## 2.0.8 - Feb 14, 2023
 - Exclude disabled categories from being exported
-## 2.0.7 - Feb 9, 2022
+## 2.0.7 - Feb 9, 2023
 - Sanitize category names and copy the values to unbxdCategoryPathId (based on relevancy team request)
-## 2.0.6 - Jan 11, 2022
+## 2.0.6 - Jan 11, 2023
 - Select category names with specific to store ID
-## 2.0.5 - Jan 6, 2022
+## 2.0.5 - Jan 6, 2023
 - Support for multi part feed upload option. This is not enabled by default but can be enabled through unbxd > catalog > indexing section
 ## 2.0.4 - December 6, 2022
 - For Customers with simple product catalog variants attributes are not sent in the feed. 
