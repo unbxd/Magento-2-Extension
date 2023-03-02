@@ -244,7 +244,7 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
         $compositeProductTypes = $this->resourceModel->getCompositeTypes();
 
         foreach ($indexData as $productId => $productData) {
-            $isComposite = in_array($productData['type_id'], $compositeProductTypes);
+            $isComposite = isset($productData['type_id']) && in_array($productData['type_id'], $compositeProductTypes);
             $hasChildren = isset($productData['children_ids']) && !empty($productData['children_ids']);
             if ($isComposite && !$hasChildren) {
                 unset($indexData[$productId]);

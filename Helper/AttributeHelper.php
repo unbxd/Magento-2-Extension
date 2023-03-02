@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,8 +10,10 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Helper;
 
+use Error;
 use Magento\Catalog\Api\Data\EavAttributeInterface;
 use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory as EavAttributeFactory;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory as AttributeCollectionFactory;
@@ -19,6 +22,10 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
+use Magento\Swatches\Helper\Media as SwatchHelper;
+use Magento\Swatches\Model\ResourceModel\Swatch\CollectionFactory as SwatchCollectionFactory;
+use Magento\Swatches\Model\ResourceModel\Swatch\Collection as SwatchCollection;
+use Unbxd\ProductFeed\Logger\LoggerInterface;
 
 /**
  * Product feed attributes helper.
@@ -63,6 +70,22 @@ class AttributeHelper extends AbstractHelper
      */
     private $attributeMappers = [];
 
+    /** 
+     * @var SwatchCollectionFactory
+     */
+    private $swatchCollectionFactory;
+
+    /**
+     * @var SwatchHelper
+     */
+    private $swatchHelper;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+
     /**
      * AttributeHelper constructor.
      * @param Context $context
@@ -74,12 +97,18 @@ class AttributeHelper extends AbstractHelper
         Context $context,
         EavAttributeFactory $attributeFactory,
         AttributeCollectionFactory $collectionFactory,
-        HelperData $helperData
+        HelperData $helperData,
+        SwatchCollectionFactory $swatchCollectionFactory,
+        SwatchHelper $swatchHelper,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
         $this->attributeFactory = $attributeFactory;
         $this->attributeCollectionFactory = $collectionFactory;
         $this->helperData = $helperData;
+        $this->swatchCollectionFactory = $swatchCollectionFactory;
+        $this->swatchHelper = $swatchHelper;
+        $this->logger = $logger->create("feed");
     }
 
     /**
@@ -140,9 +169,9 @@ class AttributeHelper extends AbstractHelper
      */
     public function getFieldType(AttributeInterface $attribute)
     {
-        if ($type = $attribute->getData("unbxd_field_type")){
+        if ($type = $attribute->getData("unbxd_field_type")) {
             return $type;
-        }else if($attribute->getData("use_value_id",false)){
+        } else if ($attribute->getData("use_value_id", false)) {
             return FeedConfig::FIELD_TYPE_NUMBER;
         }
         $type = FeedConfig::FIELD_TYPE_TEXT;
@@ -169,7 +198,7 @@ class AttributeHelper extends AbstractHelper
     {
         $specificStaticBoolAttributes = ['has_options', 'required_options'];
         return (bool) ($attribute->getSourceModel() == \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class)
-        || in_array($attribute->getAttributeCode(), $specificStaticBoolAttributes);
+            || in_array($attribute->getAttributeCode(), $specificStaticBoolAttributes);
     }
 
     /**
@@ -242,9 +271,9 @@ class AttributeHelper extends AbstractHelper
     {
         $value =  (bool) (in_array($attribute->getBackendType(), ['varchar', 'text'])
             && ($attribute->getFrontendInput() == 'multiselect'));
-        if ($attribute->getData('unbxd_multiselect_override',false)){
+        if ($attribute->getData('unbxd_multiselect_override', false)) {
             return !$value;
-        }else{
+        } else {
             return $value;
         }
     }
@@ -280,7 +309,7 @@ class AttributeHelper extends AbstractHelper
         }
 
         if ($attribute->usesSource() && !is_array($value)) {
-            $value = explode(',', $value??'');
+            $value = explode(',', $value ?? '');
         }
 
         if (!is_array($value)) {
@@ -288,25 +317,25 @@ class AttributeHelper extends AbstractHelper
         }
 
         $value = array_map($this->attributeMappers[$mapperKey], $value);
-        if ($attribute->getData("unbxd_field_type") && $attribute->getData("unbxd_field_type") == "bool"){
-            if (($value && !is_array($value)) || (is_array($value) && $value[0])){ 
+        if ($attribute->getData("unbxd_field_type") && $attribute->getData("unbxd_field_type") == "bool") {
+            if (($value && !is_array($value)) || (is_array($value) && $value[0])) {
                 $values[$attributeCode] = "True";
-            }else{
-                $values[$attributeCode]="False";
+            } else {
+                $values[$attributeCode] = "False";
             }
-             return $values;
+            return $values;
         }
         $value = array_filter($value);
         $value = array_values($value);
         $values[$attributeCode] = $value;
 
-        
-        if (!$attribute->getData("use_value_id",false) && $attribute->usesSource()) {
+
+        if (!$attribute->getData("use_value_id", false) && $attribute->usesSource()) {
             $optionTextFieldName = $this->getOptionTextFieldName($attributeCode);
             $optionTextValues = $this->getIndexOptionsText($attribute, $storeId, $value);
             $this->normalizeOptionTextValues($optionTextValues);
             // filter empty values, not using array_filter here because it could remove "0" string from values.
-            $optionTextValues = array_diff( $optionTextValues , ['', null, false]);
+            $optionTextValues = array_diff($optionTextValues, ['', null, false]);
             $optionTextValues = array_values($optionTextValues);
             $values[$optionTextFieldName] = $optionTextValues;
         }
@@ -344,7 +373,7 @@ class AttributeHelper extends AbstractHelper
      */
     public function getIndexOptionsText(AttributeInterface $attribute, $storeId, array $optionIds)
     {
-        $mapperKey = "options_". $attribute->getId()."_". $storeId;
+        $mapperKey = "options_" . $attribute->getId() . "_" . $storeId;
 
         if (!isset($this->attributeMappers[$mapperKey])) {
             $this->attributeMappers[$mapperKey] = function ($optionId) use ($attribute, $storeId) {
@@ -365,7 +394,7 @@ class AttributeHelper extends AbstractHelper
      */
     public function getOptionTextFieldName($fieldName)
     {
-        return self::OPTION_TEXT_PREFIX."_".$fieldName;
+        return self::OPTION_TEXT_PREFIX . "_" . $fieldName;
     }
 
     /**
@@ -394,10 +423,33 @@ class AttributeHelper extends AbstractHelper
             if ($this->getFieldType($attribute) == FeedConfig::FIELD_TYPE_BOOL) {
                 $optionValue = $attribute->getStoreLabel($storeId);
             }
+            $swatchValue = $this->getSwatchThumbForOptionValue($attribute, $optionId);
+            if($swatchValue){
+                $optionValue = $optionValue.":".$swatchValue;
+            }
             $this->attributeOptionTextCache[$storeId][$attributeId][$optionId] = $optionValue;
         }
 
         return $this->attributeOptionTextCache[$storeId][$attributeId][$optionId];
+    }
+
+    private function getSwatchThumbForOptionValue($attribute, $optionId)
+    {
+        try {
+            if ($attribute->getData("export_swatch_image")) {
+                /** @var SwatchCollection */
+                $swatchCollection = $this->swatchCollectionFactory->create();
+                $swatchCollection->addFieldtoFilter('option_id', $optionId);
+                $item = $swatchCollection->getFirstItem();
+                if ($item) {
+                    return $this->swatchHelper->getSwatchAttributeImage('swatch_thumb', $item->getValue());
+                }
+            }
+        } catch (\Exception | Error $e) {
+            $this->logger->error('Error fetching swatch value.'.$e->getMessage(), $e);
+        }
+
+        return null;
     }
 
     /**
@@ -433,7 +485,8 @@ class AttributeHelper extends AbstractHelper
         } elseif ($attribute->getBackendType() == 'int') {
             $value = intval($value);
         } elseif (($attribute->getFrontendClass() == 'validate-digits')
-            || ($attribute->getFrontendClass() == 'validate-number')) {
+            || ($attribute->getFrontendClass() == 'validate-number')
+        ) {
             $value = floatval(filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
         }
 
@@ -497,7 +550,7 @@ class AttributeHelper extends AbstractHelper
         $fieldOptions = [
             'fieldName' => (string) $fieldName,
             'dataType' => (string) $fieldType,
-            'multiValued' => (boolean) $isFieldMultivalued,
+            'multiValued' => (bool) $isFieldMultivalued,
             'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE,
         ];
 

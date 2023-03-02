@@ -121,6 +121,19 @@ class IncludeAttributeInProductFeed implements ObserverInterface
             );
 
             $fieldset->addField(
+                'export_swatch_image',
+                'select',
+                [
+                    'name'   => 'export_swatch_image',
+                    'label'  => __('Export Swatch Image in Attribute Value'),
+                    'title'  => __('Export Swatch Image in Attribute Value'),
+                    'note' => __('Specify whether to export swatch image for visual text attributes'),
+                    'values' => $this->yesNo->toOptionArray(),
+                ],
+                '^'
+            );
+
+            $fieldset->addField(
                 'use_value_id',
                 'select',
                 [

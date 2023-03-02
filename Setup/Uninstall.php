@@ -135,6 +135,7 @@ class Uninstall implements UninstallInterface
             $installer->getTable('catalog_eav_attribute') => 'unbxd_field_type',
             $installer->getTable('catalog_eav_attribute') =>  'include_in_unbxd_product_feed',
             $installer->getTable('catalog_eav_attribute') =>  'use_value_id',
+            $installer->getTable('catalog_eav_attribute') =>  'export_swatch_image',
             $installer->getTable('catalog_eav_attribute') =>  'consider_attribute_onlyat_parent'
         ];
         foreach ($relatedData as $tableName => $columnName) {

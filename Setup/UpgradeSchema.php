@@ -241,6 +241,32 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $installer->getConnection()->createTable($table);
         }
 
+        if (version_compare($context->getVersion(), '2.0.9', '<')) {
+             // create attribute parameter to include/exclude from product feed
+        $catalogEavAttributeTable = $installer->getTable('catalog_eav_attribute');
+        if (
+            $installer->tableExists($catalogEavAttributeTable)
+            && !$installer->getConnection()->tableColumnExists(
+                $catalogEavAttributeTable, 'export_swatch_image'
+            )
+        ) {
+            $installer->getConnection()
+                ->addColumn(
+                    $catalogEavAttributeTable,
+                    'export_swatch_image',
+                    [
+                        'type' => Table::TYPE_SMALLINT,
+                        'nullable' => false,
+                        'unsigned' => true,
+                        'length' => 1,
+                        'default' => 0,
+                        'comment' => 'Export Swatch Image in Attribute Value',
+                    ]
+                );
+        }
+
+        }
+
         if (version_compare($context->getVersion(), '1.0.20', '<')) {
             $columnName = 'number_of_attempts';
             $indexingQueueTable = $installer->getTable('unbxd_productfeed_indexing_queue');
