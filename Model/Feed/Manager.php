@@ -360,6 +360,7 @@ class Manager
             )
             ->sendFeed($store,true)
             ->stopProfiler();
+        unset($this->feed);
     }
 
     /**
@@ -503,7 +504,7 @@ class Manager
             } catch (\Exception $e) {
                 $this->logger->critical($e);
                 $this->postProcessActions();
-                return $this;
+                throw $e;
             } finally {
                 $fileManager->closeStream();
             }
@@ -632,7 +633,7 @@ class Manager
                 }
             } catch (\Exception $e) {
                 $this->logger->critical($e);
-                $this->postProcessActions();
+                //$this->postProcessActions();
             }
         }
 
@@ -833,7 +834,7 @@ class Manager
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
-            return $this;
+            throw $e;
         }
     }
 

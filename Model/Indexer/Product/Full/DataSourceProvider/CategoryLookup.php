@@ -20,6 +20,7 @@ use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Exception;
 use Unbxd\ProductFeed\Model\Feed\Config;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 
 /**
  * Data source used to append categories data to product whe category indexer is not working in ur environment.
@@ -53,6 +54,11 @@ class CategoryLookup implements DataSourceProviderInterface
      */
     private $logger;
 
+    /**
+     * @var CategoryCollectionFactory
+     */
+    private $categoryCollectionFactory;
+
 
     /**
      * CategoryLookup constructor.
@@ -64,12 +70,14 @@ class CategoryLookup implements DataSourceProviderInterface
     public function __construct(ProductRepositoryInterface $productRepository,
         LoggerInterface $logger, 
         HelperData $helperData,
-        AttributeHelper $attributeHelper
+        AttributeHelper $attributeHelper,
+        CategoryCollectionFactory $categoryCollectionFactory
     ) {
         $this->productRepository = $productRepository;
         $this->logger = $logger->create("feed");
         $this->attributeHelper = $attributeHelper;
         $this->helperData = $helperData;
+        $this->categoryCollectionFactory = $categoryCollectionFactory;
 
     }
 
@@ -79,6 +87,21 @@ class CategoryLookup implements DataSourceProviderInterface
     public function getDataSourceCode()
     {
         return self::DATA_SOURCE_CODE;
+    }
+
+    private function getCategoryCollection($productId){
+        $collection = $this->categoryCollectionFactory->create();
+        $collection->joinField(
+            'product_id',
+            'catalog_category_product',
+            'product_id',
+            'category_id = entity_id',
+            null
+        )->addFieldToFilter(
+            'product_id',
+            (int)$productId
+        );
+        return $collection;
     }
 
     /**
@@ -92,12 +115,8 @@ class CategoryLookup implements DataSourceProviderInterface
         foreach (array_keys($indexData) as $productId) {
             try {
                 if ($productId != "fields"){
-                    /**
-                     * @var Product $product
-                     */
-                    $product = $this->productRepository->getById($productId,false,$storeId);
-                    if ($product){
-                        $categoryCollection = $product->getCategoryCollection();
+
+                        $categoryCollection = $this->getCategoryCollection($productId);
                         if($storeId){
                             $categoryCollection->setStoreId($storeId);
                         }
@@ -116,7 +135,6 @@ class CategoryLookup implements DataSourceProviderInterface
                             $categoryDataList[] = array_filter($categoryData,'Unbxd\\ProductFeed\\Helper\\HelperUtil::_nonNull');
                         }
                         $indexData[$productId]["category"] = $categoryDataList;
-                    }
                 }
             }catch (\Exception $e) {
                 $this->logger->error('Error while fetching category data -'.$productId. $e->__toString());
