@@ -31,6 +31,8 @@ class Category
 
     private $missingCategoryPath = [];
 
+    private $skippedCategoryCacheList = [];
+
     private $rootCategoryId;
 
     /**
@@ -91,6 +93,8 @@ class Category
             if (isset($this->categoryCacheList[$categoryId])) {
                 $result[] = $this->categoryCacheList[$categoryId];
                 continue;
+            }else if(in_array($categoryId,$this->skippedCategoryCacheList)){
+                continue;
             }
             $name = isset($data['name']) ? (string) trim($data['name']) : null;
             $urlPath = isset($data['id_path'])
@@ -125,37 +129,39 @@ class Category
                     //$name = ucwords(trim(str_replace('-', ' ', strtolower($urlKey))));
                     if ($key !== false && isset($categoryData[$key]['name']) ) {
                         if((isset($categoryData[$key]['is_active']) && $categoryData[$key]['is_active']) || $retainInactiveCategory){
-                        $name = trim($categoryData[$key]['name']);
+                            $name = trim($categoryData[$key]['name']);
                         }else{
-                            $this->logger->info("Skipping disabled category   with category ID " . $key . " for entityID- " . $entity_id);
                             $skipRecord = true;
                             break;
                         }
                     } else {
                         try {
-                            if (!in_array($tempPath, $this->missingCategoryPath)) {
+                            if (!in_array($urlKey, $this->missingCategoryPath)) {
+                                // add cache to get categoryName without reloading
+                                $this->logger->info("Load Category by urlKey " . $urlKey . " for entityID- " . $entity_id);
                                 $category = $this->categoryFactory->create()->setStoreId($store)->load($urlKey);
                             } else {
                                 $category = [];
+                                $skipRecord = true;
+                                break;
                             }
                             if (!empty($category)) {
                                 if($category->getIsActive() || $retainInactiveCategory){
                                     $name = $category->getName();
-                                    $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
                                 }else{
-                                    $this->logger->info("Skipping disabled category   with category ID " . $category->getId() . " for entityID- " . $entity_id);
                                     $skipRecord = true;
+                                    $this->missingCategoryPath[] = $urlKey;
                                     break;
                                 }
                             } else {
-                                $this->logger->error("Unable to find category path -" . $tempPath . " for entityID- " . $entity_id);
-                                $this->missingCategoryPath[] = $tempPath;
+                                $this->logger->error("Unable to find category path -" . $urlKey . " for entityID- " . $entity_id);
+                                $this->missingCategoryPath[] = $urlKey;
                                 $skipRecord = true;
                                 break;
                             }
 
                         } catch (\Exception $e) {
-                            $this->logger->error("Encountered exception while fetching category -" . $tempPath . " for entityID- " . $entity_id . " with error " . $e->getMessage() . " -stack-" . $e->getTraceAsString());
+                            $this->logger->error("Encountered exception while fetching category -" . $urlKey . " for entityID- " . $entity_id . " with error " . $e->getMessage() . " -stack-" . $e->getTraceAsString());
                             $skipRecord = true;
                             break;
 
@@ -172,6 +178,8 @@ class Category
                     $result[] = $pathString;
 
                     $this->categoryCacheList[$categoryId] = $pathString;
+                }else{
+                    $this->skippedCategoryCacheList[] = $categoryId;
                 }
             }
         }
@@ -225,7 +233,7 @@ class Category
                         if((isset($categoryData[$key]['is_active']) && $categoryData[$key]['is_active']) || $retainInactiveCategory){
                         $name = trim($categoryData[$key]['name']);
                         }else{
-                            $this->logger->info("Skipping disabled category   with category ID " . $key . " for entityID- " . $entity_id);
+                            $this->logger->debug("Skipping disabled category   with category ID " . $key . " for entityID- " . $entity_id);
                                 $skipRecord = true;
                                 break;
 
@@ -245,12 +253,12 @@ class Category
                             if (!empty($category)) {
                                 if($category->getIsActive() || $retainInactiveCategory){
                                     $name = $category->getName();
-                                    $this->logger->info("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
+                                    $this->logger->debug("Setting category name -" . $name . " with category ID " . $category->getId() . " & path -" . $tempPath . " for entityID- " . $entity_id);
                                 }else{
                                     $name="";
                                     $skipRecord = true;
                                     break;
-                                    $this->logger->info("Skipping disabled category   with category ID " . $category->getId() . " for entityID- " . $entity_id);
+                                    $this->logger->debug("Skipping disabled category   with category ID " . $category->getId() . " for entityID- " . $entity_id);
                                 }
                             } else {
                                 $this->logger->error("Unable to find category path -" . $tempPath . " for entityID- " . $entity_id);
@@ -288,5 +296,6 @@ class Category
     public function reset()
     {
         $this->categoryCacheList = [];
+        $this->skippedCategoryCacheList = [];
     }
 }

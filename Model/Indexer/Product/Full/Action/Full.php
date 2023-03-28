@@ -206,6 +206,7 @@ class Full
 				foreach ($this->dataSourceProvider->getList() as $dataSource) {
 					/** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
 					$batchIndex = $dataSource->appendData($storeId, $batchIndex);
+                    $this->logger->info("Processed Data Source Provider ::".$dataSource->getDataSourceCode()." with memory of ".memory_get_usage());
 				}
                 }
 
