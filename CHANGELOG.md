@@ -1,4 +1,7 @@
-# Version 2.0.9
+# Version 2.0.10
+## 2.0.10 - Mar 28, 2023
+- Memory optimization of category lookup during feed build
+- Added loggers to monitor memory usuage
 ## 2.0.9 - Mar 2, 2023
 - Memory optimization of providers
 - Optional support for urlRewrite module
