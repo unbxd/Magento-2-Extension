@@ -1,4 +1,6 @@
-# Version 2.0.10
+# Version 2.0.11
+## 2.0.11 - Apr 19, 2023
+- Support for product delete in incremental feed
 ## 2.0.10 - Mar 28, 2023
 - Memory optimization of category lookup during feed build
 - Added loggers to monitor memory usuage
