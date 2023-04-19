@@ -435,7 +435,22 @@ class DataHandler
             try {
                 // schema fields has key 'fields', do only for products
                 if (is_int($productId)) {
-                    if(!isset($data["entity_id"])){
+                    if(array_key_exists('action', $data) && trim($data['action']) == Config::OPERATION_TYPE_DELETE){
+                        $operationKey = array_key_exists('action', $data)
+                        ? trim($data['action'])
+                        : Config::OPERATION_TYPE_ADD;
+                        if ($operationKey == Config::OPERATION_TYPE_DELETE) {
+                            $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
+                            $data = [$key => strval($productId)];
+                        }
+    
+                        if(array_key_exists('action', $data)){
+                            unset($data['action']);
+                        }
+                        $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
+                        continue;
+                    }
+                    elseif(!isset($data["entity_id"])){
                         $this->logger->info("In-complete data detected for product -".$productId);
                         unset($index[$productId]);
                         continue;
@@ -481,14 +496,6 @@ class DataHandler
                     $operationKey = array_key_exists('action', $data)
                         ? trim($data['action'])
                         : Config::OPERATION_TYPE_ADD;
-                    
-                    
-
-                    // if operation type is 'delete' uniqueId is only one required field
-                    if ($operationKey == Config::OPERATION_TYPE_DELETE) {
-                        $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
-                        $data = [$key => strval($productId)];
-                    }
 
                     if(array_key_exists('action', $data)){
                         unset($data['action']);

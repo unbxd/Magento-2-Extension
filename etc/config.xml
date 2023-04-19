@@ -53,7 +53,7 @@
                 <multi_part_batch_size>100000</multi_part_batch_size>
                 <indexing_queue_archival_time>7200</indexing_queue_archival_time>
                 <feed_view_archival_time>7200</feed_view_archival_time>
-                <feed_file_cleanup_enabled>1</feed_file_cleanup_enabled>
+                <feed_file_cleanup_enabled>0</feed_file_cleanup_enabled>
             </indexing>
             <cron>
                 <general_settings>
@@ -66,7 +66,7 @@
                 </full_feed_settings>
             </cron>
             <feed>
-                <enable_stream_serialization>0</enable_stream_serialization>
+                <enable_stream_serialization>1</enable_stream_serialization>
                 <reader_db_connection></reader_db_connection>
                 <full_state_flag></full_state_flag>
                 <incremental_state_flag></incremental_state_flag>
