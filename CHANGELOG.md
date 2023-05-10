@@ -1,4 +1,6 @@
-# Version 2.0.11
+# Version 2.0.12
+## 2.0.12 - May 10, 2023
+- Remove zend_http module dependency
 ## 2.0.11 - Apr 19, 2023
 - Support for product delete in incremental feed
 ## 2.0.10 - Mar 28, 2023
