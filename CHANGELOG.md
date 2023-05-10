@@ -1,4 +1,6 @@
-# Version 2.0.12
+# Version 2.0.13
+## 2.0.13 - May 10, 2023
+- Updated execute function in command to match with that of specification in 2.4.6 Magento
 ## 2.0.12 - May 10, 2023
 - Remove zend_http module dependency
 ## 2.0.11 - Apr 19, 2023
