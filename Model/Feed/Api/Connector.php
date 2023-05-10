@@ -17,6 +17,7 @@ use Unbxd\ProductFeed\Model\Serializer;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
 use Unbxd\ProductFeed\Api\Data\FeedViewInterface;
+use Unbxd\ProductFeed\Logger\LoggerInterface;
 
 /**
  * Class Connector
@@ -34,6 +35,11 @@ class Connector
      * @var CurlFactory
      */
     protected $curlFactory;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var ResponseFactory
@@ -108,11 +114,13 @@ class Connector
         CurlFactory $curlFactory,
         ResponseFactory $responseFactory,
         HelperData $helperData,
-        Serializer $serializer
+        Serializer $serializer,
+        LoggerInterface $logger,
     ) {
         $this->curlFactory = $curlFactory;
         $this->responseFactory = $responseFactory;
         $this->helperData = $helperData;
+        $this->logger = $logger->create("feed");
         $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()->get(Serializer::class);
     }
 
@@ -210,7 +218,7 @@ class Connector
      * @param string $method
      * @return $this
      */
-    private function setRequestMethod($method = \Zend_Http_Client::POST)
+    private function setRequestMethod($method = \Laminas\Http\Request::METHOD_POST)
     {
         $this->requestMethod = (string) $method;
 
@@ -387,7 +395,7 @@ class Connector
      */
     public function execute(
         $type = FeedConfig::FEED_TYPE_FULL,
-        $method = \Zend_Http_Client::POST,
+        $method = \Laminas\Http\Request::METHOD_POST,
         $headers = [],
         $params = [],
         $store = null,
@@ -412,7 +420,7 @@ class Connector
      */
     private function buildRequest(
         $type = FeedConfig::FEED_TYPE_FULL,
-        $method = \Zend_Http_Client::POST,
+        $method = \Laminas\Http\Request::METHOD_POST,
         $headers = [],
         $params = [],
         $store = null,
@@ -433,6 +441,23 @@ class Connector
         return $this;
     }
 
+    private function log($info){
+        try{
+            $this->logger->info($info);
+        }catch(\Exception $e){
+            $this->logger->error("Error printing url details");
+        }
+    }
+
+    private function logObject($message,$object){
+        try{
+            $objectSerialised = print_r($object,true);
+            $this->logger->info($message." ".$objectSerialised);
+        }catch(\Exception $e){
+            $this->logger->error("Error printing object details");
+        }
+    }
+
     /**
      * @return $this
      * @throws \Exception
@@ -450,8 +475,9 @@ class Connector
                 $this->getHeaders(),
                 $body
             );
-
+            $this->log("Request URL".$httpAdapter->getInfo(CURLINFO_EFFECTIVE_URL));
             $result = $httpAdapter->read();
+            $this->logObject("Raw Response",$result);
             if ($httpAdapter->getErrno()) {
                 $this->doError(sprintf(
                     'API service connection error #%s: %s',

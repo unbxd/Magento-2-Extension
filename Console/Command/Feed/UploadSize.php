@@ -71,7 +71,7 @@ class UploadSize extends AbstractCommand
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET, [], [], $storeId);
+                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE,\Laminas\Http\Request::METHOD_GET, [], [], $storeId);
         } catch (\Exception $e) {
             throw new \Exception(__($e->getMessage()));
         }

@@ -26,7 +26,7 @@ class Price extends Renderer
      *
      * @param \Magento\Framework\DataObject $row
      * @return float|int|string
-     * @throws \Zend_Currency_Exception
+     * @throws \Exception
      */
     public function render(\Magento\Framework\DataObject $row)
     {

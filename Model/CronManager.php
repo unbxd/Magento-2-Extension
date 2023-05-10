@@ -805,7 +805,7 @@ class CronManager
                 $connectorManager->resetHeaders()
                     ->resetParams()
                     ->setExtraParams([FeedViewInterface::UPLOAD_ID => $uploadId])
-                    ->execute($apiEndpointType, \Zend_Http_Client::GET, [], [], $storeId);
+                    ->execute($apiEndpointType, \Laminas\Http\Request::METHOD_GET, [], [], $storeId);
             } catch (\Exception $e) {
                 return;
             }
@@ -874,7 +874,7 @@ class CronManager
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET, [], [], $store);
+                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Laminas\Http\Request::METHOD_GET, [], [], $store);
         } catch (\Exception $e) {
             return 0;
         }

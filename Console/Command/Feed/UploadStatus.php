@@ -114,7 +114,7 @@ class UploadStatus extends AbstractCommand
             $connectorManager->resetHeaders()
                 ->resetParams()
                 ->setExtraParams([FeedViewInterface::UPLOAD_ID => $uploadId])
-                ->execute($type, \Zend_Http_Client::GET, [], [], $storeId);
+                ->execute($type, \Laminas\Http\Request::METHOD_GET, [], [], $storeId);
         } catch (\Exception $e) {
             throw new \Exception(__($e->getMessage()));
         }

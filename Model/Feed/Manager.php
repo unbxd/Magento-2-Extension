@@ -683,7 +683,7 @@ class Manager
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Zend_Http_Client::GET, [], [], $store);
+                ->execute(FeedConfig::FEED_TYPE_UPLOADED_SIZE, \Laminas\Http\Request::METHOD_GET, [], [], $store);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
@@ -722,7 +722,7 @@ class Manager
         try {
             $connectorManager->resetHeaders()
                 ->resetParams()
-                ->execute($apiEndpointType, \Zend_Http_Client::GET, [], [], $store);
+                ->execute($apiEndpointType, \Laminas\Http\Request::METHOD_GET, [], [], $store);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
@@ -768,7 +768,7 @@ class Manager
         /** @var \Unbxd\ProductFeed\Model\Feed\Api\Connector $connectorManager */
         $connectorManager = $this->getConnectorManager();
         try {
-            $connectorManager->execute($this->type, \Zend_Http_Client::POST, [], $params, $store,$queryParameter);
+            $connectorManager->execute($this->type, \Laminas\Http\Request::METHOD_POST, [], $params, $store,$queryParameter);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
@@ -818,7 +818,7 @@ class Manager
         /** @var \Unbxd\ProductFeed\Model\Feed\Api\Connector $connectorManager */
         $connectorManager = $this->getConnectorManager();
         try {
-            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_START, \Zend_Http_Client::POST, [], [], $store);
+            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_START, \Laminas\Http\Request::METHOD_POST, [], [], $store);
 
             /** @var FeedResponse $response */
             $response = $connectorManager->getResponse();
@@ -846,7 +846,7 @@ class Manager
         try {
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
             $queryParameter = "?feedId=".$feedViewEntity->getUploadId();
-            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Zend_Http_Client::POST, [], [], $store,$queryParameter);
+            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Laminas\Http\Request::METHOD_POST, [], [], $store,$queryParameter);
 
             /** @var FeedResponse $response */
             $response = $connectorManager->getResponse();
@@ -1032,7 +1032,7 @@ class Manager
         $this->logger->info('Flush system configuration cache.');
 
         try {
-            $this->cacheManager->flushByTypes();
+            //$this->cacheManager->flushByTypes();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }

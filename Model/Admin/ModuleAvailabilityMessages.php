@@ -112,10 +112,6 @@ class ModuleAvailabilityMessages implements MessageInterface
         return md5($this->getModuleName() . '_' . $this->authSession->getUser()->getLogdate());
     }
 
-    /**
-     * @return bool
-     * @throws \Zend_Json_Exception
-     */
     public function isDisplayed()
     {
         if (!$this->moduleHelper->isModuleEnable($this->getModuleName())) {
@@ -170,12 +166,7 @@ class ModuleAvailabilityMessages implements MessageInterface
         return $this->moduleHelper->getModuleName();
     }
 
-    /**
-     * Get full package name
-     *
-     * @return mixed
-     * @throws \Zend_Json_Exception
-     */
+
     private function getPackageName()
     {
         $moduleInfo = $this->moduleHelper->getModuleInfo();
@@ -186,10 +177,7 @@ class ModuleAvailabilityMessages implements MessageInterface
         return $moduleInfo->getName();
     }
 
-    /**
-     * @return mixed
-     * @throws \Zend_Json_Exception
-     */
+
     private function getCurrentInstalledVersion()
     {
         $moduleInfo = $this->moduleHelper->getModuleInfo();
@@ -200,10 +188,6 @@ class ModuleAvailabilityMessages implements MessageInterface
         return $moduleInfo->getVersion();
     }
 
-    /**
-     * @return bool|string
-     * @throws \Zend_Json_Exception
-     */
     private function getAvailablePackageVersion()
     {
         $packageName = $this->getPackageName();

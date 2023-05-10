@@ -14,6 +14,7 @@ namespace Unbxd\ProductFeed\Model\Feed\Api;
 use Magento\Framework\DataObject;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Serializer;
+use Laminas\Http\Response as LaminasResponse;
 
 /**
  * Class Response
@@ -161,14 +162,14 @@ class Response extends DataObject
     }
 
     /**
-     * Creates a new \Zend_Http_Response object from a string.
+     * Creates a new LaminasResponse object from a string.
      *
      * @param string $response
-     * @return \Zend_Http_Response
+     * @return LaminasResponse
      */
     public function createResponse($response)
     {
-        return \Zend_Http_Response::fromString($response);
+        return LaminasResponse::fromString($response);
     }
 
     /**
@@ -179,10 +180,10 @@ class Response extends DataObject
      */
     public function apply($response)
     {
-        /** @var \Zend_Http_Response $resultResponse */
+        /** @var LaminasResponse $resultResponse */
         $resultResponse = $this->createResponse($response);
-        if ($resultResponse instanceof \Zend_Http_Response) {
-            if ($code = $resultResponse->getStatus()) {
+        if ($resultResponse instanceof LaminasResponse) {
+            if ($code = $resultResponse->getStatusCode()) {
                 $this->setResponseCode($code);
             }
 
@@ -195,7 +196,7 @@ class Response extends DataObject
                 $this->setResponseBody($body);
             }
 
-            if ($message = $resultResponse->getMessage()) {
+            if ($message = $resultResponse->getReasonPhrase()) {
                 $this->setResponseMessage($message);
             }
 
