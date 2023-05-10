@@ -104,6 +104,7 @@ class SearchDownload extends Command
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
 
         }
+        return 0;
 
     }
 

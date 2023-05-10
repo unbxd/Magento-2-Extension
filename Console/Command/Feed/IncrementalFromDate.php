@@ -65,7 +65,7 @@ class IncrementalFromDate extends AbstractCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return bool|int|null
+     * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(InputInterface $input, OutputInterface $output)
@@ -93,13 +93,14 @@ class IncrementalFromDate extends AbstractCommand
 
         if (empty($stores)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
+            return 401;
         }
         // check if related cron process doesn't occur to this process to prevent duplicate execution
         $jobs = $this->getCronManager()->getRunningSchedules(CronManager::FEED_JOB_CODE_UPLOAD);
         if ($jobs->getSize()) {
             $message = 'At the moment, the cron job is already executing this process. ' . "\n" . 'To prevent duplicate process, which will increase the load on the server, please try it later.';
             $output->writeln("<error>{$message}</error>");
-            return false;
+            return 429;
         }
 
         // pre process actions
@@ -126,7 +127,7 @@ class IncrementalFromDate extends AbstractCommand
         // post process actions
         $this->postProcessActions($output, $stores, $errors, $start);
 
-        return true;
+        return 0;
     }
 
     private function uploadFromDate($storeId, $fromDate)

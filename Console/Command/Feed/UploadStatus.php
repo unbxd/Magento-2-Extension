@@ -82,7 +82,7 @@ class UploadStatus extends AbstractCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return bool|int|null
+     * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(InputInterface $input, OutputInterface $output)
@@ -123,7 +123,7 @@ class UploadStatus extends AbstractCommand
 
         $this->postProcessActions($output);
 
-        return true;
+        return 0;
     }
 
     /**

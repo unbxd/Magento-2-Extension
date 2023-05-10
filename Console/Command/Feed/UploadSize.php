@@ -48,7 +48,7 @@ class UploadSize extends AbstractCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return bool|int|null
+     * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(InputInterface $input, OutputInterface $output)
@@ -60,7 +60,7 @@ class UploadSize extends AbstractCommand
         // check authorization credentials
         if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
-            return false;
+            return 401;
         }
 
         // pre process actions
@@ -81,7 +81,7 @@ class UploadSize extends AbstractCommand
         // post process actions
         $this->postProcessActions($output);
 
-        return true;
+        return 0;
     }
 
     /**

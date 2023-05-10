@@ -49,7 +49,7 @@ class Full extends AbstractCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return bool|int|null
+     * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(InputInterface $input, OutputInterface $output)
@@ -69,7 +69,7 @@ class Full extends AbstractCommand
         // check authorization credentials
         if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
-            return false;
+            return 401;
         }
 
         // check if related cron process doesn't occur to this process to prevent duplicate execution
@@ -77,14 +77,14 @@ class Full extends AbstractCommand
         if ($jobs->getSize()) {
             $message = 'At the moment, the cron job is already executing this process. '. "\n" . 'To prevent duplicate process, which will increase the load on the server, please try it later.';
             $output->writeln("<error>{$message}</error>");
-            return false;
+            return 429;
         }
 
         // check if catalog product not empty
         $productIds = $this->productHelper->getAllProductsIds();
         if (!count($productIds)) {
             $output->writeln("<error>There are no products to perform this operation.</error>");
-            return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
+            return 0;
         }
 
         // pre process actions
@@ -109,7 +109,7 @@ class Full extends AbstractCommand
                 if(!$this->feedHelper->isMultiPartUploadEnabled()){
                 if (empty($index)) {
                     $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
-                    return false;
+                    return 0;
                 }
 
                 try {
@@ -133,7 +133,7 @@ class Full extends AbstractCommand
         $workingTime = round($end - $start, 2);
         $output->writeln("<info>Working time: {$workingTime}</info>");
 
-        return true;
+        return 0;
     }
 
     /**

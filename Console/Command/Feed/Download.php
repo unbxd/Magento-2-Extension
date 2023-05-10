@@ -52,7 +52,7 @@ class Download extends AbstractCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return bool|int|null
+     * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(InputInterface $input, OutputInterface $output)
@@ -67,19 +67,19 @@ class Download extends AbstractCommand
         // check authorization credentials
         if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
-            return false;
+            return 401;
         }
 
         if($this->feedHelper->isMultiPartUploadEnabled($storeId)){
             $output->writeln("<error>Feed download option is not support when multi part upload is enabled.</error>");
-            return false;
+            return 400;
         }
 
         // check if catalog product not empty
         $productIds = $this->productHelper->getAllProductsIds();
         if (!count($productIds)) {
             $output->writeln("<error>There are no products to perform this operation.</error>");
-            return false;
+            return 0;
         }
 
         // pre process actions
@@ -91,12 +91,12 @@ class Download extends AbstractCommand
             $index = $this->reindexAction->rebuildProductStoreIndex($storeId, [],null,$this->getFeedManager());
         } catch (\Exception $e) {
             $output->writeln("<error>Indexing error: {$e->getMessage()}</error>");
-            return false;
+            return 500;
         }
 
         if (empty($index)) {
             $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
-            return false;
+            return 0;
         }
 
         try {
@@ -104,11 +104,12 @@ class Download extends AbstractCommand
             $this->getFeedManager()->executeForDownload($index, $storeId);
         } catch (\Exception $e) {
             $output->writeln("<error>Feed generation error: {$e->getMessage()}</error>");
-            return false;
+            return 500;
         }
 
         // post process actions
         $this->postProcessActions($output, $storeId, $start);
+        return 0;
     }
 
     /**

@@ -58,7 +58,7 @@ class Incremental extends AbstractCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return bool|int|null
+     * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(InputInterface $input, OutputInterface $output)
@@ -78,7 +78,7 @@ class Incremental extends AbstractCommand
         // check authorization credentials
         if (!$this->feedHelper->isAuthorizationCredentialsSetup($storeId)) {
             $output->writeln("<error>Please check authorization credentials to perform this operation.</error>");
-            return false;
+            return 401;
         }
 
         // check if related cron process doesn't occur to this process to prevent duplicate execution
@@ -86,14 +86,14 @@ class Incremental extends AbstractCommand
         if ($jobs->getSize()) {
             $message = 'At the moment, the cron job is already executing this process. '. "\n" . 'To prevent duplicate process, which will increase the load on the server, please try it later.';
             $output->writeln("<error>{$message}</error>");
-            return false;
+            return 429;
         }
 
         // check if product ids was setup
         $productIds = $input->getArgument(self::PRODUCTS_ID_ARGUMENT_KEY);
         if (!count($productIds)) {
             $output->writeln("<error>Product ID(s) are required. Please provide at least one product ID to perform this operation.</error>");
-            return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
+            return 0;
         }
 
         // pre process actions
@@ -117,7 +117,7 @@ class Incremental extends AbstractCommand
 
                 if (empty($index)) {
                     $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
-                    return false;
+                    return 0;
                 }
 
                 try {
@@ -140,7 +140,7 @@ class Incremental extends AbstractCommand
         $workingTime = round($end - $start, 2);
         $output->writeln("<info>Working time: {$workingTime}</info>");
 
-        return true;
+        return 0;
     }
 
     /**
