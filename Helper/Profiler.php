@@ -225,7 +225,7 @@ class Profiler
         $currentAvg = $this->getCurrentCpuLoadAvg();
         $fullLoad = $cores + $cores/2;
         return round(min(100, $currentAvg * 100 / $fullLoad), 3);
-        }catch (\Exception $e){
+        }catch (\Exception|\Error $e){
             return 0;
         }
     }

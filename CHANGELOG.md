@@ -1,4 +1,6 @@
-# Version 2.0.13
+# Version 2.0.14
+## 2.0.14 - May 24, 2023
+- Support for product feed execution in macos
 ## 2.0.13 - May 10, 2023
 - Updated execute function in command to match with that of specification in 2.4.6 Magento
 ## 2.0.12 - May 10, 2023
