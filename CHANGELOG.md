@@ -1,4 +1,6 @@
-# Version 2.0.14
+# Version 2.0.15
+## 2.0.15 - June 14, 2023
+- Support to restrict maximum number of variants per product
 ## 2.0.14 - May 24, 2023
 - Support for product feed execution in macos
 ## 2.0.13 - May 10, 2023
