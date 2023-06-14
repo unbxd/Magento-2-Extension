@@ -106,6 +106,11 @@
                     <validate>validate-number validate-number-range number-range-1-5</validate>
                     <comment><![CDATA[The maximum number of synchronization attempts, when operation(s) are in 'ERROR' state.<br/>Available value in range from 1 to 5.]]></comment>
                 </field>
+                 <field id="number_of_variants" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Max Number Of Variants per product to be exported</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[The maximum number of variants per product to be exported.<br/>If left empty it exports all variants.]]></comment>
+                </field>
                 <field id="use_categoryid_insteadof_path" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Use Category ID</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

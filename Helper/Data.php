@@ -57,6 +57,7 @@ class Data extends AbstractHelper
      * catalog section
      */
     const XML_PATH_CATALOG_AVAILABLE_PRODUCT_TYPES = 'unbxd_catalog/general/available_product_types';
+    const XML_PATH_NUMBER_OF_VARIANTS = 'unbxd_catalog/general/number_of_variants';
     const XML_PATH_CATALOG_EXCLUDE_PRODUCTS_FILTER_ATTRIBUTES = 'unbxd_catalog/general/filter_attributes';
     const XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS = 'unbxd_catalog/general/max_number_of_attempts';
     
@@ -399,6 +400,20 @@ class Data extends AbstractHelper
     {
         return (bool) ($this->getSiteKey($store) && $this->getSecretKey($store) && $this->getApiKey($store));
     }
+
+    /**
+     * @param null $store
+     * @return mixed
+     */
+    public function getNumberOfVariantToExport($store = null)
+    {
+        return trim($this->scopeConfig->getValue(
+            self::XML_PATH_NUMBER_OF_VARIANTS,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        )?? 0);
+    }
+    
 
     /**
      * Retrieve all product types supported by Unbxd service

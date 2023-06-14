@@ -39,6 +39,7 @@
                 <retain_inactive_category>0</retain_inactive_category>
                 <fetch_from_category_tables>0</fetch_from_category_tables>
                 <retain_root_category>0</retain_root_category>
+                <number_of_variants></number_of_variants>
             </general>
             <images>
                 <use_cached_product_images>0</use_cached_product_images>

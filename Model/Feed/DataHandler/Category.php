@@ -138,7 +138,7 @@ class Category
                         try {
                             if (!in_array($urlKey, $this->missingCategoryPath)) {
                                 // add cache to get categoryName without reloading
-                                $this->logger->info("Load Category by urlKey " . $urlKey . " for entityID- " . $entity_id);
+                                $this->logger->debug("Load Category by urlKey " . $urlKey . " for entityID- " . $entity_id);
                                 $category = $this->categoryFactory->create()->setStoreId($store)->load($urlKey);
                             } else {
                                 $category = [];

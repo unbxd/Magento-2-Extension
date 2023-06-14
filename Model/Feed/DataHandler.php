@@ -792,9 +792,15 @@ class DataHandler
      */
     private function appendChildDataToParent(array &$index, array &$parentData, array $childIds, $store = null)
     {
+        $variantCount = $this->helperData->getNumberOfVariantToExport($store);
+        $indexCount = 0;
         foreach ($childIds as $id) {
             if (!array_key_exists($id, $index)) {
                 // child product doesn't exist in index
+                $this->logger->info("Child Product doesn't exist ".$id);
+                continue;
+            }else if($variantCount && $variantCount > 0 && $variantCount <= $indexCount){
+                $this->logger->info("Skip Child Product as variant limit exceeded ".$id);
                 continue;
             }
             if (!isset($index[$id][Config::getPreparedKey()]) && (!in_array($id, $this->relatedEntityPreparedDataList))) {
@@ -803,6 +809,7 @@ class DataHandler
             $childData = $this->formatChildFields($index[$id], $id);
             if (!empty($childData)) {
                 $parentData[Config::CHILD_PRODUCTS_FIELD_KEY][] = $childData;
+                $indexCount++;
             }
         }
 
