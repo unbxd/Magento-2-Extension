@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Model\Indexer\Product\Full\Action;
 
 use Unbxd\ProductFeed\Model\ResourceModel\Indexer\Product\Full\Action\Full as ResourceModel;
@@ -17,6 +19,7 @@ use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Feed\Config as FeedConfig;
 use Unbxd\ProductFeed\Model\Feed\Manager as FeedManager;
+
 
 
 /**
@@ -38,8 +41,8 @@ class Full
     private $dataSourceProvider;
 
     /** 
-    * @var DataSourceProvider
-    */
+     * @var DataSourceProvider
+     */
 
     private $incrementalSourceProvider;
 
@@ -107,6 +110,33 @@ class Full
         return $this->resourceModel->getProducts($storeId, $productIds, $fromId, $fromUpdatedDate, $useFilters, $limit);
     }
 
+    private function addChildrensForParent($storeId, array &$indexData)
+    {
+        $productIds = array_keys($indexData);
+        $allChildrenIds = $this->resourceModel->getRelationsByParent($productIds, $storeId);
+        $indexProductId = array_keys($indexData);
+        $toBeFetchedChildrens = array_diff($allChildrenIds, $indexProductId);
+        if (!empty($toBeFetchedChildrens)) {
+            $productId = 0;
+            do {
+                $products = $this->getProducts($storeId, $toBeFetchedChildrens, $productId, null);
+                foreach ($products as $productData) {
+                    $productId = (int) $productData['entity_id'];
+                    // check if product related to parent product, if so - mark it (use for filtering index data in feed process)
+                    $parentId = $this->resourceModel->getRelatedParentProduct($productId);
+                    if ($parentId && ($parentId != $productId)) {
+                        $productData[FeedConfig::PARENT_ID_KEY] = (int) $parentId;
+                    };
+                    $productData['has_options'] = (bool) $productData['has_options'];
+                    $productData['required_options'] = (bool) $productData['required_options'];
+                    $productData['created_at'] = (string) $this->helperData->formatDateTime($productData['created_at']);
+                    $productData['updated_at'] = (string) $this->helperData->formatDateTime($productData['updated_at']);
+                    $indexData[$productId] = $productData;
+                }
+            } while (!empty($products));
+        }
+    }
+
     /**
      * Get data for a list of product in a store ID.
      * If the product list IDs is null, all products data will be loaded.
@@ -132,7 +162,7 @@ class Full
             }
         }
 
-		$productId = 0;
+        $productId = 0;
         do {
             $products = $this->getProducts($storeId, $productIds, $productId, $fromUpdatedDate);
             foreach ($products as $productData) {
@@ -168,7 +198,7 @@ class Full
                 $batch = [];
             }
         }
-		
+
         if (count($batch) > 0) {
             yield $batch;
         }
@@ -183,7 +213,7 @@ class Full
      * @param FeedManager $feedManager
      * @return array|mixed
      */
-    private function appendIndexData($storeId, $initIndexData, $incremental=false,$feedManager = null)
+    private function appendIndexData($storeId, $initIndexData, $incremental = false, $feedManager = null)
     {
         $index = [];
         $fields = [];
@@ -191,50 +221,52 @@ class Full
         $multiPartBatchSize = $this->helperData->getMultiPartBatchSize() ?? $batchSize;
         $processCount = 0;
         $multiPartBatchCount = 0;
-        if(!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager){
+        if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager) {
             $feedManager->startMultiUpload($storeId);
         }
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
-			if (!empty($batchIndex)) {
-                if($incremental && $this->helperData->isPartialIncrementalEnabled())
-                {
+            if (!empty($batchIndex)) {
+                if ($incremental && $this->helperData->isPartialIncrementalEnabled()) {
                     foreach ($this->dataSourceProvider->getIncrementList() as $dataSource) {
                         /** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
                         $batchIndex = $dataSource->appendData($storeId, $batchIndex);
                     }
-                }else{
-				foreach ($this->dataSourceProvider->getList() as $dataSource) {
-					/** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
-					$batchIndex = $dataSource->appendData($storeId, $batchIndex);
-                    $this->logger->info("Processed Data Source Provider ::".$dataSource->getDataSourceCode()." with memory of ".memory_get_usage());
-				}
+                } else {
+                    if ($this->helperData->isMultiPartUploadEnabled()) {
+                        $this->addChildrensForParent($storeId, $batchIndex);
+                    }
+                    foreach ($this->dataSourceProvider->getList() as $dataSource) {
+                        /** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
+                        $batchIndex = $dataSource->appendData($storeId, $batchIndex);
+                        $this->logger->info("Processed Data Source Provider ::" . $dataSource->getDataSourceCode() . " with memory of " . memory_get_usage());
+                    }
                 }
 
                 $processCount += $batchSize;
-                $multiPartBatchCount +=$batchSize;
-                $this->logger->info("Processed Products Count ::".$processCount);
+                $multiPartBatchCount += $batchSize;
+                $this->logger->info("Processed Products Count ::" . $processCount);
             }
-            if (isset($batchIndex["fields"])){
-                $fields = array_merge($fields,$batchIndex["fields"]);
+            if (isset($batchIndex["fields"])) {
+                $fields = array_merge($fields, $batchIndex["fields"]);
                 unset($batchIndex["fields"]);
-                $index["fields"]=$fields;
+                $index["fields"] = $fields;
             }
-			if (!empty($batchIndex) ) {
-				$index += $batchIndex;
-                if($this->helperData->isMultiPartUploadEnabled() && $multiPartBatchCount >= $multiPartBatchSize && $feedManager){                        
-                        $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
-                        $multiPartBatchCount = 0;
-                        $index = [];
+            if (!empty($batchIndex)) {
+                $index += $batchIndex;
+                if ($this->helperData->isMultiPartUploadEnabled() && $multiPartBatchCount >= $multiPartBatchSize && $feedManager) {
+                    $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
+                    $multiPartBatchCount = 0;
+                    $index = [];
                 }
-			}
+            }
         }
-        if(!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager){
-            if (!empty($index) ) {
-                $feedManager->batchExecute($index,$processCount,$incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL,$storeId);
+        if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager) {
+            if (!empty($index)) {
+                $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
             }
             $feedManager->endMultiUpload($storeId);
         }
-		$index["fields"]=$fields;
+        $index["fields"] = $fields;
         return $index;
     }
 
@@ -248,20 +280,20 @@ class Full
      * @return array|mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function rebuildProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null,$feedManager = null)
+    public function rebuildProductStoreIndex($storeId, $productIds = [], $fromUpdatedDate = null, $feedManager = null)
     {
         $initIndexData = $this->initProductStoreIndex($storeId, $productIds, $fromUpdatedDate);
         $fullIndex = [];
         if (!empty($initIndexData)) {
-			$fullIndex = $this->appendIndexData($storeId, $initIndexData,(!empty($productIds) || $fromUpdatedDate != null),$feedManager);
+            $fullIndex = $this->appendIndexData($storeId, $initIndexData, (!empty($productIds) || $fromUpdatedDate != null), $feedManager);
         }
 
         // try to detect deleted product(s)
         if (!empty($productIds)) {
             foreach ($productIds as $id) {
-                if (!array_key_exists($id,$fullIndex)) {
+                if (!array_key_exists($id, $fullIndex)) {
                     $fullIndex[$id]['action'] = FeedConfig::OPERATION_TYPE_DELETE;
-                    $this->logger->info("Following product will be deleted from index - ".$id);
+                    $this->logger->info("Following product will be deleted from index - " . $id);
                 }
             }
         }
