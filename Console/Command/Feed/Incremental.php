@@ -161,10 +161,6 @@ class Incremental extends AbstractCommand
             $output->writeln("<info>" . FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_COMPLETE . "</info>");
         } else if ($this->feedHelper->isLastSynchronizationProcessing()) {
             $output->writeln("<info>" . strip_tags(FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_INDEXING) . "</info>");
-        } else {
-            $affectedIds = implode(',', array_values($stores));
-            $errorMessage = sprintf($errorMessage, $affectedIds);
-            $output->writeln("<error>{$errorMessage}</error>");
         }
 
         return $this;

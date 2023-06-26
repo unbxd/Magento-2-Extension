@@ -115,7 +115,7 @@ class Connector
         ResponseFactory $responseFactory,
         HelperData $helperData,
         Serializer $serializer,
-        LoggerInterface $logger,
+        LoggerInterface $logger
     ) {
         $this->curlFactory = $curlFactory;
         $this->responseFactory = $responseFactory;

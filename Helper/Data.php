@@ -608,6 +608,8 @@ class Data extends AbstractHelper
                 case 'swatch_image':
                     $path = self::XML_PATH_IMAGES_SWATCH_IMAGE_ID;
                     break;
+                default:
+                    return null;
             }
             return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $store);
         }
