@@ -1,4 +1,7 @@
-# Version 2.0.15
+# Version 2.0.16
+## 2.0.16 - June 26, 2023
+- Removed trailing comma on constructor arguments, fixed a couple of bugs
+- Add missing child products which could get truncated due to batching in multipart
 ## 2.0.15 - June 14, 2023
 - Support to restrict maximum number of variants per product
 ## 2.0.14 - May 24, 2023
