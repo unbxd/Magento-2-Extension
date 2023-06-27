@@ -395,7 +395,7 @@ class Manager
 
         // caching feed operation type
         $this->type = $type;
-
+        $feedViewIdClone = $this->feedViewId;
         $this->startProfiler()
             ->initExecute($index, $store)
             ->serializeAndWriteFeed(
@@ -410,7 +410,7 @@ class Manager
 
         $this->logger->info('END feed execute.');
 
-        return $this->feedViewId;
+        return $feedViewIdClone;
     }
 
     /**
