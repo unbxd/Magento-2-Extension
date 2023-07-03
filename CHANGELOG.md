@@ -1,4 +1,6 @@
-# Version 2.0.16
+# Version 2.0.17
+## 2.0.17 - July 3, 2023
+- Restrict product count in incremental sync to 10K
 ## 2.0.16 - June 26, 2023
 - Removed trailing comma on constructor arguments, fixed a couple of bugs
 - Add missing child products which could get truncated due to batching in multipart
