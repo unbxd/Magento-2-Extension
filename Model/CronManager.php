@@ -477,16 +477,19 @@ class CronManager
 
     private function processIncrementalJobForStore($storeId)
     {
-        $jobs = $this->getPendingJobsForStore($storeId, false, 999);
-        if ($jobs->getSize() == 0) {
+        $jobsList = $this->getPendingJobsForStore($storeId, false, 999);
+        if ($jobsList->getSize() == 0) {
             $this->logger->info(sprintf('No incremental job for store with #%d', $storeId));
             return;
         }
         $jobData = [];
-        $jobIds = [];
-        foreach ($jobs as $job) {
+        $jobs = [];
+        foreach ($jobsList as $job) {
             $jobData = array_merge($jobData, $this->queueHandler->convertStringToIds($job->getAffectedEntities()));
-            $jobIds[] = $job->getId();
+            $jobs[] = $job;
+            if(count($jobData) > 10000){
+                break;
+            }
         }
         $jobData = array_unique($jobData);
 
