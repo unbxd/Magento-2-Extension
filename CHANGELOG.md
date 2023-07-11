@@ -1,4 +1,6 @@
-# Version 2.0.17
+# Version 2.0.18
+## 2.0.18 - July 11, 2023
+- Restrict Not visible individual products from feed in a multi locale site setup
 ## 2.0.17 - July 3, 2023
 - Restrict product count in incremental sync to 10K
 ## 2.0.16 - June 26, 2023
