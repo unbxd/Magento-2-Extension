@@ -429,9 +429,9 @@ class CronManager
             if ($this->isFullJobForStorePending($storeId)) {
                 $this->removeAllButOneFullJobForStore($storeId);
                 $this->processFullJobForStore($storeId);
-            }else{
+            } else {
                 $this->processIncrementalJobForStore($storeId);
-            }   
+            }
         }
         $this->cleanupQueue();
         $this->cleanupFeedViewRecord();
@@ -487,7 +487,7 @@ class CronManager
         foreach ($jobsList as $job) {
             $jobData = array_merge($jobData, $this->queueHandler->convertStringToIds($job->getAffectedEntities()));
             $jobs[] = $job;
-            if(count($jobData) > 10000){
+            if (count($jobData) > 10000) {
                 break;
             }
         }
@@ -504,9 +504,9 @@ class CronManager
             $isReindexSuccess = true;
         } catch (\Exception $e) {
             $error = $e->getMessage();
-            
+
             $this->logger->error(
-                sprintf('Reindex failed for store with #%d. Error: %s. Trace: %s', $storeId, $error,$e->getTraceAsString())
+                sprintf('Reindex failed for store with #%d. Error: %s. Trace: %s', $storeId, $error, $e->getTraceAsString())
             );
         }
 
@@ -528,8 +528,8 @@ class CronManager
         }
         $updateData = [
             IndexingQueueInterface::STATUS => ($isReindexSuccess && $feedViewId)
-            ? IndexingQueue::STATUS_COMPLETE
-            : IndexingQueue::STATUS_ERROR,
+                ? IndexingQueue::STATUS_COMPLETE
+                : IndexingQueue::STATUS_ERROR,
             IndexingQueueInterface::FINISHED_AT => date('Y-m-d H:i:s'),
             IndexingQueueInterface::EXECUTION_TIME => $this->logger->getTime(),
         ];
@@ -590,13 +590,13 @@ class CronManager
                 $feedManager = $this->feedManagerFactory->create();
                 /** @var FullReindexAction $fullReindexAction */
                 $fullReindexAction = $this->fullReindexActionFactory->create();
-                $jobIndex = $fullReindexAction->rebuildProductStoreIndex($storeId, $jobData,null,$feedManager);
+                $jobIndex = $fullReindexAction->rebuildProductStoreIndex($storeId, $jobData, null, $feedManager);
                 $this->logger->info(sprintf('Finished reindex for job with #%s. Stats:', $jobId))->logStats();
                 $isReindexSuccess = true;
             } catch (\Exception $e) {
                 $error = $e->getMessage();
                 $this->logger->error(
-                    sprintf('Reindex failed for job with #%d. Error: %s. Trace: %s', $storeId, $error,$e->getTraceAsString())
+                    sprintf('Reindex failed for job with #%d. Error: %s. Trace: %s', $storeId, $error, $e->getTraceAsString())
                 );
             }
 
@@ -615,8 +615,8 @@ class CronManager
             $numberOfAttempts = (int) $job->getNumberOfAttempts() + 1;
             $updateData = [
                 IndexingQueueInterface::STATUS => $isReindexSuccess
-                ? IndexingQueue::STATUS_COMPLETE
-                : IndexingQueue::STATUS_ERROR,
+                    ? IndexingQueue::STATUS_COMPLETE
+                    : IndexingQueue::STATUS_ERROR,
                 IndexingQueueInterface::FINISHED_AT => date('Y-m-d H:i:s'),
                 IndexingQueueInterface::EXECUTION_TIME => $this->logger->getTime(),
                 IndexingQueueInterface::ADDITIONAL_INFORMATION => __($additionalInformation),
@@ -634,26 +634,29 @@ class CronManager
                 $this->logger->error(sprintf('Can\'t execute feed for job record #%d. Empty index.', $jobId));
                 continue;
             }
-
             // perform synchronization on reindex success with no empty index data
             if ($isReindexSuccess) {
-                if(!$this->helperData->isMultiPartUploadEnabled()){
-                $type = $isFullReindex ? FeedConfig::FEED_TYPE_FULL : FeedConfig::FEED_TYPE_INCREMENTAL;
-                
-                $feedViewId = $feedManager->execute($jobIndex, $type, $storeId,
-                    [
-                        FeedViewInterface::REINDEX_JOB_ID => $jobId,
-                        IndexingQueueInterface::NUMBER_OF_ATTEMPTS => $numberOfAttempts,
-                    ]
-                );
-            }
-                // set feed view ID, related to current reindex process
-                if ($feedViewId) {
-                    $this->queueHandler->update($jobId,
+                if (!$this->helperData->isMultiPartUploadEnabled()) {
+                    $type = $isFullReindex ? FeedConfig::FEED_TYPE_FULL : FeedConfig::FEED_TYPE_INCREMENTAL;
+
+                    $feedViewId = $feedManager->execute(
+                        $jobIndex,
+                        $type,
+                        $storeId,
                         [
-                            IndexingQueueInterface::FEED_VIEW_ID => $feedViewId,
+                            FeedViewInterface::REINDEX_JOB_ID => $jobId,
+                            IndexingQueueInterface::NUMBER_OF_ATTEMPTS => $numberOfAttempts,
                         ]
                     );
+                    // set feed view ID, related to current reindex process
+                    if ($feedViewId) {
+                        $this->queueHandler->update(
+                            $jobId,
+                            [
+                                IndexingQueueInterface::FEED_VIEW_ID => $feedViewId,
+                            ]
+                        );
+                    }
                 }
             }
         }
@@ -792,15 +795,15 @@ class CronManager
             /** @var \Unbxd\ProductFeed\Model\FeedView $job */
             $jobId = $job->getId();
             $storeId = $job->getStoreId();
-            $uploadId = trim($job->getUploadId()?? '');
-            $jobType = trim($job->getOperationTypes()?? '');
+            $uploadId = trim($job->getUploadId() ?? '');
+            $jobType = trim($job->getOperationTypes() ?? '');
             if (!$jobId || !$uploadId) {
                 continue;
             }
 
             $apiEndpointType = ($jobType == FeedConfig::FEED_TYPE_FULL)
-            ? FeedConfig::FEED_TYPE_FULL_UPLOADED_STATUS
-            : FeedConfig::FEED_TYPE_INCREMENTAL_UPLOADED_STATUS;
+                ? FeedConfig::FEED_TYPE_FULL_UPLOADED_STATUS
+                : FeedConfig::FEED_TYPE_INCREMENTAL_UPLOADED_STATUS;
 
             /** @var ApiConnector $connectorManager */
             $connectorManager = $this->getConnectorManager();
@@ -819,13 +822,13 @@ class CronManager
                 $responseBodyData = $response->getResponseBodyAsArray();
                 if (!empty($responseBodyData)) {
                     $status = array_key_exists(FeedResponse::RESPONSE_FIELD_STATUS, $responseBodyData)
-                    ? $responseBodyData[FeedResponse::RESPONSE_FIELD_STATUS]
-                    : null;
+                        ? $responseBodyData[FeedResponse::RESPONSE_FIELD_STATUS]
+                        : null;
 
                     if ($status && ($status != FeedResponse::RESPONSE_FIELD_STATUS_VALUE_INDEXING)) {
                         $status = ($status == FeedResponse::RESPONSE_FIELD_STATUS_VALUE_INDEXED)
-                        ? FeedView::STATUS_COMPLETE
-                        : FeedView::STATUS_ERROR;
+                            ? FeedView::STATUS_COMPLETE
+                            : FeedView::STATUS_ERROR;
                         $updateData = [
                             FeedViewInterface::STATUS => $status,
                         ];
@@ -1025,8 +1028,8 @@ class CronManager
             } else {
                 $isFullCatalogAffected = (bool) ($job->getOperationTypes() == FeedConfig::FEED_TYPE_FULL);
                 $entityIds = $isFullCatalogAffected
-                ? []
-                : $this->queueHandler->convertStringToIds($job->getAffectedEntities());
+                    ? []
+                    : $this->queueHandler->convertStringToIds($job->getAffectedEntities());
                 $actionType = empty($entityIds) ? IndexingQueue::TYPE_REINDEX_FULL : '';
 
                 // added new job with related data to indexing queue
