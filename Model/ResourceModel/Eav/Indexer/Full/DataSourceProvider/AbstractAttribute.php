@@ -112,8 +112,29 @@ class AbstractAttribute extends Indexer
             ->where('t_default.attribute_id IN (?)', $attributeIds)
             ->where("entity.{$entityIdField} IN (?)", $entityIds)
             ->columns(['value' => new \Zend_Db_Expr('COALESCE(t_store.value, t_default.value)')]);
+        $valueInDefaultStore =  $this->connection->fetchAll($select);
+        $select->reset();
+        $joinStoreValuesConditionClauses = [
+            "t_default.$linkField = t_store.$linkField",
+            't_default.attribute_id = t_store.attribute_id',
+            't_default.store_id = 0',
+        ];
 
-        return $this->connection->fetchAll($select);
+        $joinStoreValuesCondition = implode(' AND ', $joinStoreValuesConditionClauses);
+        $select->from(
+            ['entity' => $this->getEntityMetaData($this->getEntityTypeId())->getEntityTable()],
+            [$entityIdField]
+            )->joinInner(
+                ['t_store' => $tableName],
+                new \Zend_Db_Expr("entity.{$linkField} = t_store.{$linkField}"),
+                ['attribute_id','value']
+            )->joinLeft(['t_default' => $tableName], $joinStoreValuesCondition, [])
+            ->where('t_store.store_id = ?', $storeId)
+            ->where('t_default.store_id is null')
+            ->where('t_store.attribute_id IN (?)', $attributeIds)
+            ->where("entity.{$entityIdField} IN (?)", $entityIds);
+        $valueInStoreScope =  $this->connection->fetchAll($select);
+        return array_merge($valueInDefaultStore,$valueInStoreScope);
     }
 
     /**
