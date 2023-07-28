@@ -134,7 +134,7 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
                     if (!isset($indexData[$productId])) {
                         $indexData[$productId] = [];
                     }
-                    $indexData[$productId] += $indexValues;
+                    $indexData[$productId] = array_merge($indexData[$productId],$indexValues);
 
                     if (!isset($indexData[$productId]['indexed_attributes'])) {
                         $indexData[$productId]['indexed_attributes'] = [];

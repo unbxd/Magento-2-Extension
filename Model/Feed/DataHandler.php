@@ -171,7 +171,7 @@ class DataHandler
      */
     private $childrenData = [];
 
-     /**
+    /**
      * Local cache for children which can also be sold individually and data is prepared
      *
      * @var array
@@ -301,10 +301,10 @@ class DataHandler
         $this->setIndexedFields($indexedFields);
         unset($index['fields']);
         $this->buildCatalogData($index, $store);
-        if(array_key_exists("add",$this->catalog)){
-           $this->buildSchemaFields();
+        if (array_key_exists("add", $this->catalog)) {
+            $this->buildSchemaFields();
         }
-        
+
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_prepare_data_after.');
         $this->eventManager->dispatch(
             $this->eventPrefix . '_prepare_data_after',
@@ -364,11 +364,11 @@ class DataHandler
                 $indexedFields[$mappedFieldKey] = array_replace($fieldData, ['fieldName' => $mappedFieldKey]);
             }
             if (in_array($fieldData['fieldName'], $urlAttributes)) {
-                $fieldData['dataType']='link';
+                $fieldData['dataType'] = 'link';
             }
             // convert to needed format
-            if(!strpos($fieldData['fieldName'],"*")){
-            $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);
+            if (!strpos($fieldData['fieldName'], "*")) {
+                $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);
             }
         }
         // process child fields
@@ -391,8 +391,8 @@ class DataHandler
         foreach ($this->getChildrenSchemaFields() as $childField) {
             // add only fields that already exist in schema fields
             if (array_key_exists($childField, $fields)) {
-                $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX.ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField));
-                
+                $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX . ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField));
+
                 if (!array_key_exists($childKey, $fields)) {
                     $childFieldData = $fields[$childField];
                     if (!empty($childFieldData)) {
@@ -435,23 +435,27 @@ class DataHandler
             try {
                 // schema fields has key 'fields', do only for products
                 if (is_int($productId)) {
-                    if(array_key_exists('action', $data) && trim($data['action']) == Config::OPERATION_TYPE_DELETE){
+                    if (!empty($data["status"]) && ((is_array($data["status"]) ? $data["status"][0] : $data["status"]) == "2" || (is_array($data["status"]) ? $data["status"][0] : $data["status"]) == 2)) {
+                        $this->logger->info("Disabled product hence skipping - " . $productId);
+                        unset($index[$productId]);
+                        continue;
+                    }
+                    if (array_key_exists('action', $data) && trim($data['action']) == Config::OPERATION_TYPE_DELETE) {
                         $operationKey = array_key_exists('action', $data)
-                        ? trim($data['action'])
-                        : Config::OPERATION_TYPE_ADD;
+                            ? trim($data['action'])
+                            : Config::OPERATION_TYPE_ADD;
                         if ($operationKey == Config::OPERATION_TYPE_DELETE) {
                             $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
                             $data = [$key => strval($productId)];
                         }
-    
-                        if(array_key_exists('action', $data)){
+
+                        if (array_key_exists('action', $data)) {
                             unset($data['action']);
                         }
                         $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
                         continue;
-                    }
-                    elseif(!isset($data["entity_id"])){
-                        $this->logger->info("In-complete data detected for product -".$productId);
+                    } elseif (!isset($data["entity_id"])) {
+                        $this->logger->info("In-complete data detected for product -" . $productId);
                         unset($index[$productId]);
                         continue;
                     }
@@ -462,7 +466,7 @@ class DataHandler
                     ) {
                         $currentChildIds = $data[Config::CHILD_PRODUCT_IDS_FIELD_KEY];
                         $this->appendChildDataToParent($index, $data, $currentChildIds, $store);
-                    } else if(!$isOnlySimpleProduct){
+                    } else if (!$isOnlySimpleProduct) {
                         // if product doesn't have children - add empty variants data
                         $data[Config::CHILD_PRODUCTS_FIELD_KEY] = [];
                     }
@@ -474,9 +478,8 @@ class DataHandler
                         if (!isset($data[Config::FIELD_KEY_VISIBILITY]) || empty($data[Config::FIELD_KEY_VISIBILITY]) || (is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == "Not Visible Individually" || (is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == 1) {
                             continue;
                         }
-                        $this->relatedEntityPreparedDataList[]=$data['entity_id'];
-
-                    }else if (isset($data[Config::FIELD_KEY_VISIBILITY]) && !empty($data[Config::FIELD_KEY_VISIBILITY]) && ((is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == "Not Visible Individually" || (is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == 1)) {
+                        $this->relatedEntityPreparedDataList[] = $data['entity_id'];
+                    } else if (isset($data[Config::FIELD_KEY_VISIBILITY]) && !empty($data[Config::FIELD_KEY_VISIBILITY]) && ((is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == "Not Visible Individually" || (is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == 1)) {
                         continue;
                     }
 
@@ -497,14 +500,14 @@ class DataHandler
                         ? trim($data['action'])
                         : Config::OPERATION_TYPE_ADD;
 
-                    if(array_key_exists('action', $data)){
+                    if (array_key_exists('action', $data)) {
                         unset($data['action']);
                     }
                     $this->catalog[$operationKey][Config::CATALOG_ITEMS_FIELD_KEY][] = $data;
                 }
             } catch (\Exception $e) {
                 unset($index[$productId]);
-                $this->logger->error("Encountered exception while processing product -" . $data["sku"]." with error ".$e->getMessage()." -stack-".$e->getTraceAsString());
+                $this->logger->error("Encountered exception while processing product -" . $data["sku"] . " with error " . $e->getMessage() . " -stack-" . $e->getTraceAsString());
             }
         }
 
@@ -613,9 +616,9 @@ class DataHandler
 
             if (is_array($data[$productAttribute])) {
                 // retrieve only first required value
-                if(!empty($data[$productAttribute])){
+                if (!empty($data[$productAttribute])) {
                     $value = $data[$productAttribute][0];
-                }else{
+                } else {
                     continue;
                 }
             } else {
@@ -637,7 +640,7 @@ class DataHandler
                 case Config::FIELD_KEY_THUMBNAIL_PATH:
                 case Config::FIELD_KEY_SWATCH_IMAGE_PATH:
 
-                    $imageUrl = $this->imageDataHandler->getImageUrl($productId,$value, $productAttribute,  $store);
+                    $imageUrl = $this->imageDataHandler->getImageUrl($productId, $value, $productAttribute,  $store);
                     if ($imageUrl) {
                         $data[$unbxdField] = $imageUrl;
                         unset($data[$productAttribute]);
@@ -645,7 +648,7 @@ class DataHandler
                     }
                     break;
                 case Config::FIELD_KEY_CATEGORY_DATA:
-                    $categoryData = $this->categoryDataHandler->buildCategoryList($data[Config::FIELD_KEY_CATEGORY_DATA],$store,$data["entity_id"]);
+                    $categoryData = $this->categoryDataHandler->buildCategoryList($data[Config::FIELD_KEY_CATEGORY_DATA], $store, $data["entity_id"]);
                     if (!empty($categoryData)) {
                         $data[$unbxdField] = $categoryData;
                         $data[Config::FIELD_UNBXD_CATEGORY_PATH] = $this->sanitizeCategoryInformation($categoryData);
@@ -672,9 +675,9 @@ class DataHandler
 
     private function sanitizeCategoryInformation($categoryData)
     {
-        if ($categoryData){
+        if ($categoryData) {
             $sanitizedCategoryData = [];
-            foreach($categoryData as $categoryPath){
+            foreach ($categoryData as $categoryPath) {
                 $sanitizedCategoryData[] = preg_replace('/& {0,}/i', '', $categoryPath);
             }
             return $sanitizedCategoryData;
@@ -724,7 +727,7 @@ class DataHandler
         foreach (ImageDataHandler::getMediaAttributes() as $attribute) {
             if (isset($data[$attribute]) && !in_array($attribute, $this->getProcessedImages())) {
                 $value = is_array($data[$attribute]) ? $data[$attribute][0] : $data[$attribute];
-                $data[$attribute] = $this->imageDataHandler->getImageUrl($productId,(string) $value, $attribute, $store);
+                $data[$attribute] = $this->imageDataHandler->getImageUrl($productId, (string) $value, $attribute, $store);
             }
         }
         // clear processed images for current product
@@ -797,10 +800,10 @@ class DataHandler
         foreach ($childIds as $id) {
             if (!array_key_exists($id, $index)) {
                 // child product doesn't exist in index
-                $this->logger->info("Child Product doesn't exist ".$id);
+                $this->logger->info("Child Product doesn't exist " . $id);
                 continue;
-            }else if($variantCount && $variantCount > 0 && $variantCount <= $indexCount){
-                $this->logger->info("Skip Child Product as variant limit exceeded ".$id);
+            } else if ($variantCount && $variantCount > 0 && $variantCount <= $indexCount) {
+                $this->logger->info("Skip Child Product as variant limit exceeded " . $id);
                 continue;
             }
             if (!isset($index[$id][Config::getPreparedKey()]) && (!in_array($id, $this->relatedEntityPreparedDataList))) {
@@ -843,15 +846,15 @@ class DataHandler
 
                 $camelCaseKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
 
-                if ($camelCaseKey == $key && array_key_exists($key,$this->keyMap)){
+                if ($camelCaseKey == $key && array_key_exists($key, $this->keyMap)) {
                     //This could be a component product which is already formated with keys
                     $this->setChildrenSchemaFields($this->keyMap[$key]);
-                }else{
+                } else {
                     $this->setChildrenSchemaFields($key);
                 }
 
-                $newKey = Config::CHILD_PRODUCT_FIELD_PREFIX.ucfirst($camelCaseKey);
-                
+                $newKey = Config::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($camelCaseKey);
+
 
                 if (
                     in_array($key, [
@@ -887,10 +890,10 @@ class DataHandler
      */
     private function prepareFieldValues(array &$data)
     {
-        $optionTextPrefix = AttributeHelper::OPTION_TEXT_PREFIX.'_';
+        $optionTextPrefix = AttributeHelper::OPTION_TEXT_PREFIX . '_';
         foreach ($data as $key => $value) {
             $pureKey = str_replace($optionTextPrefix, '', $key);
-            $optionTextKey = $optionTextPrefix.$pureKey;
+            $optionTextKey = $optionTextPrefix . $pureKey;
             if (strpos($key, $optionTextPrefix) !== false) {
                 // field with option labels
                 if (!array_key_exists($pureKey, $data)) {
@@ -965,8 +968,8 @@ class DataHandler
      */
     private function buildProductUrl($urlKey, $storeId)
     {
-        $path = $urlKey.$this->getProductUrlSuffix($storeId);
-        $url = $this->getStore($storeId)->getBaseUrl(UrlInterface::URL_TYPE_WEB,true) . $path;
+        $path = $urlKey . $this->getProductUrlSuffix($storeId);
+        $url = $this->getStore($storeId)->getBaseUrl(UrlInterface::URL_TYPE_WEB, true) . $path;
         //$url = $this->getFrontendUrl($path);
         // check if use category path for product url
         if ($this->helperData->isSetFlag(HelperProduct::XML_PATH_PRODUCT_URL_USE_CATEGORY)) {
@@ -1039,7 +1042,7 @@ class DataHandler
             $newKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
             $data[$newKey] = $value;
             if ($newKey != $key) {
-                $this->keyMap[$newKey]=$key;
+                $this->keyMap[$newKey] = $key;
                 unset($data[$key]);
             }
         }
