@@ -1,4 +1,8 @@
-# Version 2.0.18
+# Version 2.0.19
+## 2.0.19 - July 29, 2023
+- Fixed fetching of product attribute value if only set at a given store scope and has no default value
+- Skip products which are disabled only at store scope
+- Restrict Not visible individual products from feed in a multi locale site setup
 ## 2.0.18 - July 11, 2023
 - Restrict Not visible individual products from feed in a multi locale site setup
 ## 2.0.17 - July 3, 2023
