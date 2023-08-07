@@ -1,4 +1,6 @@
-# Version 2.0.19
+# Version 2.0.20
+## 2.0.20 - August 07, 2023
+- Support for dynamic attributes
 ## 2.0.19 - July 29, 2023
 - Fixed fetching of product attribute value if only set at a given store scope and has no default value
 - Skip products which are disabled only at store scope
