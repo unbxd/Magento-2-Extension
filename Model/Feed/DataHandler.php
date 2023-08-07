@@ -190,6 +190,9 @@ class DataHandler
      */
     private $loggerType = null;
 
+    private $dynamicFieldsPattern = "/.*_unx_(ts|tsm|d|dm|dt|dtm)$/i";
+
+
     /**
      * DataHandler constructor.
      * @param EventManager $eventManager
@@ -367,7 +370,7 @@ class DataHandler
                 $fieldData['dataType'] = 'link';
             }
             // convert to needed format
-            if (!strpos($fieldData['fieldName'], "*")) {
+            if (!strpos($fieldData['fieldName'], "*") && !preg_match($this->dynamicFieldsPattern, $fieldData['fieldName'])) {
                 $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);
             }
         }
@@ -391,7 +394,11 @@ class DataHandler
         foreach ($this->getChildrenSchemaFields() as $childField) {
             // add only fields that already exist in schema fields
             if (array_key_exists($childField, $fields)) {
-                $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX . ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField));
+                if (!strpos($childField, "*") && !preg_match($this->dynamicFieldsPattern, $childField)) {
+                    $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX . ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField));
+                } else {
+                    $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($childField);
+                }
 
                 if (!array_key_exists($childKey, $fields)) {
                     $childFieldData = $fields[$childField];
@@ -843,8 +850,11 @@ class DataHandler
             $variantIdKey = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::CHILD_PRODUCT_FIELD_VARIANT_ID);
             foreach ($data as $key => $value) {
                 // collect child fields to use for add to schema fields
-
-                $camelCaseKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
+                if (!preg_match($this->dynamicFieldsPattern, $key)) {
+                    $camelCaseKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
+                }else{
+                    $camelCaseKey = $key;
+                }
 
                 if ($camelCaseKey == $key && array_key_exists($key, $this->keyMap)) {
                     //This could be a component product which is already formated with keys
@@ -1039,11 +1049,13 @@ class DataHandler
     private function formatArrayKeysToCamelCase(array &$data)
     {
         foreach ($data as $key => $value) {
-            $newKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
-            $data[$newKey] = $value;
-            if ($newKey != $key) {
-                $this->keyMap[$newKey] = $key;
-                unset($data[$key]);
+            if (!preg_match($this->dynamicFieldsPattern, $key)) {
+                $newKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
+                $data[$newKey] = $value;
+                if ($newKey != $key) {
+                    $this->keyMap[$newKey] = $key;
+                    unset($data[$key]);
+                }
             }
         }
 
