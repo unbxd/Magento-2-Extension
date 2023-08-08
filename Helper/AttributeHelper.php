@@ -121,6 +121,10 @@ class AttributeHelper extends AbstractHelper
         return $this->attributeCollectionFactory->create();
     }
 
+    public function getMultiStoreEnabledStores(){
+        return $this->helperData->getMultiStoreEnabledStores();
+    }
+
     /**
      * Retrieve a new product attribute instance by code.
      *
@@ -291,9 +295,12 @@ class AttributeHelper extends AbstractHelper
      * @param $value
      * @return array
      */
-    public function prepareIndexValue(AttributeInterface $attribute, $storeId, $value)
+    public function prepareIndexValue(AttributeInterface $attribute, $storeId, $value, $multiStore = false)
     {
         $attributeCode = $attribute->getAttributeCode();
+        if($multiStore){
+            $attributeCode  = $attributeCode."_store_".$storeId;
+        }
         $values = [];
 
         $mapperKey = 'simple_' . $attribute->getId();
@@ -571,9 +578,9 @@ class AttributeHelper extends AbstractHelper
     public function getSpecificFieldOptions($fieldName)
     {
         $fieldType = FeedConfig::FIELD_TYPE_TEXT;
-        if (($fieldName == 'price') || ($fieldName == 'original_price')) {
+        if (($fieldName == 'price') || ($fieldName == 'original_price') || strpos($fieldName,'price_store_') !== false) {
             $fieldType = FeedConfig::FIELD_TYPE_DECIMAL;
-        } else if ($fieldName == 'quantity_and_stock_status') {
+        } else if ($fieldName == 'quantity_and_stock_status' || strpos($fieldName,'quantity_and_stock_status_store_') !== false) {
             $fieldType = FeedConfig::FIELD_TYPE_BOOL;
         }
 

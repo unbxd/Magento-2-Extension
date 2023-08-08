@@ -189,6 +189,14 @@
             </group>
             <group id="indexing" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Indexing Settings</label>
+                    <field id="multi_store_enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="1">
+                        <label>Index Store Specific Data</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment><![CDATA[Set this option to true if magento instance is a multi store setup indexing using a common unbxd site key.<br/>
+                            ex: for a customer with multiple stores, enable this attribute for all the store scopes which you wanted to also be sent to Unbxd.<br/>
+                            Don't set this attribute to true within default scope.
+                        ]]></comment>
+                    </field>
                 <field id="enabled_queue" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled Indexing Queue</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

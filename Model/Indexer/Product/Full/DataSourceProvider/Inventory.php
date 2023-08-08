@@ -64,29 +64,42 @@ class Inventory implements DataSourceProviderInterface
      */
     public function appendData($storeId, array $indexData)
     {
-        $inventoryData = $this->resourceModel->loadInventoryData($storeId, array_keys($indexData));
+        
         $indexedFields = [];
+        $this->appendInventoryData($storeId,$indexData,$indexedFields);
+        $stores = $this->attributeHelper->getMultiStoreEnabledStores();
+        foreach($stores as $multiStoreId){
+            $this->appendInventoryData($multiStoreId,$indexData,$indexedFields,true);
+        }
+        $this->attributeHelper->appendSpecificIndexedFields($indexData, $indexedFields);
+
+        return $indexData;
+    }
+
+    private function appendInventoryData($storeId, array &$indexData,array &$indexedFields, $multiStore=false)
+    {
+        $inventoryData = $this->resourceModel->loadInventoryData($storeId, array_keys($indexData));
         foreach ($inventoryData as $inventoryDataRow) {
             $productId = (int) $inventoryDataRow['product_id'];
             $isInStock = (bool) $inventoryDataRow['stock_status'];
             $qty = (int) $inventoryDataRow['qty'];
-            $indexData[$productId]['quantity_and_stock_status'] = $isInStock;
+            $qtyAndStockStatus = $multiStore ? "quantity_and_stock_status_store_".$storeId : "quantity_and_stock_status";
+            $indexData[$productId][$qtyAndStockStatus] = $isInStock;
 
-            if (!in_array('quantity_and_stock_status', $indexedFields)) {
-                $indexedFields[] = 'quantity_and_stock_status';
+            if (!in_array($qtyAndStockStatus, $indexedFields)) {
+                $indexedFields[] = $qtyAndStockStatus;
             }
-            $indexData[$productId]['availabilityText']= ($isInStock ? "true" : "false");
-            if (!in_array('availabilityText', $indexedFields)) {
-                $indexedFields[] = 'availabilityText';
+            $availabilityText = $multiStore ? "availabilityText_store_".$storeId : "availabilityText";
+            $indexData[$productId][$availabilityText]= ($isInStock ? "true" : "false");
+            if (!in_array($availabilityText, $indexedFields)) {
+                $indexedFields[] = $availabilityText;
             }
-            $indexData[$productId]['availabilityLabel']= ($isInStock ? "In Stock" : "Out of Stock");
-            if (!in_array('availabilityLabel', $indexedFields)) {
-                $indexedFields[] = 'availabilityLabel';
+            $availabilityLabel = $multiStore ? "availabilityLabel_store_".$storeId : "availabilityLabel";
+            $indexData[$productId][$availabilityLabel]= ($isInStock ? "In Stock" : "Out of Stock");
+            if (!in_array($availabilityLabel, $indexedFields)) {
+                $indexedFields[] = $availabilityLabel;
             }
         }
 
-        $this->attributeHelper->appendSpecificIndexedFields($indexData, $indexedFields);
-
-        return $indexData;
     }
 }

@@ -401,6 +401,28 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 );
         }
 
+        if (
+            $installer->tableExists($catalogEavAttributeTable)
+            && !$installer->getConnection()->tableColumnExists(
+                $catalogEavAttributeTable, 'send_multistore_info'
+            )
+        ) {
+            $installer->getConnection()
+                ->addColumn(
+                    $catalogEavAttributeTable,
+                    'send_multistore_info',
+                    [
+                        'type' => Table::TYPE_SMALLINT,
+                        'nullable' => false,
+                        'unsigned' => true,
+                        'length' => 1,
+                        'default' => 0,
+                        'comment' => 'Include store specific information when multi store indexing enabled.',
+                    ]
+                );
+        }
+
+
         // add fields which link re-index operation with synchronization process and vice versa
         if (version_compare($context->getVersion(), '1.0.40', '<')) {
             $indexingQueueColumnName = 'feed_view_id';

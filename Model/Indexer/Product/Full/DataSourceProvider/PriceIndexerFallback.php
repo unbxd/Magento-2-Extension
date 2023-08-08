@@ -112,51 +112,65 @@ class PriceIndexerFallback implements DataSourceProviderInterface
                 $pendingProductString = print_r($pendingProductIds, true);
                 $this->logger->debug("The following products are awaiting price changes ::" . $pendingProductString);
                 $this->logger->debug("The following products will be evaulavted for price changes ::" . $recheckProductString);
+                $indexedFields = array('price', 'original_price');
                 foreach ($recheckProductsIds as $productId) {
-                    try {
-                        if(isset($indexData[$productId])){
-                        $product = $this->productRepository->getById($productId, false, $storeId);
-                        if ($product->getTypeId() == 'configurable') {
-                            $optionsPrice=$this->getCustomOptionsMinPrice($product);
-                            $indexData[$productId]["price"] = $this->getMinPriceForConfigurableProduct($product)->getValue()+$optionsPrice;
-                            if ($product->getPriceInfo()->getPrice('regular_price')->getMaxRegularAmount()) {
-                                $indexData[$productId]["original_price"] = $product->getPriceInfo()->getPrice('regular_price')->getMaxRegularAmount()->getValue()+$optionsPrice;
-                            }
-                        } else if ($product->getTypeId() == 'grouped') {
-                            $indexData[$productId]["price"] = $product->getPriceInfo()->getPrice('final_price')->getMinProduct()->getPriceInfo()->getPrice('final_price')->getValue();
-                        } else if ($product->getTypeId() == 'bundle') {
-                            $indexData[$productId]["price"] = $product->getPriceInfo()->getPrice('regular_price')->getMinimalPrice()->getValue();
-                            if ($product->getPriceInfo()->getPrice('regular_price')->getMaximalPrice()->getValue()) {
-                                $indexData[$productId]["original_price"] = $product->getPriceInfo()->getPrice('regular_price')->getMaximalPrice()->getValue();
-                            }
-                        } else {
-                            $optionsPrice=$this->getCustomOptionsMinPrice($product);
-                            $priceInfo = $product->getPriceInfo();
-                            $finalPrice = $priceInfo->getPrice("final_price")->getValue();
-                            $price = $priceInfo->getPrice("regular_price")->getValue();
-                            if ( $finalPrice && $finalPrice < $price) {
-                                $indexData[$productId]["price"] = $finalPrice+$optionsPrice;
-                                $indexData[$productId]["original_price"] = $price+$optionsPrice;
-                            } else {
-                                $indexData[$productId]["price"] = $price+$optionsPrice;
-                            }
+                    $this->appendPriceData($indexData,$productId,$storeId);
+                    $stores = $this->attributeHelper->getMultiStoreEnabledStores();
+                        foreach($stores as $multiStoreId){
+                            $this->appendPriceData($indexData,$productId,$multiStoreId,true);
+                            $indexedFields[] = "price_store_".$storeId;
+                            $indexedFields[] = "original_price_store_".$storeId;
                         }
-                    }else{
-                        $this->logger->info("Attempt to set price for a product which is not in the index :" . $productId);
-                    }
-                    } catch (\Exception $e) {
-                        $this->logger->error("Error while processing price for product " . $productId . "with error - " . $e->__toString());
-                    } catch (\Error $er) {
-                        $this->logger->error("Error while processing price for product " . $productId . "with error - " . $er->__toString());
-                    }
+
                 }
                 if (!empty($recheckProductsIds) && !array_key_exists("fields",$indexData)) {
-                    $this->attributeHelper->appendSpecificIndexedFields($indexData, array('price', 'original_price'));
+                    $this->attributeHelper->appendSpecificIndexedFields($indexData, $indexedFields);
                 }
             }
         }
         
         return $indexData;
+    }
+
+    private function appendPriceData(&$indexData,$productId,$storeId,$multiStore=false){
+        try {
+            if(isset($indexData[$productId])){
+            $product = $this->productRepository->getById($productId, false, $storeId);
+            $priceAttribute = $multiStore ? "price_store_".$storeId : "price";
+            $originalPriceAttribute = $multiStore ? "original_price_store_".$storeId : "original_price";
+            if ($product->getTypeId() == 'configurable') {
+                $optionsPrice=$this->getCustomOptionsMinPrice($product);
+                $indexData[$productId][$priceAttribute] = $this->getMinPriceForConfigurableProduct($product)->getValue()+$optionsPrice;
+                if ($product->getPriceInfo()->getPrice('regular_price')->getMaxRegularAmount()) {
+                    $indexData[$productId][$originalPriceAttribute] = $product->getPriceInfo()->getPrice('regular_price')->getMaxRegularAmount()->getValue()+$optionsPrice;
+                }
+            } else if ($product->getTypeId() == 'grouped') {
+                $indexData[$productId][$priceAttribute] = $product->getPriceInfo()->getPrice('final_price')->getMinProduct()->getPriceInfo()->getPrice('final_price')->getValue();
+            } else if ($product->getTypeId() == 'bundle') {
+                $indexData[$productId][$priceAttribute] = $product->getPriceInfo()->getPrice('regular_price')->getMinimalPrice()->getValue();
+                if ($product->getPriceInfo()->getPrice('regular_price')->getMaximalPrice()->getValue()) {
+                    $indexData[$productId][$originalPriceAttribute] = $product->getPriceInfo()->getPrice('regular_price')->getMaximalPrice()->getValue();
+                }
+            } else {
+                $optionsPrice=$this->getCustomOptionsMinPrice($product);
+                $priceInfo = $product->getPriceInfo();
+                $finalPrice = $priceInfo->getPrice("final_price")->getValue();
+                $price = $priceInfo->getPrice("regular_price")->getValue();
+                if ( $finalPrice && $finalPrice < $price) {
+                    $indexData[$productId][$priceAttribute] = $finalPrice+$optionsPrice;
+                    $indexData[$productId][$originalPriceAttribute] = $price+$optionsPrice;
+                } else {
+                    $indexData[$productId][$priceAttribute] = $price+$optionsPrice;
+                }
+            }
+        }else{
+            $this->logger->info("Attempt to set price for a product which is not in the index :" . $productId);
+        }
+        } catch (\Exception $e) {
+            $this->logger->error("Error while processing price for product " . $productId . "with error - " . $e->__toString());
+        } catch (\Error $er) {
+            $this->logger->error("Error while processing price for product " . $productId . "with error - " . $er->__toString());
+        }
     }
 
     private function getCustomOptionsMinPrice($product)

@@ -80,6 +80,19 @@ class IncludeAttributeInProductFeed implements ObserverInterface
                 ],
                 '^'
             );
+
+            $fieldset->addField(
+                'send_multistore_info',
+                'select',
+                [
+                    'name'   => 'send_multistore_info',
+                    'label'  => __('Send Store Specific Information'),
+                    'title'  => __('Send Store Specific Information'),
+                    'note' => __('Include store specific information when multi store indexing enabled.'),
+                    'values' => $this->yesNo->toOptionArray(),
+                ],
+                '^'
+            );
             
             $fieldset->addField(
                 'unbxd_multiselect_override',

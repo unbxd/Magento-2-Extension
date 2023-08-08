@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider;
 
 use Unbxd\ProductFeed\Model\Eav\Indexer\Full\DataSourceProvider\AbstractAttribute;
@@ -29,9 +31,9 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
     /**
      * Related data source code
      */
-	const DATA_SOURCE_CODE = 'attribute';
-    
-	
+    const DATA_SOURCE_CODE = 'attribute';
+
+
     /**
      * @var array
      */
@@ -40,10 +42,10 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
     /**
      * {@inheritdoc}
      */
-	public function getDataSourceCode()
-	{
-		return self::DATA_SOURCE_CODE;
-	}
+    public function getDataSourceCode()
+    {
+        return self::DATA_SOURCE_CODE;
+    }
 
     /**
      * {@inheritdoc}
@@ -68,20 +70,20 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
 
             foreach ($relationsByChildId as $childId => $relations) {
                 foreach ($relations as $relation) {
-                    try{
-                    $parentId = (int) $relation['parent_id'];
-                    if (isset($indexData[$parentId]) && isset($childrenIndexData[$childId])) {
-                        $indexData[$parentId]['children_ids'][] = $childId;
-                        $this->addRelationData(
-                            $indexData[$parentId],
-                            $childrenIndexData[$childId],
-                            $relation
-                        );
-                        $this->addChildData($indexData[$parentId], $childrenIndexData[$childId]);
-                        $this->addChildSku($indexData[$parentId], $relation);
-                    }
-                    }catch(\Exception $e){
-                        $this->logger->error("Error while populating child product ".$childId." for parent ".$relation['parent_id']." :: " . $e->__toString());
+                    try {
+                        $parentId = (int) $relation['parent_id'];
+                        if (isset($indexData[$parentId]) && isset($childrenIndexData[$childId])) {
+                            $indexData[$parentId]['children_ids'][] = $childId;
+                            $this->addRelationData(
+                                $indexData[$parentId],
+                                $childrenIndexData[$childId],
+                                $relation
+                            );
+                            $this->addChildData($indexData[$parentId], $childrenIndexData[$childId]);
+                            $this->addChildSku($indexData[$parentId], $relation);
+                        }
+                    } catch (\Exception $e) {
+                        $this->logger->error("Error while populating child product " . $childId . " for parent " . $relation['parent_id'] . " :: " . $e->__toString());
                     }
                 }
             }
@@ -123,33 +125,67 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
      */
     private function addAttributeData($storeId, $productIds, $indexData = [])
     {
-        foreach ($this->attributeIdsByTable as $backendTable => $attributeIds) {
-            $attributesData = $this->loadAttributesRawData($storeId, $productIds, $backendTable, $attributeIds);
-            if (!empty($attributesData)) {
-                foreach ($attributesData as $row) {
-                try{
-                    $productId = (int) $row['entity_id'];
-                    $attribute = $this->attributesById[$row['attribute_id']];
-                    $indexValues = $this->attributeHelper->prepareIndexValue($attribute, $storeId, $row['value']);
-                    if (!isset($indexData[$productId])) {
-                        $indexData[$productId] = [];
-                    }
-                    $indexData[$productId] = array_merge($indexData[$productId],$indexValues);
 
-                    if (!isset($indexData[$productId]['indexed_attributes'])) {
-                        $indexData[$productId]['indexed_attributes'] = [];
-                    }
-                    $indexData[$productId]['indexed_attributes'][] = $attribute->getAttributeCode();
-
-                    $this->setIndexedField($attribute->getAttributeCode());
-                }catch(\Exception $e){
-                    $this->logger->error("Error while populating attribute ".$this->attributesById[$row['attribute_id']]->getAttributeCode()." for product ".$row['entity_id']." :: " . $e->__toString());
-                }
-                }
-            }
+        $this->addAttributeDataInternal($storeId, $productIds, $indexData);
+        $stores = $this->attributeHelper->getMultiStoreEnabledStores();
+        foreach ($stores as $multiStoreId) {
+            $this->addAttributeDataInternal($multiStoreId, $productIds, $indexData, true);
         }
 
         return $indexData;
+    }
+
+    private function addAttributeDataInternal($storeId, $productIds, &$indexData = [], $multiStore = false)
+    {
+        foreach ($this->attributeIdsByTable as $backendTable => $attributeIds) {
+            $attributesIdsTobeExtracted = [];
+            if ($multiStore) {
+                // Check if attribute is enabled for multi store info extract
+                foreach ($attributeIds as $attributeId) {
+                    try {
+                        if ((bool)$this->attributesById[$attributeId]->getSendMultistoreInfo()) {
+                            $attributesIdsTobeExtracted[] = $attributeId;
+                        }
+                    } catch (\Exception $e) {
+                        $this->logger->error("Unable to fetch attribute data for multi store validation " . $attributeId);
+                    }
+                }
+            } else {
+                $attributesIdsTobeExtracted = $attributeIds;
+            }
+            $attributesData = $this->loadAttributesRawData($storeId, $productIds, $backendTable, $attributesIdsTobeExtracted);
+            if (!empty($attributesData)) {
+                foreach ($attributesData as $row) {
+                    try {
+                        $productId = (int) $row['entity_id'];
+                        $attribute = $this->attributesById[$row['attribute_id']];
+                        $indexValues = $this->attributeHelper->prepareIndexValue($attribute, $storeId, $row['value'], $multiStore);
+                        if (!isset($indexData[$productId])) {
+                            $indexData[$productId] = [];
+                        }
+                        $indexData[$productId] = array_merge($indexData[$productId], $indexValues);
+
+                        if (!isset($indexData[$productId]['indexed_attributes'])) {
+                            $indexData[$productId]['indexed_attributes'] = [];
+                        }
+                        if ($multiStore) {
+                            $attributeCode = $attribute->getAttributeCode() . "_store_" . $storeId;
+                            $indexData[$productId]['indexed_attributes'][] = $attributeCode;
+                            $attributeSchema = $this->attributeHelper->getFieldOptions($attribute);
+                            $attributeSchema["fieldName"] = $attributeCode;
+                            $this->setField($attributeCode, $attributeSchema);
+                            $this->setIndexedField($attributeCode);
+                        } else {
+                            $indexData[$productId]['indexed_attributes'][] = $attribute->getAttributeCode();
+                            $this->setField($attribute->getAttributeCode(), $this->attributeHelper->getFieldOptions($attribute));
+                            $this->setIndexedField($attribute->getAttributeCode());
+                        }
+                    } catch (\Exception $e) {
+                        $this->logger->error("Error while populating attribute " . $this->attributesById[$row['attribute_id']]->getAttributeCode() . " for product " . $row['entity_id'] . " :: " . $e->__toString());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -172,12 +208,12 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
         foreach ($addedChildAttributesData as $attributeCode => $value) {
             $optionTextPrefix = sprintf('%s_', AttributeHelper::OPTION_TEXT_PREFIX);
             $pureKey = str_replace($optionTextPrefix, '', $attributeCode);
-            if(is_array($value) && !in_array($attributeCode,$this->skipChildProductValuesForAttribute) && !in_array($pureKey,$this->skipChildProductValuesForAttribute)){
-            if (!isset($parentData[$attributeCode])) {
-                $parentData[$attributeCode] = [];
-            }
-            // Boolean type attributes are the possible non array value which is prevented from rolling up from child to parent
-            $parentData[$attributeCode] = array_values(array_unique(array_merge($parentData[$attributeCode], $value)));
+            if (is_array($value) && !in_array($attributeCode, $this->skipChildProductValuesForAttribute) && !in_array($pureKey, $this->skipChildProductValuesForAttribute)) {
+                if (!isset($parentData[$attributeCode])) {
+                    $parentData[$attributeCode] = [];
+                }
+                // Boolean type attributes are the possible non array value which is prevented from rolling up from child to parent
+                $parentData[$attributeCode] = array_values(array_unique(array_merge($parentData[$attributeCode], $value)));
             }
         }
     }

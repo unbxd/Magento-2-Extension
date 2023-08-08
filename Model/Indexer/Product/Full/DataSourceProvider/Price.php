@@ -27,7 +27,7 @@ class Price implements DataSourceProviderInterface
     /**
      * Related data source code
      */
-	const DATA_SOURCE_CODE = 'price';
+	const DATA_SOURCE_CODE = "price";
 	
     /**
      * @var ResourceModel
@@ -73,8 +73,22 @@ class Price implements DataSourceProviderInterface
      */
     public function appendData($storeId, array $indexData)
     {
-        $priceData = $this->resourceModel->loadPriceData($storeId, array_keys($indexData));
+        
         $indexedFields = [];
+        
+        $this->appendPriceData($storeId,$indexData,$indexedFields);
+        $stores = $this->attributeHelper->getMultiStoreEnabledStores();
+        foreach($stores as $multiStoreId){
+            $this->appendPriceData($multiStoreId,$indexData,$indexedFields,true);
+        }
+        $this->attributeHelper->appendSpecificIndexedFields($indexData, $indexedFields);
+
+        return $indexData;
+    }
+
+    private function appendPriceData($storeId, array &$indexData,array &$indexedFields, $multiStore=false)
+    {
+        $priceData = $this->resourceModel->loadPriceData($storeId, array_keys($indexData));
         foreach ($priceData as $priceDataRow) {
             $productId = (int) $priceDataRow['entity_id'];
             $productTypeId = $indexData[$productId]['type_id'];
@@ -83,38 +97,36 @@ class Price implements DataSourceProviderInterface
 
             $price = $priceReader->getPrice($priceDataRow);
             $originalPrice = $priceReader->getOriginalPrice($priceDataRow);
-            $indexData[$productId]['price'] = $price;
+            $priceAttribute = $multiStore ? "price_store_".$storeId : "price";
+            $originalPriceAttribute = $multiStore ? "original_price_store_".$storeId : "original_price";
+            $indexData[$productId][$priceAttribute] = $price;
 
-            if (!in_array('price', $indexedFields)) {
-                $indexedFields[] = 'price';
+            if (!in_array($priceAttribute, $indexedFields)) {
+                $indexedFields[] = $priceAttribute;
             }
-            if (!in_array('original_price', $indexedFields)) {
-                $indexedFields[] = 'original_price';
+            if (!in_array($originalPriceAttribute, $indexedFields)) {
+                $indexedFields[] = $originalPriceAttribute;
             }
 
             $includeOriginal = (bool) ($price != $originalPrice);
             if ($includeOriginal) {
-                $indexData[$productId]['original_price'] = $originalPrice;
+                $indexData[$productId][$originalPriceAttribute] = $originalPrice;
             }
             if (!isset($indexData[$productId]['indexed_attributes'])) {
-                $indexData[$productId]['indexed_attributes'] = ['price'];
-                $indexData[$productId]['indexed_attributes'] = ['original_price'];
+                $indexData[$productId]['indexed_attributes'] = [$priceAttribute];
+                $indexData[$productId]['indexed_attributes'] = [$originalPriceAttribute];
             } else {
-                if (!in_array('price', $indexData[$productId]['indexed_attributes'])) {
-                    $indexData[$productId]['indexed_attributes'][] = 'price';
+                if (!in_array($priceAttribute, $indexData[$productId]['indexed_attributes'])) {
+                    $indexData[$productId]['indexed_attributes'][] = $priceAttribute;
                 }
                 if (
                     $includeOriginal
-                    && !in_array('original_price', $indexData[$productId]['indexed_attributes'])
+                    && !in_array($originalPriceAttribute, $indexData[$productId]['indexed_attributes'])
                 ) {
-                    $indexData[$productId]['indexed_attributes'][] = 'original_price';
+                    $indexData[$productId]['indexed_attributes'][] = $originalPriceAttribute;
                 }
             }
         }
-
-        $this->attributeHelper->appendSpecificIndexedFields($indexData, $indexedFields);
-
-        return $indexData;
     }
 
     /**

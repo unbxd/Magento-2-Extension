@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -60,7 +62,7 @@ class Data extends AbstractHelper
     const XML_PATH_NUMBER_OF_VARIANTS = 'unbxd_catalog/general/number_of_variants';
     const XML_PATH_CATALOG_EXCLUDE_PRODUCTS_FILTER_ATTRIBUTES = 'unbxd_catalog/general/filter_attributes';
     const XML_PATH_CATALOG_MAX_NUMBER_OF_ATTEMPTS = 'unbxd_catalog/general/max_number_of_attempts';
-    
+
     /**
      * Indexing Settings
      */
@@ -117,6 +119,8 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_FEED_STREAMING_ENABLED = 'unbxd_catalog/feed/enable_stream_serialization';
 
     const XML_PATH_CATALOG_FEED_READER_DB_CONNECTION_NAME = 'unbxd_catalog/feed/reader_db_connection';
+
+    const XML_PATH_INDEXING_MULTI_STORE_ENABLED = 'unbxd_catalog/indexing/multi_store_enabled';
 
 
     /**
@@ -207,7 +211,7 @@ class Data extends AbstractHelper
      */
     public function getConfigValue($path, $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeCode = null)
     {
-        return trim($this->scopeConfig->getValue($path, $scopeType, $scopeCode)?? '');
+        return trim($this->scopeConfig->getValue($path, $scopeType, $scopeCode) ?? '');
     }
 
     /**
@@ -220,7 +224,24 @@ class Data extends AbstractHelper
      */
     public function updateConfigValue($path, $value, $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeId = 0)
     {
-        $this->configWriter->save($path, trim($value?? ''), $scope, $scopeId);
+        $this->configWriter->save($path, trim($value ?? ''), $scope, $scopeId);
+    }
+
+
+    public function getMultiStoreEnabledStores()
+    {
+        $stores = array_keys($this->storeManager->getStores());
+        $storeIds  = [];
+        foreach ($stores as $storeId) {
+            if ($this->scopeConfig->isSetFlag(
+                self::XML_PATH_INDEXING_MULTI_STORE_ENABLED,
+                ScopeInterface::SCOPE_STORE,
+                $storeId
+            )) {
+                $storeIds[] = $storeId;
+            }
+        }
+        return $storeIds;
     }
 
     /**
@@ -265,13 +286,13 @@ class Data extends AbstractHelper
      * @param null $store
      * @return mixed
      */
-    public function getReaderConnectionName($store = null){
+    public function getReaderConnectionName($store = null)
+    {
         return trim($this->scopeConfig->getValue(
             self::XML_PATH_CATALOG_FEED_READER_DB_CONNECTION_NAME,
             ScopeInterface::SCOPE_STORE,
             $store
-        )??ResourceConnection::DEFAULT_CONNECTION);
-        
+        ) ?? ResourceConnection::DEFAULT_CONNECTION);
     }
 
     /**
@@ -297,7 +318,7 @@ class Data extends AbstractHelper
             self::XML_PATH_SETUP_SECRET_KEY,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -305,13 +326,14 @@ class Data extends AbstractHelper
      * @param null $store
      * @return mixed
      */
-    public function getEnableSerialization($store = null){
-        
+    public function getEnableSerialization($store = null)
+    {
+
         return trim($this->scopeConfig->getValue(
             self::XML_PATH_CATALOG_FEED_STREAMING_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -324,7 +346,7 @@ class Data extends AbstractHelper
             self::XML_PATH_SETUP_API_KEY,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -337,7 +359,7 @@ class Data extends AbstractHelper
             self::XML_PATH_FULL_FEED_API_ENDPOINT,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -350,7 +372,7 @@ class Data extends AbstractHelper
             self::XML_PATH_INCREMENTAL_FEED_API_ENDPOINT,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -363,7 +385,7 @@ class Data extends AbstractHelper
             self::XML_PATH_FULL_UPLOADED_STATUS,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -376,7 +398,7 @@ class Data extends AbstractHelper
             self::XML_PATH_INCREMENTAL_UPLOADED_STATUS,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -389,7 +411,7 @@ class Data extends AbstractHelper
             self::XML_PATH_UPLOADED_SIZE,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? '');
+        ) ?? '');
     }
 
     /**
@@ -411,9 +433,9 @@ class Data extends AbstractHelper
             self::XML_PATH_NUMBER_OF_VARIANTS,
             ScopeInterface::SCOPE_STORE,
             $store
-        )?? 0);
+        ) ?? 0);
     }
-    
+
 
     /**
      * Retrieve all product types supported by Unbxd service
@@ -504,8 +526,8 @@ class Data extends AbstractHelper
             $store
         );
     }
-    
-    
+
+
 
     /**
      * @param null $store
@@ -546,7 +568,7 @@ class Data extends AbstractHelper
         );
     }
 
-    
+
 
     /**
      * @param null $store
@@ -654,7 +676,7 @@ class Data extends AbstractHelper
             $store
         );
     }
-    
+
 
     /**
      * @param null $store
@@ -668,7 +690,7 @@ class Data extends AbstractHelper
             $store
         );
     }
-    
+
 
     /**
      * @param null $store
@@ -711,7 +733,7 @@ class Data extends AbstractHelper
 
     public function isCleanupFileOnCompletion($store = null)
     {
-        
+
         return (int)$this->scopeConfig->getValue(
             self::XML_PATH_FEED_FILE_CLEANUP,
             ScopeInterface::SCOPE_STORE,
@@ -719,7 +741,7 @@ class Data extends AbstractHelper
         );
     }
 
-     /**
+    /**
      * @param null $store
      * @return mixed
      */
