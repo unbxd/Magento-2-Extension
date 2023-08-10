@@ -1,4 +1,6 @@
-# Version 2.0.20
+# Version 2.0.21
+## 2.0.21 - August 10, 2023
+- Support for Multi-Store Single Site Indexing
 ## 2.0.20 - August 07, 2023
 - Support for dynamic attributes
 ## 2.0.19 - July 29, 2023
