@@ -16,6 +16,7 @@ namespace Unbxd\ProductFeed\Model\Feed;
 use Unbxd\ProductFeed\Helper\Feed;
 use Unbxd\ProductFeed\Model\Feed\DataHandlerFactory;
 use Unbxd\ProductFeed\Api\Data\FeedViewInterface;
+use Magento\Store\Model\ScopeInterface;
 use Unbxd\ProductFeed\Model\FeedView;
 use Unbxd\ProductFeed\Helper\Profiler;
 use Unbxd\ProductFeed\Model\CacheManager;
@@ -33,6 +34,7 @@ use Unbxd\ProductFeed\Logger\LoggerInterface;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Unbxd\ProductFeed\Helper\Data as ConfigHelper;
 use Unbxd\ProductFeed\Model\Feed\JsonStreamWriter;
+use \Magento\Framework\Filesystem\Io\Sftp;
 
 /**
  * Class Manager
@@ -66,6 +68,8 @@ class Manager
      * @var FeedHelper
      */
     private $feedHelper;
+
+    protected $sftp;
 
     /**
      * @var CacheManager
@@ -212,6 +216,7 @@ class Manager
         ConfigHelper $configHelper,
         LoggerInterface $logger,
         JsonStreamWriter $jsonStreamWriter,
+        Sftp $sftp,
         $loggerType = null
     ) {
         $this->dataHandlerFactory = $dataHandlerFactory;
@@ -227,6 +232,7 @@ class Manager
         $this->loggerType = $loggerType;
         $this->configHelper = $configHelper;
         $this->jsonStreamWriter = $jsonStreamWriter;
+        $this->sftp = $sftp;
         $this->setIsNeedToArchive(true);
     }
 
@@ -341,10 +347,10 @@ class Manager
             $this->logger->error('Unable to execute feed. Index data are empty.');
             return false;
         }
-        if(!$this->logger->isTimerStarted()){
+        if (!$this->logger->isTimerStarted()) {
             $this->logger->startTimer();
         }
-        
+
         $ids = ($type == FeedConfig::FEED_TYPE_FULL) ? [] : array_keys($index);
         $this->type = $type;
         $this->preProcessActions($ids, $type, $store, []);
@@ -358,7 +364,7 @@ class Manager
                 true,
                 !$this->feedHelper->isCleanupFileOnCompletion()
             )
-            ->sendFeed($store,true)
+            ->sendFeed($store, true)
             ->stopProfiler();
         unset($this->feed);
     }
@@ -405,7 +411,7 @@ class Manager
                 ]
             )
             ->sendFeed($store)
-            ->postProcessActions()
+            ->postProcessActions($store)
             ->stopProfiler();
 
         $this->logger->info('END feed execute.');
@@ -420,11 +426,11 @@ class Manager
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function serializeAndWriteFeed($fileParameters = [],$batchUpdate = false, $useNewFileInstance = false)
+    public function serializeAndWriteFeed($fileParameters = [], $batchUpdate = false, $useNewFileInstance = false)
     {
         if ($this->configHelper->getEnableSerialization()) {
             if (!empty($fileParameters) || $useNewFileInstance) {
-                $fileManager = $this->getFileManager($fileParameters,$useNewFileInstance);
+                $fileManager = $this->getFileManager($fileParameters, $useNewFileInstance);
             } else {
                 $fileManager = $this->getFileManager();
             }
@@ -738,6 +744,55 @@ class Manager
         return $this;
     }
 
+    private function sendSFTP($store = null, $batchUpload = false)
+    {
+        $this->logger->info('Uploading file to sftp location');
+        $params = $this->buildFileParameters();
+        if (empty($params)) {
+            $this->logger->error('File parameters for request are empty.');
+            return $this;
+        }
+        $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_before.');
+        $this->eventManager->dispatch(
+            $this->eventPrefix . '_send_before',
+            ['file_params' => $params, 'feed_manager' => $this]
+        );
+        try {
+            $args = [
+                'host' => $this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_HOST, ScopeInterface::SCOPE_STORE, $store),
+                'username' => $this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_USERNAME, ScopeInterface::SCOPE_STORE, $store),
+                'password' => $this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_PASSWORD, ScopeInterface::SCOPE_STORE, $store),
+                'timeout' => 15,
+            ];
+            $this->sftp->open($args);
+            $fileManager = $this->getFileManager();
+            $filePath = $fileManager->getFileLocation();
+
+            // create and change to the configured path
+            if ($this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_DIRECTORY, ScopeInterface::SCOPE_STORE, $store)) {
+                $this->sftp->cd($this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_DIRECTORY, ScopeInterface::SCOPE_STORE, $store));
+            }
+            $this->sftp->write(basename($filePath), $filePath);
+            $this->logger->info('Uploaded file to sftp location '.basename($filePath));
+        } catch (\Exception $e) {
+            $this->logger->critical($e);
+            throw $e;
+        } finally {
+            if ($this->sftp) {
+                $this->sftp->close();
+            }
+        }
+
+        if (!$batchUpload) {
+            $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_after.');
+            $this->eventManager->dispatch(
+                $this->eventPrefix . '_send_after',
+                ['file_params' => $params, 'feed_manager' => $this]
+            );
+        }
+        return $this;
+    }
+
     /**
      * Send feed data through Unbxd API
      *
@@ -745,19 +800,22 @@ class Manager
      * @param null $batchUpload
      * @return $this
      */
-    private function sendFeed($store = null,$batchUpload = false)
+    private function sendFeed($store = null, $batchUpload = false)
     {
         $this->logger->info('Send feed to service.');
-
+        if ($this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_ENABLED, ScopeInterface::SCOPE_STORE, $store)) {
+            $this->sendSFTP($store, $batchUpload);
+            return $this;
+        }
         $params = $this->buildFileParameters();
         if (empty($params)) {
             $this->logger->error('File parameters for request are empty.');
             return $this;
         }
         $queryParameter = '';
-        if($batchUpload){
+        if ($batchUpload) {
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
-            $queryParameter = "?feedId=".$feedViewEntity->getUploadId();
+            $queryParameter = "?feedId=" . $feedViewEntity->getUploadId();
         }
         $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_before.');
         $this->eventManager->dispatch(
@@ -768,45 +826,44 @@ class Manager
         /** @var \Unbxd\ProductFeed\Model\Feed\Api\Connector $connectorManager */
         $connectorManager = $this->getConnectorManager();
         try {
-            $connectorManager->execute($this->type, \Laminas\Http\Request::METHOD_POST, [], $params, $store,$queryParameter);
+            $connectorManager->execute($this->type, \Laminas\Http\Request::METHOD_POST, [], $params, $store, $queryParameter);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             $this->postProcessActions();
-            if($batchUpload){
+            if ($batchUpload) {
                 throw $e;
             }
             return $this;
         }
 
-        if(!$batchUpload){
-        $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_after.');
-        $this->eventManager->dispatch(
-            $this->eventPrefix . '_send_after',
-            ['file_params' => $params, 'feed_manager' => $this]
-        );
-    }
+        if (!$batchUpload) {
+            $this->logger->info('Dispatch event: ' . $this->eventPrefix . '_send_after.');
+            $this->eventManager->dispatch(
+                $this->eventPrefix . '_send_after',
+                ['file_params' => $params, 'feed_manager' => $this]
+            );
+        }
 
         /** @var FeedResponse $response */
         $response = $connectorManager->getResponse();
         if ($response instanceof FeedResponse) {
             if (!$response->getIsError()) {
-                if(!$batchUpload){
-                // additional API calls
-                if (FeedConfig::VALIDATE_STATUS_FOR_UPLOADED_FEED) {
-                    $this->checkUploadedFeedStatus($connectorManager, $response, $store);
+                if (!$batchUpload) {
+                    // additional API calls
+                    if (FeedConfig::VALIDATE_STATUS_FOR_UPLOADED_FEED) {
+                        $this->checkUploadedFeedStatus($connectorManager, $response, $store);
+                    }
+                    if (FeedConfig::RETRIEVE_SIZE_FOR_UPLOADED_FEED) {
+                        $this->retrieveUploadedSize($connectorManager, $response, $store);
+                    }
                 }
-                if (FeedConfig::RETRIEVE_SIZE_FOR_UPLOADED_FEED) {
-                    $this->retrieveUploadedSize($connectorManager, $response, $store);
+            } else {
+                $this->logger->error("Error submitting feed" . $response->getResponseBody());
+                if ($batchUpload) {
+                    $this->postProcessActions();
+                    throw new \Exception("Failed to start multi part upload");
                 }
             }
-            }else{
-                $this->logger->error("Error submitting feed".$response->getResponseBody());
-                if($batchUpload){
-                $this->postProcessActions();
-                throw new \Exception("Failed to start multi part upload");
-                }
-            }
-
         }
 
         return $this;
@@ -828,7 +885,7 @@ class Manager
                     $this->getFeedViewManager()->updateUploadId($this->feedViewId, $response->getUploadId());
                 } else {
                     $this->logger->error("Upload ID missing");
-                    throw new \Exception("Failed to start multi part upload ".$response->getResponseBody());
+                    throw new \Exception("Failed to start multi part upload " . $response->getResponseBody());
                 }
             }
         } catch (\Exception $e) {
@@ -845,14 +902,14 @@ class Manager
         $connectorManager = $this->getConnectorManager();
         try {
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
-            $queryParameter = "?feedId=".$feedViewEntity->getUploadId();
-            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Laminas\Http\Request::METHOD_POST, [], [], $store,$queryParameter);
+            $queryParameter = "?feedId=" . $feedViewEntity->getUploadId();
+            $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Laminas\Http\Request::METHOD_POST, [], [], $store, $queryParameter);
 
             /** @var FeedResponse $response */
             $response = $connectorManager->getResponse();
             if ($response instanceof FeedResponse) {
                 if ($response->getIsError()) {
-                    $this->logger->error("Error calling end multi part ".$response->getResponseBody());
+                    $this->logger->error("Error calling end multi part " . $response->getResponseBody());
                     throw new \Exception("Failed to end multi part upload");
                 }
             }
@@ -1065,28 +1122,56 @@ class Manager
      *
      * @return $this
      */
-    public function postProcessActions()
+    public function postProcessActions($store = null)
     {
         $this->logger->info('Post-process execution actions.');
 
-        /** @var ApiConnector $connectorManager */
-        $connectorManager = $this->getConnectorManager();
-        /** @var FeedResponse $response */
-        $response = $connectorManager->getResponse();
-
-        if ($response instanceof FeedResponse) {
-            if ($response->getIsError()) {
-                // log errors if any
-                $this->logger->error($response->getErrorsAsString());
+        if ($this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_ENABLED, ScopeInterface::SCOPE_STORE, $store)) {
+            $updateData = [
+                FeedViewInterface::STATUS => FeedView::STATUS_COMPLETE,
+                FeedViewInterface::FINISHED_AT => date('Y-m-d H:i:s'),
+                FeedViewInterface::EXECUTION_TIME => $this->logger->getTime(),
+                FeedViewInterface::UPLOAD_ID => "SFTP UPload"
+            ];
+            
+            if ($this->uploadedFeedSize > 0) {
+                $message = sprintf(
+                    'Total Uploaded Feed Size: %s (children products are not counted)',
+                    $this->uploadedFeedSize
+                );
+                if (empty($updateData[FeedViewInterface::ADDITIONAL_INFORMATION])) {
+                    $updateData[FeedViewInterface::ADDITIONAL_INFORMATION] = $message;
+                } else {
+                    $updateData[FeedViewInterface::ADDITIONAL_INFORMATION] =
+                        sprintf(
+                            '%s' . '<br/>' . '%s',
+                            $updateData[FeedViewInterface::ADDITIONAL_INFORMATION],
+                            $message
+                        );
+                }
             }
+            $this->getFeedViewManager()->update($this->feedViewId, $updateData);
+        } else {
 
-            // performing operations with response
-            $this->updateConfigStats($response);
-            $this->updateFeedView($response);
+            /** @var ApiConnector $connectorManager */
+            $connectorManager = $this->getConnectorManager();
+            /** @var FeedResponse $response */
+            $response = $connectorManager->getResponse();
+
+            if ($response instanceof FeedResponse) {
+                if ($response->getIsError()) {
+                    // log errors if any
+                    $this->logger->error($response->getErrorsAsString());
+                }
+
+                // performing operations with response
+                $this->updateConfigStats($response);
+                $this->updateFeedView($response);
+            }
         }
 
-        if($this->feedHelper->isCleanupFileOnCompletion()){
-             $this->cleanupFeedFiles();
+        if ($this->feedHelper->isCleanupFileOnCompletion()) {
+            $this->cleanupFeedFiles();
         }
 
         // reset local cache to initial state
@@ -1133,7 +1218,7 @@ class Manager
      * @param bool $newInstance
      * @return FileManager|null
      */
-    private function getFileManager($data = [],$newInstance = false)
+    private function getFileManager($data = [], $newInstance = false)
     {
         if (null == $this->fileManager || $newInstance) {
             /** @var FeedFileManager */

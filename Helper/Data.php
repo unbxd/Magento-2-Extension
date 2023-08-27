@@ -47,6 +47,15 @@ class Data extends AbstractHelper
     const XML_PATH_SETUP_API_KEY = 'unbxd_setup/general/api_key';
 
     /**
+     * SFTP endpoints
+     */
+    const XML_PATH_SFTP_ENABLED = 'unbxd_setup/sftp/enabled';
+    const XML_PATH_SFTP_HOST = 'unbxd_setup/sftp/hostname';
+    const XML_PATH_SFTP_USERNAME = 'unbxd_setup/sftp/username';
+    const XML_PATH_SFTP_PASSWORD = 'unbxd_setup/sftp/password';
+    const XML_PATH_SFTP_DIRECTORY = 'unbxd_setup/sftp/directory';
+
+    /**
      * API endpoints
      */
     const XML_PATH_FULL_FEED_API_ENDPOINT = 'unbxd_setup/api_endpoints/full';
@@ -213,6 +222,8 @@ class Data extends AbstractHelper
     {
         return trim($this->scopeConfig->getValue($path, $scopeType, $scopeCode) ?? '');
     }
+
+
 
     /**
      * Save config value to storage
@@ -659,6 +670,10 @@ class Data extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_CATALOG_MULTI_PART_UPLOAD_ENABLED,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        ) && !$this->scopeConfig->isSetFlag(
+            self::XML_PATH_SFTP_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
         );

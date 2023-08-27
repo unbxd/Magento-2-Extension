@@ -21,6 +21,14 @@
                 <api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
                 <secret_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
              </general>
+             <sftp>
+                <enabled>0</enabled>
+                <hostname></hostname>
+                <username></username>
+                <password></password>
+                <directory></directory>
+             </sftp>
+
             <api_endpoints>
                 <full>https://feed.unbxd.io/api/%s/upload/catalog/full</full>
                 <incremental>https://feed.unbxd.io/api/%s/upload/catalog/delta</incremental>

@@ -73,6 +73,31 @@
                     <comment><![CDATA[The pattern <strong>%s</strong> will be replaced by the appropriate authorization keys.]]></comment>
                 </field>
             </group>
+            <group id="sftp" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+             <label>SFTP Config</label>
+                <fieldset_css>unbxd-fieldset</fieldset_css>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use SFTP instead of API transfer</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Use SFTP instead of API transfer]]></comment>
+                </field>
+                <field id="hostname" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Hostname</label>
+                    <comment><![CDATA[Hostname should be both hostname:port]]></comment>
+                </field>
+                <field id="username" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Hostname</label>
+                    <comment><![CDATA[SFTP username]]></comment>
+                </field>
+                <field id="password" translate="label comment" type="obscure" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Password</label>
+                    <comment><![CDATA[SFTP password]]></comment>
+                </field>
+                <field id="directory" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Directory</label>
+                    <comment><![CDATA[Directory structure to upload within sftp, leave empty if it has to be root directory]]></comment>
+                </field>
+            </group>
         </section>
         <section id="unbxd_catalog" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
             <class>separator-top</class>
