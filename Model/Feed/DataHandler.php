@@ -441,6 +441,11 @@ class DataHandler
         foreach ($index as $productId => &$data) {
             try {
                 // schema fields has key 'fields', do only for products
+                if(array_key_exists('documentType_unx_ts',$data) && $data['documentType_unx_ts'] != 'product'){
+                    $this->formatArrayKeysToCamelCase($data);
+                    $this->catalog[Config::OPERATION_TYPE_ADD][Config::CATALOG_ITEMS_FIELD_KEY][] =  $data;
+                    continue;
+                }
                 if (is_int($productId)) {
                     if (!empty($data["status"]) && ((is_array($data["status"]) ? $data["status"][0] : $data["status"]) == "2" || (is_array($data["status"]) ? $data["status"][0] : $data["status"]) == 2)) {
                         $this->logger->info("Disabled product hence skipping - " . $productId);

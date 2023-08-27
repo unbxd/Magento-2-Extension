@@ -12,6 +12,7 @@
 namespace Unbxd\ProductFeed\Model\Indexer\Product\Full;
 
 use Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface;
+use Unbxd\ProductFeed\Model\Indexer\Product\Full\ContentDataSourceProviderInterface;
 
 /**
  * Class DataSourceProvider
@@ -36,6 +37,11 @@ class DataSourceProvider
      */
     private $incrementalDataSources = [];
 
+     /**
+     * @var ContentDataSourceProviderInterface[]
+     */
+    private $contentDataSources = [];
+
 
 
     /**
@@ -46,10 +52,12 @@ class DataSourceProvider
     public function __construct(
         $typeName = self::DATA_SOURCES_DEFAULT_TYPE,
         $dataSources = [],
-        $incrementalDataSources = []
+        $incrementalDataSources = [],
+        $contentDataSources = []
     ) {
         $this->typeName = $typeName;
         $this->dataSources = $dataSources;
+        $this->contentDataSources = $contentDataSources;
         $this->incrementalDataSources = $incrementalDataSources;
     }
 
@@ -71,6 +79,15 @@ class DataSourceProvider
     public function getList()
     {
         return $this->dataSources;
+    }
+
+     /** 
+    * Retrieves data source list for content
+    *
+    */
+    public function getContentList()
+    {
+        return $this->contentDataSources;
     }
 
     /** 

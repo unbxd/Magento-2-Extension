@@ -127,6 +127,8 @@ class Full
                     if ($parentId && ($parentId != $productId)) {
                         $productData[FeedConfig::PARENT_ID_KEY] = (int) $parentId;
                     };
+                    $productData['productId_unx_ts'] =  $productData['entity_id'];
+                    $productData['documentType_unx_ts'] = 'product';
                     $productData['has_options'] = (bool) $productData['has_options'];
                     $productData['required_options'] = (bool) $productData['required_options'];
                     $productData['created_at'] = (string) $this->helperData->formatDateTime($productData['created_at']);
@@ -172,6 +174,8 @@ class Full
                 if ($parentId && ($parentId != $productId)) {
                     $productData[FeedConfig::PARENT_ID_KEY] = (int) $parentId;
                 };
+                $productData['productId_unx_ts'] =  $productData['entity_id'];
+                $productData['documentType_unx_ts'] = 'product';
                 $productData['has_options'] = (bool) $productData['has_options'];
                 $productData['required_options'] = (bool) $productData['required_options'];
                 $productData['created_at'] = (string) $this->helperData->formatDateTime($productData['created_at']);
@@ -259,6 +263,16 @@ class Full
                     $index = [];
                 }
             }
+        }
+        foreach ($this->dataSourceProvider->getContentList() as $dataSource) {
+            /** Unbxd\ProductFeed\Model\Indexer\Product\Full\ContentDataSourceProviderInterface $dataSource */
+            $batchIndex = $dataSource->getData($storeId,$incremental);
+            if (isset($batchIndex["fields"])) {
+                $fields = array_merge($fields, $batchIndex["fields"]);
+                unset($batchIndex["fields"]);
+                $index["fields"] = $fields;
+            }
+            $index += $batchIndex;
         }
         if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager) {
             if (!empty($index)) {

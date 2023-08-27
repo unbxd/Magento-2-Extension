@@ -190,6 +190,8 @@
                 <item name="inventory" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Inventory</item>
                 <item name="price" xsi:type="object">Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProvider\Price</item>
             </argument>
+             <argument name="contentDataSources" xsi:type="array">
+             </argument>
         </arguments>
     </type>
     <!-- END: indexer -->
