@@ -1,4 +1,8 @@
-# Version 2.0.21
+# Version 2.0.22
+## 2.0.22 - August 29, 2023
+-  Support for ability to enable SFTP for Incremental / Full
+-  Support to upload file to sftp endpoint instead of direct api call
+-  Ability to append non product content documents into unbxd
 ## 2.0.21 - August 10, 2023
 - Support for Multi-Store Single Site Indexing
 ## 2.0.20 - August 07, 2023
