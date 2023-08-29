@@ -77,16 +77,21 @@
              <label>SFTP Config</label>
                 <fieldset_css>unbxd-fieldset</fieldset_css>
                 <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Use SFTP instead of API transfer</label>
+                    <label>Use SFTP (for full feed) instead of API transfer</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Use SFTP instead of API transfer]]></comment>
+                    <comment><![CDATA[Use SFTP (for full feed) instead of API transfer]]></comment>
+                </field>
+                <field id="incremental_enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use SFTP (for incrementals ) instead of API transfer</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Use SFTP (for incrementals ) instead of API transfer]]></comment>
                 </field>
                 <field id="hostname" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label>Hostname</label>
                     <comment><![CDATA[Hostname should be both hostname:port]]></comment>
                 </field>
                 <field id="username" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="1">
-                    <label>Hostname</label>
+                    <label>User Name</label>
                     <comment><![CDATA[SFTP username]]></comment>
                 </field>
                 <field id="password" translate="label comment" type="obscure" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="1">

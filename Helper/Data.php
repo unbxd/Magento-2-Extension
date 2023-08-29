@@ -49,7 +49,8 @@ class Data extends AbstractHelper
     /**
      * SFTP endpoints
      */
-    const XML_PATH_SFTP_ENABLED = 'unbxd_setup/sftp/enabled';
+    const XML_PATH_SFTP_FULL_ENABLED = 'unbxd_setup/sftp/enabled';
+    const XML_PATH_SFTP_INCREMENTAL_ENABLED = 'unbxd_setup/sftp/incremental_enabled';
     const XML_PATH_SFTP_HOST = 'unbxd_setup/sftp/hostname';
     const XML_PATH_SFTP_USERNAME = 'unbxd_setup/sftp/username';
     const XML_PATH_SFTP_PASSWORD = 'unbxd_setup/sftp/password';
@@ -673,7 +674,7 @@ class Data extends AbstractHelper
             ScopeInterface::SCOPE_STORE,
             $store
         ) && !$this->scopeConfig->isSetFlag(
-            self::XML_PATH_SFTP_ENABLED,
+            self::XML_PATH_SFTP_FULL_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
         );

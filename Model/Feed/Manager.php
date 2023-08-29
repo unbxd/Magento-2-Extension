@@ -803,7 +803,7 @@ class Manager
     private function sendFeed($store = null, $batchUpload = false)
     {
         $this->logger->info('Send feed to service.');
-        if ($this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_ENABLED, ScopeInterface::SCOPE_STORE, $store)) {
+        if ($this->type && (($this->type == FeedConfig::FEED_TYPE_FULL && $this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_FULL_ENABLED, ScopeInterface::SCOPE_STORE, $store)) || ($this->type == FeedConfig::FEED_TYPE_INCREMENTAL && $this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_INCREMENTAL_ENABLED, ScopeInterface::SCOPE_STORE, $store)))) {
             $this->sendSFTP($store, $batchUpload);
             return $this;
         }
@@ -1126,7 +1126,7 @@ class Manager
     {
         $this->logger->info('Post-process execution actions.');
 
-        if ($this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_ENABLED, ScopeInterface::SCOPE_STORE, $store)) {
+        if ($this->type && (($this->type == FeedConfig::FEED_TYPE_FULL && $this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_FULL_ENABLED, ScopeInterface::SCOPE_STORE, $store)) || ($this->type == FeedConfig::FEED_TYPE_INCREMENTAL && $this->feedHelper->isSetFlag(FeedHelper::XML_PATH_SFTP_INCREMENTAL_ENABLED, ScopeInterface::SCOPE_STORE, $store)))) {
             $updateData = [
                 FeedViewInterface::STATUS => FeedView::STATUS_COMPLETE,
                 FeedViewInterface::FINISHED_AT => date('Y-m-d H:i:s'),

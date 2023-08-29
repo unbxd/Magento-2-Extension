@@ -23,6 +23,7 @@
              </general>
              <sftp>
                 <enabled>0</enabled>
+                <incremental_enabled>0</incremental_enabled>
                 <hostname></hostname>
                 <username></username>
                 <password></password>
