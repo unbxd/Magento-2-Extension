@@ -17,5 +17,9 @@
     <indexer id="unbxd_products" view_id="unbxd_products" class="Unbxd\ProductFeed\Model\Indexer\Product">
         <title translate="true">Unbxd Products</title>
         <description translate="true">Rebuild products index</description>
+        <dependencies>
+            <indexer id="catalog_product_price"/>
+            <indexer id="catalogrule_rule" />
+        </dependencies>
     </indexer>
 </config>
