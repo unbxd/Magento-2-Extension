@@ -1,4 +1,9 @@
-# Version 2.0.22
+# Version 2.0.23
+## 2.0.23 - October 10, 2023
+-  Added fail safe logic if area code is set by third party extensions incorrectly
+-  Removed default schedule for reprocess cron
+-  Updated unbxd indexer  dependency with catalog  rule
+-  Fixed php8.1 compatibility scenario for inline blocks
 ## 2.0.22 - August 29, 2023
 -  Support for ability to enable SFTP for Incremental / Full
 -  Support to upload file to sftp endpoint instead of direct api call
