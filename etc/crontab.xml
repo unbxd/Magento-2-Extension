@@ -20,8 +20,6 @@
         <job name="unbxd_product_feed_check_uploaded_status" instance="Unbxd\ProductFeed\Cron\CheckUploadedFeedStatus" method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
-        <job name="unbxd_product_feed_reprocess_operation" instance="Unbxd\ProductFeed\Cron\ReProcessOperation" method="execute">
-            <schedule>*/15 * * * *</schedule>
-        </job>
+        <job name="unbxd_product_feed_reprocess_operation" instance="Unbxd\ProductFeed\Cron\ReProcessOperation" method="execute"/>
     </group>
 </config>
