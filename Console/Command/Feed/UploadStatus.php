@@ -87,7 +87,7 @@ class UploadStatus extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initAreaCode();
+        $this->initAreaCode($output);
 
         $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY) ?: 1;
 

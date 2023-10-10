@@ -70,7 +70,7 @@ class IncrementalFromDate extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initAreaCode();
+        $this->initAreaCode($output);
 
         $stores = [$this->getDefaultStoreId()];
         $storeId = $input->getOption(self::STORE_INPUT_OPTION_KEY);

@@ -30,6 +30,7 @@ use Unbxd\ProductFeed\Model\Feed\Api\Connector as ApiConnector;
 use Unbxd\ProductFeed\Model\Feed\FileManagerFactory;
 use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
 use Magento\Framework\ObjectManagerInterface;
+use Error;
 
 /**
  * Class AbstractCommand
@@ -225,12 +226,12 @@ abstract class AbstractCommand extends Command
     *
     * @return $this
     */
-    protected function initAreaCode()
+    protected function initAreaCode(OutputInterface $output)
    {
        try {
            $this->getState()->setAreaCode(\Magento\Framework\App\Area::AREA_GLOBAL);
-       } catch (LocalizedException $e) {
-           // area code already set
+       } catch (Error| \Exception $e) {
+            $output->writeln("<error>Area code not set by command line as it is already set by other extension.</error>");
        }
 
        return $this;
