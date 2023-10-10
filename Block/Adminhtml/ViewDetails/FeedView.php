@@ -29,4 +29,14 @@ class FeedView extends ViewDetails
     {
         return $this->registry->registry('feed_view_item');
     }
+
+      /**
+     * Returns Name in Layout
+     *
+     * @return String
+     */
+    public function getNameInLayout()
+    {
+        return 'feed_view_item';
+    }
 }

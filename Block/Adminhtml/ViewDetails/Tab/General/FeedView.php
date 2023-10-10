@@ -26,6 +26,16 @@ class FeedView extends General
     protected $_template = 'Unbxd_ProductFeed::view-details/feed/view/item/general.phtml';
 
     /**
+     * Returns Name in Layout
+     *
+     * @return String
+     */
+    public function getNameInLayout()
+    {
+        return 'feed_view_item';
+    }
+
+    /**
      * Retrieve current queue item instance
      *
      * @return FeedViewModel

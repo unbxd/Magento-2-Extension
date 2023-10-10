@@ -100,4 +100,14 @@ class ViewDetails extends \Magento\Backend\Block\Template
     {
         return IndexingQueue::REINDEX_FULL_LABEL;
     }
+
+     /**
+     * Returns Name in Layout
+     *
+     * @return String
+     */
+    public function getNameInLayout()
+    {
+        return 'unbxd_view_details';
+    }
 }

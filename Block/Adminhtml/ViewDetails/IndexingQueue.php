@@ -29,4 +29,14 @@ class IndexingQueue extends ViewDetails
     {
         return $this->registry->registry('indexing_queue_item');
     }
+
+     /**
+     * Returns Name in Layout
+     *
+     * @return String
+     */
+    public function getNameInLayout()
+    {
+        return 'indexing_queue_item';
+    }
 }

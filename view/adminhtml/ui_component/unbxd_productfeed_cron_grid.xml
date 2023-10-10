@@ -42,7 +42,7 @@
             <argument name="class" xsi:type="string">Unbxd\ProductFeed\Ui\Component\Listing\CronDataProvider</argument>
             <argument name="name" xsi:type="string">unbxd_productfeed_cron_grid_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">schedule_id</argument>
-            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">schedule_id</argument>
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
