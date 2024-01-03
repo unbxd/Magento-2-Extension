@@ -1,4 +1,6 @@
-# Version 2.0.23
+# Version 2.0.24
+## 2.0.24 - Jan 3, 2024
+-  Added config option to optional exclude schema from catalog 
 ## 2.0.23 - October 10, 2023
 -  Added fail safe logic if area code is set by third party extensions incorrectly
 -  Removed default schedule for reprocess cron
