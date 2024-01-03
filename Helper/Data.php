@@ -84,6 +84,7 @@ class Data extends AbstractHelper
     const XML_PATH_INDEXING_QUEUE_ARCHIVAL_INMINUTES = 'unbxd_catalog/indexing/indexing_queue_archival_time';
     const XML_PATH_FEED_VIEW_ARCHIVAL_INMINUTES = 'unbxd_catalog/indexing/feed_view_archival_time';
     const XML_PATH_FEED_FILE_CLEANUP = 'unbxd_catalog/indexing/feed_file_cleanup_enabled';
+    const XML_PATH_INCLUDE_SCHEMA_IN_FEED = 'unbxd_catalog/general/include_schema_in_feed';
 
     const XML_PATH_CATALOG_DATA_FIELDS_MAPPING_SETTINGS = 'unbxd_catalog/data_fields_mapping/mapping_settings';
     const XML_PATH_CATALOG_VERSION_CHECK = 'unbxd_catalog/general/check_latest_version_update';
@@ -372,6 +373,15 @@ class Data extends AbstractHelper
             ScopeInterface::SCOPE_STORE,
             $store
         ) ?? '');
+    }
+
+    public function includeSchemaInFeed($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_INCLUDE_SCHEMA_IN_FEED,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            $store
+        );
     }
 
     /**

@@ -278,7 +278,7 @@ class DataHandler
     public function initFeed(array $index, $store = null)
     {
         $this->prepareData($index, $store);
-        $this->buildFeed();
+        $this->buildFeed($store);
         return $this->getFullFeed();
     }
 
@@ -304,7 +304,7 @@ class DataHandler
         $this->setIndexedFields($indexedFields);
         unset($index['fields']);
         $this->buildCatalogData($index, $store);
-        if (array_key_exists("add", $this->catalog)) {
+        if (array_key_exists("add", $this->catalog) && $this->helperData->includeSchemaInFeed($store)) {
             $this->buildSchemaFields();
         }
 
@@ -528,10 +528,10 @@ class DataHandler
 
     /**
      * Build feed content to needed format based on prepared index data
-     *
+     * @param null $store
      * @return $this|bool
      */
-    private function buildFeed()
+    private function buildFeed($store = null)
     {
         $this->logger->info('Build feed content.');
 
@@ -543,7 +543,7 @@ class DataHandler
         }
 
         $fullFeed = [];
-        if (!empty($this->schema) && Config::INCLUDE_SCHEMA) {
+        if (!empty($this->schema) && $this->helperData->includeSchemaInFeed($store)) {
             $fullFeed = array_merge($fullFeed, $this->schema);
         }
         if (!empty($this->catalog) && Config::INCLUDE_CATALOG) {
