@@ -302,6 +302,7 @@ class Full extends Indexer
         if (empty($filterAttributes)) {
             return $this;
         }
+        
         foreach ($filterAttributes as $attribute) {
             /** @var FilterAttributeInterface $attributeCode */
             $attributeCode = $attribute->getAttributeCode();
@@ -388,7 +389,7 @@ class Full extends Indexer
 
         $conditions = ['visibility.product_id = e.entity_id'];
         $conditions[] = $this->getConnection()->quoteInto('visibility.store_id = ?', $storeId);
-        $conditions[] = $this->getConnection()->quoteInto('visibility.visibility = ?', $filterValue);
+        $conditions[] = $this->getConnection()->quoteInto('visibility.visibility != ?', $filterValue);
 
         $visibilityJoinCond = join(' AND ', $conditions);
         $select->useStraightJoin(true)

@@ -264,6 +264,9 @@ class Full
                 }
             }
         }
+        if(!empty($this->dataSourceProvider->getContentList())){
+            $processCount += $batchSize;
+        }
         foreach ($this->dataSourceProvider->getContentList() as $dataSource) {
             /** Unbxd\ProductFeed\Model\Indexer\Product\Full\ContentDataSourceProviderInterface $dataSource */
             $batchIndex = $dataSource->getData($storeId,$incremental);
@@ -273,6 +276,7 @@ class Full
                 $index["fields"] = $fields;
             }
             $index += $batchIndex;
+            $this->logger->info("Processed Data Source Provider ::" . get_class($dataSource) . " with memory of " . memory_get_usage());
         }
         if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager) {
             if (!empty($index)) {
