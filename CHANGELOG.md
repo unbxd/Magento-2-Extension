@@ -1,4 +1,6 @@
-# Version 2.0.24
+# Version 2.0.25
+## 2.0.25 - Mar 3, 2024
+-  Support for php8.2.0 
 ## 2.0.24 - Jan 3, 2024
 -  Added config option to optional exclude schema from catalog 
 ## 2.0.23 - October 10, 2023
