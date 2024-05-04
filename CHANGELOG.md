@@ -1,4 +1,6 @@
-# Version 2.0.25
+# Version 2.0.26
+## 2.0.26 - May 3, 2024
+-  Optimized unbxd product indexer to clean up duplicate product entity ids efficently
 ## 2.0.25 - Mar 3, 2024
 -  Support for php8.2.0 
 ## 2.0.24 - Jan 3, 2024
