@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Model;
 
 use Magento\Cron\Model\ConfigInterface;
@@ -46,6 +48,7 @@ use Unbxd\ProductFeed\Model\IndexingQueueFactory;
 use Unbxd\ProductFeed\Model\IndexingQueue\Handler as QueueHandler;
 use Unbxd\ProductFeed\Model\ResourceModel\FeedView\CollectionFactory as FeedViewCollectionFactory;
 use Unbxd\ProductFeed\Model\ResourceModel\IndexingQueue\CollectionFactory as IndexingQueueCollectionFactory;
+use Magento\Framework\Indexer\IndexerRegistry;
 
 /**
  * Class CronManager
@@ -72,6 +75,11 @@ class CronManager
      * @var CollectionFactory
      */
     protected $cronFactory;
+
+    /**
+     * @var IndexerRegistry
+     */
+    private $indexerRegistry;
 
     /**
      * @var ScheduleFactory
@@ -236,7 +244,8 @@ class CronManager
         HelperData $helperData,
         DBHelper $resourceHelper,
         StoreManagerInterface $storeManager,
-        FeedViewRepositoryInterface $feedViewRepository
+        FeedViewRepositoryInterface $feedViewRepository,
+        IndexerRegistry $indexerRegistry
     ) {
         $this->config = $config;
         $this->cronFactory = $cronFactory;
@@ -258,6 +267,7 @@ class CronManager
         $this->resourceHelper = $resourceHelper;
         $this->storeManager = $storeManager;
         $this->feedViewRepository = $feedViewRepository;
+        $this->indexerRegistry = $indexerRegistry;
     }
 
     /**
@@ -519,9 +529,11 @@ class CronManager
         if ($isReindexSuccess) {
             /** @var FeedManager $feedManager */
             $feedManager = $this->feedManagerFactory->create();
-            $feedViewId = $feedManager->execute($jobIndex, FeedConfig::FEED_TYPE_INCREMENTAL, $storeId,
-                [
-                ]
+            $feedViewId = $feedManager->execute(
+                $jobIndex,
+                FeedConfig::FEED_TYPE_INCREMENTAL,
+                $storeId,
+                []
             );
             // set feed view ID, related to current reindex process
 
@@ -557,20 +569,34 @@ class CronManager
             $this->logger->info(sprintf('Update job record #%d', $job->getId()));
             $this->queueHandler->update($job->getId(), $updateData);
         }
-
     }
 
     private function processFullJobForStore($storeId)
     {
         $jobs = $this->getPendingJobsForStore($storeId, true);
+
         foreach ($jobs as $job) {
+            $toVersion = null;
             $isFullReindex = (bool) ($job->getActionType() == IndexingQueue::TYPE_REINDEX_FULL);
             /** @var \Unbxd\ProductFeed\Model\IndexingQueue $job */
             $jobId = $job->getId();
-
+            try {
+                if ($isFullReindex && $this->helperData->isIndexingQueueEnabled()) {
+                    $unbxdIndexer = $this->indexerRegistry->get('unbxd_products');
+                    $unbxdIndexerView = $unbxdIndexer->getView();
+                    $changelog = $unbxdIndexerView->getChangelog();
+                    $toVersion = $changelog->getVersion();
+                }
+            } catch (\Exception $e) {
+                $error = $e->getMessage();
+                $this->logger->error(
+                    sprintf('Error in getting mview version id #%d. Error: %s. Trace: %s', $storeId, $error, $e->getTraceAsString())
+                );
+            }
             $this->logger->info(sprintf('Prepare job with #%d for reindex.', $jobId));
             // marked job as running
-            $this->queueHandler->update($jobId,
+            $this->queueHandler->update(
+                $jobId,
                 [
                     IndexingQueueInterface::STATUS => IndexingQueue::STATUS_RUNNING,
                     IndexingQueueInterface::STARTED_AT => date('Y-m-d H:i:s'),
@@ -596,7 +622,7 @@ class CronManager
             } catch (\Exception $e) {
                 $error = $e->getMessage();
                 $this->logger->error(
-                    sprintf('Reindex failed for job with #%d. Error: %s. Trace: %s', $storeId, $error, $e->getTraceAsString())
+                    sprintf('Error getting change log version: %s Trace: %s', $error, $e->getTraceAsString())
                 );
             }
 
@@ -636,6 +662,19 @@ class CronManager
             }
             // perform synchronization on reindex success with no empty index data
             if ($isReindexSuccess) {
+                try {
+                    if ($this->helperData->isIndexingQueueEnabled() && $toVersion) {
+                        $unbxdIndexer = $this->indexerRegistry->get('unbxd_products');
+                        $unbxdIndexerView = $unbxdIndexer->getView();
+                        $changelog = $unbxdIndexerView->getChangelog();
+                        $changelog->clear($toVersion);
+                    }
+                } catch (\Exception $e) {
+                    $error = $e->getMessage();
+                    $this->logger->error(
+                        sprintf('Error clearing change log version: %s Trace: %s', $error, $e->getTraceAsString())
+                    );
+                }
                 if (!$this->helperData->isMultiPartUploadEnabled()) {
                     $type = $isFullReindex ? FeedConfig::FEED_TYPE_FULL : FeedConfig::FEED_TYPE_INCREMENTAL;
 
@@ -714,7 +753,8 @@ class CronManager
         $jobs->setPageSize(
             $pageLimit
         )->setOrder(
-            IndexingQueueInterface::QUEUE_ID, DataCollection::SORT_ORDER_ASC
+            IndexingQueueInterface::QUEUE_ID,
+            DataCollection::SORT_ORDER_ASC
         );
 
         return $jobs;
@@ -782,7 +822,8 @@ class CronManager
         )->setPageSize(
             self::DEFAULT_JOBS_LIMIT_PER_RUN
         )->setOrder(
-            FeedViewInterface::FEED_ID, DataCollection::SORT_ORDER_ASC
+            FeedViewInterface::FEED_ID,
+            DataCollection::SORT_ORDER_ASC
         );
 
         if (!$jobs->getSize()) {
@@ -935,7 +976,8 @@ class CronManager
         )->setPageSize(
             self::DEFAULT_JOBS_LIMIT_PER_RUN
         )->setOrder(
-            IndexingQueueInterface::QUEUE_ID, DataCollection::SORT_ORDER_ASC
+            IndexingQueueInterface::QUEUE_ID,
+            DataCollection::SORT_ORDER_ASC
         );
 
         if (!$jobs->getSize()) {
@@ -997,7 +1039,8 @@ class CronManager
         )->setPageSize(
             self::DEFAULT_JOBS_LIMIT_PER_RUN
         )->setOrder(
-            FeedViewInterface::FEED_ID, DataCollection::SORT_ORDER_ASC
+            FeedViewInterface::FEED_ID,
+            DataCollection::SORT_ORDER_ASC
         );
 
         if (!$jobs->getSize()) {
@@ -1020,7 +1063,8 @@ class CronManager
                     'Unable to synchronization related data. Maximum number of attempts - %s.',
                     $currentNumberOfAttempts
                 );
-                $this->feedViewHandler->update($jobId,
+                $this->feedViewHandler->update(
+                    $jobId,
                     [
                         FeedViewInterface::SYSTEM_INFORMATION => __($systemInformation),
                     ]
@@ -1033,7 +1077,10 @@ class CronManager
                 $actionType = empty($entityIds) ? IndexingQueue::TYPE_REINDEX_FULL : '';
 
                 // added new job with related data to indexing queue
-                $this->queueHandler->add($entityIds, $actionType, $job->getStoreId(),
+                $this->queueHandler->add(
+                    $entityIds,
+                    $actionType,
+                    $job->getStoreId(),
                     [
                         IndexingQueueInterface::NUMBER_OF_ATTEMPTS => $job->getNumberOfAttempts(),
                     ]

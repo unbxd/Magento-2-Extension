@@ -177,6 +177,18 @@ class Full extends AbstractCommand
     protected function postProcessActions($output)
     {
         $this->flushCache();
+        try {
+            if($this->feedHelper->isIndexingQueueEnabled()){
+                $unbxdIndexer = $this->indexerRegistry->get('unbxd_products');
+                $unbxdIndexerView = $unbxdIndexer->getView();
+                $changelog = $unbxdIndexerView->getChangelog();
+                $toVersion = $changelog->getVersion();
+                $changelog->clear($toVersion);
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $output->writeln("<error>" . strip_tags(sprintf('Failed to update mview. Error: %s. Trace: %s', $error, $e->getTraceAsString())) . "</error>");
+        }
 
         return $this;
     }

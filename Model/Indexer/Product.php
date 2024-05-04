@@ -174,7 +174,8 @@ class Product implements \Magento\Framework\Indexer\ActionInterface, \Magento\Fr
             //$fromVersion = $state->getVersionId();
             $toVersion = $changelog->getVersion();
             $vsTo = $toVersion;
-            $vsFrom = max(1, $vsTo - 5000);
+            $size = $this->helperData->getIndexingMviewSize();
+            $vsFrom = max(1, $vsTo - $size);
             while ($vsFrom > 0) {
 
                 $ids = $changelog->getList($vsFrom, $vsTo);

@@ -238,6 +238,11 @@
                     <tooltip>Enabling this option is recommended in production mode or with a large product catalog.</tooltip>
                     <comment><![CDATA[If enabled, all indexing operations will be done asynchronously.]]></comment>
                 </field>
+                 <field id="mview_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch Size to query UNBXD Indexer table</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[Batch Size to query UNBXD_PRODUCTS Indexer mview table.]]></comment>
+                </field>
                 <field id="incremental_partial_update" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Partial Update on Incremental runs</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

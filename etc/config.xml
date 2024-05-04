@@ -59,6 +59,7 @@
             <indexing>
                 <multi_store_enabled>0</multi_store_enabled>
                 <enabled_queue>1</enabled_queue>
+                <mview_size>2500000</mview_size>
                 <incremental_partial_update>0</incremental_partial_update>
                 <multi_part_upload>1</multi_part_upload>
                 <batch_size>10000</batch_size>

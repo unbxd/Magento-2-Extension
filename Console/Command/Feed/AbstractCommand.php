@@ -31,6 +31,7 @@ use Unbxd\ProductFeed\Model\Feed\FileManagerFactory;
 use Unbxd\ProductFeed\Model\Feed\FileManager as FeedFileManager;
 use Magento\Framework\ObjectManagerInterface;
 use Error;
+use Magento\Framework\Indexer\IndexerRegistry;
 
 /**
  * Class AbstractCommand
@@ -133,6 +134,11 @@ abstract class AbstractCommand extends Command
      */
     private $objectManager;
 
+        /**
+     * @var IndexerRegistry
+     */
+    protected $indexerRegistry;
+
     /**
      * AbstractCommand constructor.
      * @param AppState $state
@@ -156,7 +162,8 @@ abstract class AbstractCommand extends Command
         CronManagerFactory $cronManagerFactory,
         FeedManagerFactory $feedManagerFactory,
         ConnectorFactory $connectorFactory,
-        FileManagerFactory $fileManagerFactory
+        FileManagerFactory $fileManagerFactory,
+        IndexerRegistry $indexerRegistry
     ) {
         $this->feedHelper = $feedHelper;
         $this->productHelper = $productHelper;
@@ -168,6 +175,7 @@ abstract class AbstractCommand extends Command
         $this->connectorFactory = $connectorFactory;
         $this->fileManagerFactory = $fileManagerFactory;
         $this->objectManager = $objectManager;
+        $this->indexerRegistry = $indexerRegistry;
         parent::__construct();
     }
 
