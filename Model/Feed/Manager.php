@@ -362,7 +362,7 @@ class Manager
                     'feedId' => sprintf('_%s_%s', $this->feedViewId, $partCount)
                 ],
                 true,
-                !$this->feedHelper->isCleanupFileOnCompletion()
+                true
             )
             ->sendFeed($store, true)
             ->stopProfiler();

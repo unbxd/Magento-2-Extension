@@ -103,6 +103,9 @@ class Category
             if (!$name ||  !$urlPath) {
                 continue;
             }
+            if (substr($urlPath,0,1) != "/") {
+                $urlPath = "/".$urlPath;
+            }
             if (!$this->helperData->retainRootCategory($store)){
             $urlPath = substr(strstr($urlPath,'/'.$this->rootCategoryId.'/'),strlen('/'.$this->rootCategoryId.'/'));
             }
