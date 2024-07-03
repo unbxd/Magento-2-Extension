@@ -22,7 +22,7 @@ php bin/magento cache:flush
 
 ### Manual installation
 
-1. Download this module [Link](https://github.com/unbxd/Magento-2-Extension/archive/2.0.26.zip)
+1. Download this module [Link](https://github.com/unbxd/Magento-2-Extension/archive/2.0.27.zip)
 3. Unzip module in the folder:
 
     app\code\Unbxd\ProductFeed

@@ -1,4 +1,6 @@
-# Version 2.0.26
+# Version 2.0.27
+## 2.0.27 - Jul 3, 2024
+-  Fixed multi part upload failure when clean up option enabled
 ## 2.0.26 - May 3, 2024
 -  Optimized unbxd product indexer to clean up duplicate product entity ids efficently
 ## 2.0.25 - Mar 3, 2024
