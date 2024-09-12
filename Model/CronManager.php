@@ -497,7 +497,7 @@ class CronManager
         foreach ($jobsList as $job) {
             $jobData = array_merge($jobData, $this->queueHandler->convertStringToIds($job->getAffectedEntities()));
             $jobs[] = $job;
-            if (count($jobData) > 10000) {
+            if (count($jobData) > 4000) {
                 break;
             }
         }

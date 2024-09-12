@@ -366,6 +366,9 @@ class Manager
             )
             ->sendFeed($store, true)
             ->stopProfiler();
+        if ($this->feedHelper->isCleanupFileOnCompletion()) {
+            $this->cleanupFeedFiles();
+        }
         unset($this->feed);
     }
 
@@ -773,7 +776,7 @@ class Manager
                 $this->sftp->cd($this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_DIRECTORY, ScopeInterface::SCOPE_STORE, $store));
             }
             $this->sftp->write(basename($filePath), $filePath);
-            $this->logger->info('Uploaded file to sftp location '.basename($filePath));
+            $this->logger->info('Uploaded file to sftp location ' . basename($filePath));
         } catch (\Exception $e) {
             $this->logger->critical($e);
             throw $e;
@@ -903,6 +906,7 @@ class Manager
         try {
             $feedViewEntity = $this->getFeedViewManager()->init($this->feedViewId);
             $queryParameter = "?feedId=" . $feedViewEntity->getUploadId();
+            $connectorManager->resetParams();
             $connectorManager->execute(Config::FEED_TYPE_FULL_MULTI_END, \Laminas\Http\Request::METHOD_POST, [], [], $store, $queryParameter);
 
             /** @var FeedResponse $response */
@@ -1133,7 +1137,7 @@ class Manager
                 FeedViewInterface::EXECUTION_TIME => $this->logger->getTime(),
                 FeedViewInterface::UPLOAD_ID => "SFTP UPload"
             ];
-            
+
             if ($this->uploadedFeedSize > 0) {
                 $message = sprintf(
                     'Total Uploaded Feed Size: %s (children products are not counted)',
