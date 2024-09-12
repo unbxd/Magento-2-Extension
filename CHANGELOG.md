@@ -1,4 +1,6 @@
-# Version 2.0.27
+# Version 2.0.28
+## 2.0.28 - Sep 10, 2024
+- Added Auto archival mechanism
 ## 2.0.27 - Jul 3, 2024
 -  Fixed multi part upload failure when clean up option enabled
 ## 2.0.26 - May 3, 2024
