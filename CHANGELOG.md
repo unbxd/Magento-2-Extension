@@ -1,4 +1,6 @@
-# Version 2.0.28
+# Version 2.0.29
+## 2.0.29 - Sep 27, 2024
+- Failsafe mechanism when no products to index
 ## 2.0.28 - Sep 10, 2024
 - Added Auto archival mechanism
 ## 2.0.27 - Jul 3, 2024
