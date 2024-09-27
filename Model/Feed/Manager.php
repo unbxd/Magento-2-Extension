@@ -278,7 +278,7 @@ class Manager
     /**
      * Get feed data
      *
-     * @return null
+     * @return array|null
      */
     private function getFeed()
     {
@@ -355,8 +355,13 @@ class Manager
         $this->type = $type;
         $this->preProcessActions($ids, $type, $store, []);
         $this->startProfiler()
-            ->initExecute($index, $store)
-            ->serializeAndWriteFeed(
+            ->initExecute($index, $store);
+        if(!$this->getFeed() || !array_key_exists("feed",$this->getFeed())){
+            unset($this->feed);
+            $this->logger->error('Indexing file not submitted as no products present to index in feed.');
+            return;
+        }
+            $this->serializeAndWriteFeed(
                 [
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
                     'feedId' => sprintf('_%s_%s', $this->feedViewId, $partCount)
@@ -406,8 +411,14 @@ class Manager
         $this->type = $type;
         $feedViewIdClone = $this->feedViewId;
         $this->startProfiler()
-            ->initExecute($index, $store)
-            ->serializeAndWriteFeed(
+            ->initExecute($index, $store);
+            if(!$this->getFeed() || !array_key_exists("feed",$this->getFeed())){
+                $this->logger->error('Indexing file not submitted as no products present to index in feed.');
+                $this->postProcessActions($store)
+                ->stopProfiler();
+                return;
+            }
+            $this->serializeAndWriteFeed(
                 [
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
                     'feedId' => sprintf('_%s', $this->feedViewId)
