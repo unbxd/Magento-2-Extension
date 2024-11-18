@@ -784,7 +784,11 @@ class Manager
 
             // create and change to the configured path
             if ($this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_DIRECTORY, ScopeInterface::SCOPE_STORE, $store)) {
-                $this->sftp->cd($this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_DIRECTORY, ScopeInterface::SCOPE_STORE, $store));
+                if($this->type == FeedConfig::FEED_TYPE_INCREMENTAL){
+                    $this->sftp->cd($this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_DIRECTORY, ScopeInterface::SCOPE_STORE, $store));
+                }else{
+                    $this->sftp->cd($this->feedHelper->getConfigValue(FeedHelper::XML_PATH_SFTP_DIRECTORY, ScopeInterface::SCOPE_STORE, $store)."/delta");
+                }
             }
             $this->sftp->write(basename($filePath), $filePath);
             $this->logger->info('Uploaded file to sftp location ' . basename($filePath));
