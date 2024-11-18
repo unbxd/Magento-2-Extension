@@ -1,4 +1,6 @@
-# Version 2.0.29
+# Version 2.0.30
+## 2.0.30 - Nov 18, 2024
+- Support for /delta sftp structure for incrementals
 ## 2.0.29 - Sep 27, 2024
 - Failsafe mechanism when no products to index
 ## 2.0.28 - Sep 10, 2024
