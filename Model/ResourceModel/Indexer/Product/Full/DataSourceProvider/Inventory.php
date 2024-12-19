@@ -88,7 +88,7 @@ class Inventory extends Indexer
                 ['product_id', 'stock_status', 'qty']
             )
             ->where('ciss.stock_id = ?', $stockId)
-            ->where('ciss.website_id = ?', $this->stockConfiguration->getDefaultScopeId())
+            ->where('ciss.website_id = ?', $websiteId)
             ->where('ciss.product_id IN(?)', $productIds);
 
         return $this->getConnection()->fetchAll($select);
