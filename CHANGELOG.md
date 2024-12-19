@@ -1,4 +1,6 @@
-# Version 2.0.31
+# Version 2.0.32
+## 2.0.32 - Dec 17, 2024
+- Multi Store inventory setup
 ## 2.0.31 - Nov 18, 2024
 - Support for /delta sftp structure for incrementals
 ## 2.0.30 - Nov 18, 2024
