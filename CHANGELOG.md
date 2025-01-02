@@ -1,4 +1,6 @@
-# Version 2.0.32
+# Version 2.0.33
+## 2.0.33 - Jan 2, 2025
+- Patch update
 ## 2.0.32 - Dec 17, 2024
 - Multi Store inventory setup
 ## 2.0.31 - Nov 18, 2024
