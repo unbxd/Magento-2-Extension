@@ -1,4 +1,6 @@
-# Version 2.0.33
+# Version 2.0.34
+## 2.0.33 - Jan 31, 2025
+- PHP8.3 support
 ## 2.0.33 - Jan 2, 2025
 - Patch update
 ## 2.0.32 - Dec 17, 2024
