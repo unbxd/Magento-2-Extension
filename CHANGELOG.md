@@ -1,5 +1,7 @@
-# Version 2.0.34
-## 2.0.33 - Jan 31, 2025
+# Version 2.0.35
+## 2.0.35 - Feb 13, 2025
+- Updated SFTP support for multi upload
+## 2.0.34 - Jan 31, 2025
 - PHP8.3 support
 ## 2.0.33 - Jan 2, 2025
 - Patch update

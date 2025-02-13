@@ -2,7 +2,7 @@
     "name": "unbxd/magento2-product-feed",
     "description": "The Magento 2 module, which provides possibility for synchronization product catalog with Unbxd service",
     "type": "magento2-module",
-    "version": "2.0.34",
+    "version": "2.0.35",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
