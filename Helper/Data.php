@@ -684,8 +684,22 @@ class Data extends AbstractHelper
             self::XML_PATH_CATALOG_MULTI_PART_UPLOAD_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
-        ) && !$this->scopeConfig->isSetFlag(
+        );
+    }
+
+    public function isSFTPFullEnabled($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
             self::XML_PATH_SFTP_FULL_ENABLED,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    public function isSFTPIncrementalEnabled($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_SFTP_INCREMENTAL_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $store
         );

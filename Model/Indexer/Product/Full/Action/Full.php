@@ -225,7 +225,7 @@ class Full
         $multiPartBatchSize = $this->helperData->getMultiPartBatchSize() ?? $batchSize;
         $processCount = 0;
         $multiPartBatchCount = 0;
-        if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager) {
+        if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && !$this->helperData->isSFTPFullEnabled() && $feedManager) {
             $feedManager->startMultiUpload($storeId);
         }
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
@@ -282,7 +282,10 @@ class Full
             if (!empty($index)) {
                 $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
             }
-            $feedManager->endMultiUpload($storeId);
+            $feedManager->batchExecute([["entity_id" => 50,"status" => 2]],30,FeedConfig::FEED_TYPE_FULL, $storeId);
+            if(!$this->helperData->isSFTPFullEnabled()){
+                $feedManager->endMultiUpload($storeId);
+            }
         }
         $index["fields"] = $fields;
         return $index;
