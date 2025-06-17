@@ -1,4 +1,6 @@
-# Version 2.0.35
+# Version 2.0.36
+## 2.0.36 - Jun 17, 2025
+- Provided option to not do camelcase conversion
 ## 2.0.35 - Feb 13, 2025
 - Updated SFTP support for multi upload
 ## 2.0.34 - Jan 31, 2025
