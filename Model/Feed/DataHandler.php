@@ -86,6 +86,11 @@ class DataHandler
     private $categoryDataHandler;
 
     /**
+     * @var AttributeHelper
+     */
+    private $attributeHelper;
+
+    /**
      * @var ImageDataHandler
      */
     private $imageDataHandler;
@@ -218,6 +223,7 @@ class DataHandler
         FeedConfig $feedConfig,
         UrlInterface $frontendUrlBuilder,
         LoggerInterface $logger,
+        AttributeHelper $attributeHelper,
         $loggerType = null
     ) {
         $this->eventManager = $eventManager;
@@ -231,6 +237,7 @@ class DataHandler
         $this->frontendUrlBuilder = $frontendUrlBuilder;
         $this->logger = $logger->create($loggerType);
         $this->loggerType = $loggerType;
+        $this->attributeHelper = $attributeHelper;
     }
 
     /**
@@ -371,11 +378,14 @@ class DataHandler
             }
             // convert to needed format
             if (!strpos($fieldData['fieldName'], "*") && !preg_match($this->dynamicFieldsPattern, $fieldData['fieldName'])) {
-                $fieldData['fieldName'] = SimpleDataObjectConverter::snakeCaseToCamelCase($fieldData['fieldName']);
+                $fieldData['fieldName'] = $this->convertToCamelCase($fieldData['fieldName']);
             }
         }
         // process child fields
         $this->appendChildFieldsToSchema($indexedFields);
+
+        //build price range attributes which are created only in the datahandler
+        $this->appendPriceRangeAttribute($indexedFields);
 
         $this->schema = [
             Config::SCHEMA_FIELD_KEY => array_values($indexedFields)
@@ -395,7 +405,7 @@ class DataHandler
             // add only fields that already exist in schema fields
             if (array_key_exists($childField, $fields)) {
                 if (!strpos($childField, "*") && !preg_match($this->dynamicFieldsPattern, $childField)) {
-                    $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX . ucfirst(SimpleDataObjectConverter::snakeCaseToCamelCase($childField));
+                    $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($this->convertToCamelCase($childField));
                 } else {
                     $childKey = FeedConfig::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($childField);
                 }
@@ -409,7 +419,7 @@ class DataHandler
                 }
             } else if ($childField == FeedConfig::CHILD_PRODUCT_FIELD_VARIANT_ID) {
                 // field 'variant_id' doesn't exist in main schema fields, add it manually
-                $childField = SimpleDataObjectConverter::snakeCaseToCamelCase($childField);
+                $childField = $this->convertToCamelCase($childField);
                 $fields[$childField] = [
                     'fieldName' => $childField,
                     'dataType' => FeedConfig::FIELD_TYPE_TEXT,
@@ -420,6 +430,15 @@ class DataHandler
         }
 
         return $this;
+    }
+
+    private function convertToCamelCase($key)
+    {
+        if ($this->helperData->convertToCamelCase()) {
+            return SimpleDataObjectConverter::snakeCaseToCamelCase($key);
+        } else {
+            return $key;
+        }
     }
 
     /**
@@ -441,7 +460,7 @@ class DataHandler
         foreach ($index as $productId => &$data) {
             try {
                 // schema fields has key 'fields', do only for products
-                if(array_key_exists('documentType_unx_ts',$data) && $data['documentType_unx_ts'] != 'product'){
+                if (array_key_exists('documentType_unx_ts', $data) && $data['documentType_unx_ts'] != 'product') {
                     $this->formatArrayKeysToCamelCase($data);
                     $this->catalog[Config::OPERATION_TYPE_ADD][Config::CATALOG_ITEMS_FIELD_KEY][] =  $data;
                     continue;
@@ -457,7 +476,7 @@ class DataHandler
                             ? trim($data['action'])
                             : Config::OPERATION_TYPE_ADD;
                         if ($operationKey == Config::OPERATION_TYPE_DELETE) {
-                            $key = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
+                            $key = $this->convertToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID);
                             $data = [$key => strval($productId)];
                         }
 
@@ -809,26 +828,108 @@ class DataHandler
     {
         $variantCount = $this->helperData->getNumberOfVariantToExport($store);
         $indexCount = 0;
+        $variants = [];
         foreach ($childIds as $id) {
             if (!array_key_exists($id, $index)) {
                 // child product doesn't exist in index
                 $this->logger->info("Child Product doesn't exist " . $id);
                 continue;
             } else if ($variantCount && $variantCount > 0 && $variantCount <= $indexCount) {
+                $variants[] = $index[$id];
                 $this->logger->info("Skip Child Product as variant limit exceeded " . $id);
                 continue;
             }
+            $variants[] = $index[$id];
             if (!isset($index[$id][Config::getPreparedKey()]) && (!in_array($id, $this->relatedEntityPreparedDataList))) {
                 $this->prepareFields($index[$id], $store);
             }
             $childData = $this->formatChildFields($index[$id], $id);
             if (!empty($childData)) {
+                $variants[] = $index[$id];
                 $parentData[Config::CHILD_PRODUCTS_FIELD_KEY][] = $childData;
                 $indexCount++;
             }
         }
+        if(!empty($variants)){
+            $this->populateVariantPriceRange($parentData, $variants);
+        }
 
         return $this;
+    }
+
+    private function appendPriceRangeAttribute(&$indexedFields)
+    {
+
+        $minAttribute = $this->convertToCamelCase("min_was_price");
+        $maxAttribute = $this->convertToCamelCase("max_was_price");
+
+        $indexedFields[$minAttribute] = [
+            'fieldName' => (string) $minAttribute,
+            'dataType' => FeedConfig::FIELD_TYPE_DECIMAL,
+            'multiValued' => false,
+            'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE,
+        ];
+        $indexedFields[$maxAttribute] = [
+            'fieldName' => (string) $maxAttribute,
+            'dataType' => FeedConfig::FIELD_TYPE_DECIMAL,
+            'multiValued' => false,
+            'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE,
+        ];
+        $stores = $this->attributeHelper->getMultiStoreEnabledStores();
+        foreach ($stores as $multiStoreId) {
+            $minAttribute = $this->convertToCamelCase("min_was_price_store_" . $multiStoreId);
+            $maxAttribute = $this->convertToCamelCase("max_was_price_store_" . $multiStoreId);
+            $indexedFields[$minAttribute] = [
+                'fieldName' => (string) $minAttribute,
+                'dataType' => FeedConfig::FIELD_TYPE_DECIMAL,
+                'multiValued' => false,
+                'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE,
+            ];
+            $indexedFields[$maxAttribute] = [
+                'fieldName' => (string) $maxAttribute,
+                'dataType' => FeedConfig::FIELD_TYPE_DECIMAL,
+                'multiValued' => false,
+                'autoSuggest' => FeedConfig::DEFAULT_SCHEMA_AUTO_SUGGEST_FIELD_VALUE,
+            ];
+        }
+    }
+
+    private function populateVariantPriceRange(array &$parentData, array $variants)
+    {
+
+        //$originalPriceAttribute = Config::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($this->convertToCamelCase("original_price"));
+        $originalPriceAttribute = $this->convertToCamelCase("original_price");
+        $minAttribute = $this->convertToCamelCase("min_was_price");
+        $maxAttribute = $this->convertToCamelCase("max_was_price");
+        if (!empty($variants)) {
+            $originalPrices = array_column($variants, $originalPriceAttribute);
+            $filteredPrices = array_filter($originalPrices, function ($value) {
+                return is_numeric($value);
+            });
+            if (!empty($filteredPrices)) {
+                $parentData[$minAttribute] = min($filteredPrices);
+                $parentData[$maxAttribute] = max($filteredPrices);
+            }
+        }
+
+        $stores = $this->attributeHelper->getMultiStoreEnabledStores();
+        foreach ($stores as $multiStoreId) {
+            //$originalPriceAttribute = Config::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($this->convertToCamelCase("original_price_store_" . $multiStoreId));
+            $originalPriceAttribute = $this->convertToCamelCase("original_price_store_" . $multiStoreId);
+
+            $minAttribute = $this->convertToCamelCase("min_was_price_store_" . $multiStoreId);
+            $maxAttribute = $this->convertToCamelCase("max_was_price_store_" . $multiStoreId);
+            if (!empty($variants)) {
+                $originalPrices = array_column($variants, $originalPriceAttribute);
+                $filteredPrices = array_filter($originalPrices, function ($value) {
+                    return is_numeric($value);
+                });
+                if (!empty($filteredPrices)) {
+                    $parentData[$minAttribute] = min($filteredPrices);
+                    $parentData[$maxAttribute] = max($filteredPrices);
+                }
+            }
+        }
     }
 
     /**
@@ -852,12 +953,12 @@ class DataHandler
                 }
             }
 
-            $variantIdKey = SimpleDataObjectConverter::snakeCaseToCamelCase(Config::CHILD_PRODUCT_FIELD_VARIANT_ID);
+            $variantIdKey = $this->convertToCamelCase(Config::CHILD_PRODUCT_FIELD_VARIANT_ID);
             foreach ($data as $key => $value) {
                 // collect child fields to use for add to schema fields
                 if (!preg_match($this->dynamicFieldsPattern, $key)) {
-                    $camelCaseKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
-                }else{
+                    $camelCaseKey = $this->convertToCamelCase($key);
+                } else {
                     $camelCaseKey = $key;
                 }
 
@@ -874,7 +975,7 @@ class DataHandler
                 if (
                     in_array($key, [
                         Config::SPECIFIC_FIELD_KEY_UNIQUE_ID,
-                        SimpleDataObjectConverter::snakeCaseToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID)
+                        $this->convertToCamelCase(Config::SPECIFIC_FIELD_KEY_UNIQUE_ID)
                     ])
                 ) {
                     $newKey = $variantIdKey;
@@ -1055,7 +1156,7 @@ class DataHandler
     {
         foreach ($data as $key => $value) {
             if (!preg_match($this->dynamicFieldsPattern, $key)) {
-                $newKey = SimpleDataObjectConverter::snakeCaseToCamelCase($key);
+                $newKey = $this->convertToCamelCase($key);
                 $data[$newKey] = $value;
                 if ($newKey != $key) {
                     $this->keyMap[$newKey] = $key;

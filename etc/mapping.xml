@@ -16,12 +16,12 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/mapping.xsd">
     <product>
         <fields>
-            <field name="entity_id" type="unique_id" />
+            <field name="entity_id" type="uniqueId" />
             <field name="name" type="title" />
-            <field name="image" type="image_url" />
-            <field name="url_key" type="product_url" />
+            <field name="image" type="imageUrl" />
+            <field name="url_key" type="productUrl" />
             <field name="quantity_and_stock_status" type="availability" />
-            <field name="category" type="category_path_id" />
+            <field name="category" type="categoryPathId" />
         </fields>
     </product>
 </config>

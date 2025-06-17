@@ -201,12 +201,12 @@ class Config
     /**
      * Specific fields declaration
      */
-    const SPECIFIC_FIELD_KEY_UNIQUE_ID          = 'unique_id';
+    const SPECIFIC_FIELD_KEY_UNIQUE_ID          = 'uniqueId';
     const SPECIFIC_FIELD_KEY_TITLE              = 'title';
-    const SPECIFIC_FIELD_KEY_IMAGE_URL          = 'image_url';
-    const SPECIFIC_FIELD_KEY_PRODUCT_URL        = 'product_url';
+    const SPECIFIC_FIELD_KEY_IMAGE_URL          = 'imageUrl';
+    const SPECIFIC_FIELD_KEY_PRODUCT_URL        = 'productUrl';
     const SPECIFIC_FIELD_KEY_AVAILABILITY       = 'availability';
-    const SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID   = 'category_path_id';
+    const SPECIFIC_FIELD_KEY_CATEGORY_PATH_ID   = 'categoryPathId';
 
     /**
      * @var ConfigDataInterface

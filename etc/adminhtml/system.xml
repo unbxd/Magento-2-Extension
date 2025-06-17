@@ -150,8 +150,12 @@
                     <label>Use Category ID</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Use Category ID in the feed instead of path (will result in 2|Root Category) ]]></comment>
+                </field> 
+                <field id="convert_attribute_to_camelcase" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Translate Attribute Name - CamelCase</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Translate all attribute names to camel case. ]]></comment>
                 </field>
-                
                  <field id="retain_inactive_category" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Retain Disabled Category</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
