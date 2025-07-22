@@ -1,4 +1,6 @@
-# Version 2.0.36
+# Version 2.0.37
+## 2.0.37 - July 22, 2025
+- Updated incremental to send the add and delete action in seperate request
 ## 2.0.36 - Jun 17, 2025
 - Provided option to not do camelcase conversion
 ## 2.0.35 - Feb 13, 2025
