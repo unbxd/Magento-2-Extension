@@ -261,6 +261,16 @@ abstract class AbstractCommand extends Command
     }
 
     /**
+     * Retrieve feed manager instance. Init if needed
+     *
+     * @return FeedManager|null
+     */
+    public function getNewFeedManager()
+    {
+        return $this->feedManagerFactory->create();
+    }
+
+    /**
      * Retrieve connector manager instance. Init if needed
      *
      * @return ApiConnector|null

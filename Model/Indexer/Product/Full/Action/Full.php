@@ -309,16 +309,6 @@ class Full
             $fullIndex = $this->appendIndexData($storeId, $initIndexData, (!empty($productIds) || $fromUpdatedDate != null), $feedManager);
         }
 
-        // try to detect deleted product(s)
-        if (!empty($productIds)) {
-            foreach ($productIds as $id) {
-                if (!array_key_exists($id, $fullIndex)) {
-                    $fullIndex[$id]['action'] = FeedConfig::OPERATION_TYPE_DELETE;
-                    $this->logger->info("Following product will be deleted from index - " . $id);
-                }
-            }
-        }
-
         return $fullIndex;
     }
 }

@@ -510,6 +510,16 @@ class CronManager
             /** @var FullReindexAction $fullReindexAction */
             $fullReindexAction = $this->fullReindexActionFactory->create();
             $jobIndex = $fullReindexAction->rebuildProductStoreIndex($storeId, $jobData);
+            $deleteIndex = [];
+            // try to detect deleted product(s)
+            if (!empty($jobData)) {
+                foreach ($jobData as $id) {
+                    if (!array_key_exists($id, $jobIndex)) {
+                        $deleteIndex[$id]['action'] = FeedConfig::OPERATION_TYPE_DELETE;
+                        $this->logger->info("Following product will be deleted from index - " . $id);
+                    }
+                }
+            }
             $this->logger->info(sprintf('Start incremental reindex for store with #%d', $storeId))->logStats();
             $isReindexSuccess = true;
         } catch (\Exception $e) {
@@ -520,7 +530,7 @@ class CronManager
             );
         }
 
-        if (empty($jobIndex)) {
+        if (empty($jobIndex) && empty($deleteIndex)) {
             $this->logger->error(sprintf('Can\'t execute feed for store #%d. Empty index.', $storeId));
             return;
         }
@@ -528,13 +538,25 @@ class CronManager
         // perform synchronization on reindex success with no empty index data
         if ($isReindexSuccess) {
             /** @var FeedManager $feedManager */
-            $feedManager = $this->feedManagerFactory->create();
-            $feedViewId = $feedManager->execute(
-                $jobIndex,
-                FeedConfig::FEED_TYPE_INCREMENTAL,
-                $storeId,
-                []
-            );
+            if (!empty($deleteIndex)) {
+                $this->logger->info(sprintf('Start incremental delete reindex for store with #%d', $storeId));
+                $feedManager = $this->feedManagerFactory->create();
+                $feedViewId = $feedManager->execute(
+                    $deleteIndex,
+                    FeedConfig::FEED_TYPE_INCREMENTAL,
+                    $storeId,
+                    []
+                );
+            }
+            if (!empty($jobIndex)) {
+                $feedManager = $this->feedManagerFactory->create();
+                $feedViewId = $feedManager->execute(
+                    $jobIndex,
+                    FeedConfig::FEED_TYPE_INCREMENTAL,
+                    $storeId,
+                    []
+                );
+            }
             // set feed view ID, related to current reindex process
 
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Console\Command\Feed;
 
 use Unbxd\ProductFeed\Console\Command\Feed\AbstractCommand;
@@ -84,7 +86,7 @@ class Incremental extends AbstractCommand
         // check if related cron process doesn't occur to this process to prevent duplicate execution
         $jobs = $this->getCronManager()->getRunningSchedules(CronManager::FEED_JOB_CODE_UPLOAD);
         if ($jobs->getSize()) {
-            $message = 'At the moment, the cron job is already executing this process. '. "\n" . 'To prevent duplicate process, which will increase the load on the server, please try it later.';
+            $message = 'At the moment, the cron job is already executing this process. ' . "\n" . 'To prevent duplicate process, which will increase the load on the server, please try it later.';
             $output->writeln("<error>{$message}</error>");
             return 429;
         }
@@ -109,20 +111,35 @@ class Incremental extends AbstractCommand
                 try {
                     $output->writeln("<info>Rebuild index...</info>");
                     $index = $this->reindexAction->rebuildProductStoreIndex($storeId, $productIds);
+                    $deleteIndex = [];
+                    // try to detect deleted product(s)
+                    if (!empty($productIds)) {
+                        foreach ($productIds as $id) {
+                            if (!array_key_exists($id, $index)) {
+                                $deleteIndex[$id]['action'] = FeedConfig::OPERATION_TYPE_DELETE;
+                                $output->writeln("Following product will be deleted from index - " . $id);
+                            }
+                        }
+                    }
                 } catch (\Exception $e) {
                     $output->writeln("<error>Indexing error: {$e->getMessage()}</error>");
                     $errors[$storeId] = $e->getMessage();
                     break;
                 }
 
-                if (empty($index)) {
+                if (empty($index) && empty($deleteIndex)) {
                     $output->writeln("<error>Index data is empty. Possible reason: product(s) with status 'Disabled' were performed.</error>");
                     return 0;
                 }
 
                 try {
                     $output->writeln("<info>Execute feed...</info>");
-                    $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL, $storeId);
+                    if (!empty($index)) {
+                        $this->getFeedManager()->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL, $storeId);
+                    }
+                    if (!empty($deleteIndex)) {
+                        $this->getNewFeedManager()->execute($deleteIndex, FeedConfig::FEED_TYPE_INCREMENTAL, $storeId);
+                    }
                 } catch (\Exception $e) {
                     $output->writeln("<error>Feed execution error: {$e->getMessage()}</error>");
                     $errors[$storeId] = $e->getMessage();
