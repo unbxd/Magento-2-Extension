@@ -497,11 +497,24 @@ class CronManager
         foreach ($jobsList as $job) {
             $jobData = array_merge($jobData, $this->queueHandler->convertStringToIds($job->getAffectedEntities()));
             $jobs[] = $job;
-            if (count($jobData) > 4000) {
-                break;
+            if (count($jobData) >= 2000) {
+                $jobUniqueData = array_unique($jobData);
+                if(count($jobUniqueData) > 2000){
+                    $jobData = array_slice($jobUniqueData, 2000);
+                    $jobUniqueData = array_slice($jobUniqueData, 0, 2000);   
+                }
+                $this->executeIncrementalJobForStoreInternal($storeId,$jobUniqueData,$jobs);
+                $jobs = [];
             }
         }
-        $jobData = array_unique($jobData);
+        if(count($jobData) > 0){
+            $this->executeIncrementalJobForStoreInternal($storeId,array_unique($jobData),$jobs);
+        }
+    }
+
+    private function executeIncrementalJobForStoreInternal($storeId, $jobData, $jobs)
+    {
+        
 
         $isReindexSuccess = false;
         $error = false;
