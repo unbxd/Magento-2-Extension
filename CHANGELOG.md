@@ -1,4 +1,6 @@
-# Version 2.0.38
+# Version 2.0.39
+## 2.0.39 - July 30, 2025
+- Added end time stamp file for sftp multi part upload.
 ## 2.0.38 - July 23, 2025
 - Throttled delta indexing in sizes of 2000 in a feed call
 ## 2.0.37 - July 22, 2025
