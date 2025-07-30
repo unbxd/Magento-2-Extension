@@ -225,18 +225,19 @@ class Full
         $multiPartBatchSize = $this->helperData->getMultiPartBatchSize() ?? $batchSize;
         $processCount = 0;
         $multiPartBatchCount = 0;
-        if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && !$this->helperData->isSFTPFullEnabled() && $feedManager) {
+        if (!$incremental && $this->helperData->isMultiPartUploadEnabled($storeId) && !$this->helperData->isSFTPFullEnabled($storeId) && $feedManager) {
             $feedManager->startMultiUpload($storeId);
         }
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
+            $this->logger->info("Product count in this batch ::". count($batchIndex) );
             if (!empty($batchIndex)) {
-                if ($incremental && $this->helperData->isPartialIncrementalEnabled()) {
+                if ($incremental && $this->helperData->isPartialIncrementalEnabled($storeId)) {
                     foreach ($this->dataSourceProvider->getIncrementList() as $dataSource) {
                         /** Unbxd\ProductFeed\Model\Indexer\Product\Full\DataSourceProviderInterface $dataSource */
                         $batchIndex = $dataSource->appendData($storeId, $batchIndex);
                     }
                 } else {
-                    if ($this->helperData->isMultiPartUploadEnabled()) {
+                    if ($this->helperData->isMultiPartUploadEnabled($storeId)) {
                         $this->addChildrensForParent($storeId, $batchIndex);
                     }
                     foreach ($this->dataSourceProvider->getList() as $dataSource) {
@@ -257,7 +258,7 @@ class Full
             }
             if (!empty($batchIndex)) {
                 $index += $batchIndex;
-                if ($this->helperData->isMultiPartUploadEnabled() && $multiPartBatchCount >= $multiPartBatchSize && $feedManager) {
+                if ($this->helperData->isMultiPartUploadEnabled($storeId) && $multiPartBatchCount >= $multiPartBatchSize && $feedManager) {
                     $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
                     $multiPartBatchCount = 0;
                     $index = [];
@@ -278,12 +279,12 @@ class Full
             $index += $batchIndex;
             $this->logger->info("Processed Data Source Provider ::" . get_class($dataSource) . " with memory of " . memory_get_usage());
         }
-        if (!$incremental && $this->helperData->isMultiPartUploadEnabled() && $feedManager) {
+        if (!$incremental && $this->helperData->isMultiPartUploadEnabled($storeId) && $feedManager) {
             if (!empty($index)) {
                 $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
             }
             $feedManager->batchExecute([["entity_id" => 50,"status" => 2]],30,FeedConfig::FEED_TYPE_FULL, $storeId);
-            if(!$this->helperData->isSFTPFullEnabled()){
+            if(!$this->helperData->isSFTPFullEnabled($storeId)){
                 $feedManager->endMultiUpload($storeId);
             }else{
                 $feedManager->endMultiSftpUpload($storeId);
