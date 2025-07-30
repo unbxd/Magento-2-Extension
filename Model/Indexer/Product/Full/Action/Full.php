@@ -285,6 +285,8 @@ class Full
             $feedManager->batchExecute([["entity_id" => 50,"status" => 2]],30,FeedConfig::FEED_TYPE_FULL, $storeId);
             if(!$this->helperData->isSFTPFullEnabled()){
                 $feedManager->endMultiUpload($storeId);
+            }else{
+                $feedManager->endMultiSftpUpload($storeId);
             }
         }
         $index["fields"] = $fields;

@@ -81,6 +81,7 @@ class Data extends AbstractHelper
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
     const XML_PATH_CATALOG_INDEXING_PARTIAL_INCREMENTAL_ENABLED = 'unbxd_catalog/indexing/incremental_partial_update';
     const XML_PATH_CATALOG_MULTI_PART_UPLOAD_ENABLED = 'unbxd_catalog/indexing/multi_part_upload';
+    const XML_PATH_CATALOG_MULTI_SEND_ENDFILE_SFTP= 'unbxd_catalog/indexing/send_sftp_endfile';
     const XML_PATH_CATALOG_BATCH_SIZE = 'unbxd_catalog/indexing/batch_size';
     const XML_PATH_CATALOG_MULTI_PART_BATCH_SIZE = 'unbxd_catalog/indexing/multi_part_batch_size';
     const XML_PATH_INDEXING_QUEUE_ARCHIVAL_INMINUTES = 'unbxd_catalog/indexing/indexing_queue_archival_time';
@@ -703,6 +704,19 @@ class Data extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_SFTP_FULL_ENABLED,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+     /**
+     * @param null $store
+     * @return mixed
+     */
+    public function isSFTPEndFileEnabled($store = null)
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_CATALOG_MULTI_SEND_ENDFILE_SFTP,
             ScopeInterface::SCOPE_STORE,
             $store
         );

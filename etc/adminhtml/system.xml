@@ -259,6 +259,12 @@
                     <tooltip>Enabling this option will submit records in batches which helps in reducing the memory footprint for the job</tooltip>
                     <comment><![CDATA[Enabling this option will submit records in batches which helps in reducing the memory footprint for the job]]></comment>
                 </field>
+                <field id="send_sftp_endfile" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send end file for SFTP multi part upload</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <tooltip>Enabling this option will submit zero records endfile which can be used as a marker to indicate the completion of the feed.</tooltip>
+                    <comment><![CDATA[Enabling this option will submit zero records endfile which can be used as a marker to indicate the completion of the feed.]]></comment>
+                </field>
                 <field id="batch_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Batch Size to query DB(product#)</label>
                     <validate>validate-number</validate>

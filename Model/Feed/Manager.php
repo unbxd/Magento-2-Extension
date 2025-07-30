@@ -913,6 +913,47 @@ class Manager
         }
     }
 
+    public function endMultiSftpUpload($store)
+    {
+
+        if(!$this->feedHelper->isSFTPEndFileEnabled()){
+            return;
+        }
+        $this->logger->error('Start to Upload end file.');
+           
+        if (!$this->logger->isTimerStarted()) {
+            $this->logger->startTimer();
+        }
+        $fileParameters = [
+            'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
+            'feedId' => sprintf('_%s', "end")
+        ];
+        unset($this->feed);
+        // Create empty content
+        $this->feed = [
+                FeedConfig::FEED_FIELD_KEY => [
+                    FeedConfig::CATALOG_FIELD_KEY => [
+
+                    ]
+                ]
+            ];
+        $this->startProfiler()
+            ->serializeAndWriteFeed(
+                $fileParameters,
+                true,
+                true
+            )
+            ->sendFeed($store, true)
+            ->stopProfiler();
+        if ($this->feedHelper->isCleanupFileOnCompletion()) {
+            $this->cleanupFeedFiles();
+        }
+        unset($this->feed);
+
+        $this->logger->error('End file uploaded.');
+        
+    }
+
     public function endMultiUpload($store)
     {
 

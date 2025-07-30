@@ -63,6 +63,7 @@
                 <mview_size>2500000</mview_size>
                 <incremental_partial_update>0</incremental_partial_update>
                 <multi_part_upload>1</multi_part_upload>
+                <send_sftp_endfile>0</send_sftp_endfile>
                 <batch_size>10000</batch_size>
                 <multi_part_batch_size>10000</multi_part_batch_size>
                 <indexing_queue_archival_time>7200</indexing_queue_archival_time>
