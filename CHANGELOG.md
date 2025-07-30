@@ -1,4 +1,6 @@
-# Version 2.0.39
+# Version 2.0.40
+## 2.0.40 - July 30, 2025
+- Patched config lookup to be at store scope where applicable.
 ## 2.0.39 - July 30, 2025
 - Added end time stamp file for sftp multi part upload.
 ## 2.0.38 - July 23, 2025
