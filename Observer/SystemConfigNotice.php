@@ -21,26 +21,32 @@ use Unbxd\ProductFeed\Observer\AbstractObserver;
  */
 class SystemConfigNotice extends AbstractObserver implements ObserverInterface
 {
+
     /**
      * @param Observer $observer
      * @return $this
      */
     public function execute(Observer $observer)
     {
+        $storeId= $observer->getRequest()->getParam('store');
         $section = $observer->getRequest()->getParam('section');
+        
         $warningMessages = [];
+        if(!$storeId){
+            return $this;
+        }
         if (
             ($section == self::SYSTEM_CONFIG_SECTION_PARAM_UNBXD_SETUP)
-            && !$this->helperData->isAuthorizationCredentialsSetup()
+            && !$this->helperData->isAuthorizationCredentialsSetup($storeId)
         ) {
             $warningMessages[] = $this->getAuthorizationCredentialsAreNotSetupMessage();
         }
 
         if ($section == self::SYSTEM_CONFIG_SECTION_PARAM_UNBXD_CATALOG) {
-            if (!$this->helperData->isGeneralCronConfigured()) {
+            if (!$this->helperData->isGeneralCronConfigured($storeId)) {
                 $warningMessages[] = $this->getGeneralCronIsNotConfiguredMessage();
             }
-            if (!$this->helperData->isIndexingQueueEnabled()) {
+            if (!$this->helperData->isIndexingQueueEnabled($storeId)) {
                 $warningMessages[] = $this->getIndexingQueueIsDisabledMessage();
             }
         }

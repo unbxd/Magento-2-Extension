@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Block\Adminhtml;
 
 use Magento\Backend\Block\Template;
@@ -17,6 +19,7 @@ use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Unbxd\ProductFeed\Model\Serializer;
 use Magento\Framework\App\ObjectManager;
 use Magento\Store\Model\Store;
+use Magento\Framework\App\RequestInterface;
 
 /**
  * Class Common
@@ -39,6 +42,8 @@ class Common extends Template
      */
     private $serializer;
 
+    protected $request;
+
     /**
      * Common constructor.
      * @param Template\Context $context
@@ -49,11 +54,13 @@ class Common extends Template
     public function __construct(
         Template\Context $context,
         HelperData $helperData,
+        RequestInterface $request,
         array $data = [],
         Serializer $serializer = null
     ) {
         parent::__construct($context, $data);
         $this->formKey = $context->getFormKey();
+        $this->request = $request;
         $this->helperData = $helperData;
         $this->serializer = $serializer ?: ObjectManager::getInstance()->get(Serializer::class);
     }
@@ -65,6 +72,7 @@ class Common extends Template
     public function getConfig()
     {
         return [
+            'store' => $this->request->getParam('store'),
             'isActionAllow' => $this->isActionAllow(),
             'isGeneralCronConfigured' => $this->isGeneralCronConfigured(),
             'store' => $this->_request->getParam(Store::ENTITY, $this->getStore()->getId()),
@@ -73,7 +81,7 @@ class Common extends Template
                 'fullSync' => $this->getFullSyncActionUrl(),
                 'incrementalSync' => $this->getIncrementalSyncActionUrl(),
                 'generate' => $this->getGenerateProductFeedActionUrl(),
-                'searchdata'=>$this->getGenerateSearchData(),
+                'searchdata' => $this->getGenerateSearchData(),
             ]
         ];
     }
@@ -107,7 +115,11 @@ class Common extends Template
      */
     private function isActionAllow()
     {
-        return $this->helperData->isAuthorizationCredentialsSetup($this->getStore());
+        $storeId = (int) $this->request->getParam('store');
+        if ($storeId) {
+            return $this->helperData->isAuthorizationCredentialsSetup($storeId);
+        }
+        return false;
     }
 
     /**
@@ -118,7 +130,11 @@ class Common extends Template
      */
     private function isGeneralCronConfigured()
     {
-        return $this->helperData->isGeneralCronConfigured($this->getStore());
+        $storeId = (int) $this->request->getParam('store');
+        if ($storeId) {
+            return $this->helperData->isGeneralCronConfigured($this->getStore());
+        }
+        return false;
     }
 
     /**
@@ -129,7 +145,8 @@ class Common extends Template
      */
     private function getActionUrl($path = '')
     {
-        return $this->getUrl($path,
+        return $this->getUrl(
+            $path,
             [
                 '_secure' => $this->getRequest()->isSecure()
             ]

@@ -13,6 +13,9 @@ namespace Unbxd\ProductFeed\Observer;
 
 use Unbxd\ProductFeed\Helper\Data as HelperData;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Store\Model\StoreManagerInterface;
+
+
 
 /**
  * Class AbstractObserver
@@ -42,6 +45,14 @@ abstract class AbstractObserver
      */
     protected $messageManager;
 
+    
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
+    
+
     /**
      * AbstractObserver constructor.
      * @param HelperData $helperData
@@ -49,10 +60,12 @@ abstract class AbstractObserver
      */
     public function __construct(
         HelperData $helperData,
-        ManagerInterface $messageManager
+        ManagerInterface $messageManager,
+        StoreManagerInterface $storeManagerInterface
     ) {
         $this->helperData = $helperData;
         $this->messageManager = $messageManager;
+        $this->storeManager = $storeManagerInterface;
     }
 
     /**

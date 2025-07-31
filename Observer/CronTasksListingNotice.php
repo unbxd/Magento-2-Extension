@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
@@ -27,9 +29,13 @@ class CronTasksListingNotice extends AbstractObserver implements ObserverInterfa
      */
     public function execute(Observer $observer)
     {
-        if (!$this->helperData->isGeneralCronConfigured()) {
-            $this->messageManager->addWarningMessage($this->getGeneralCronIsNotConfiguredMessage());
+        foreach ($this->storeManager->getStores() as $store) {
+            if ($this->helperData->isGeneralCronConfigured($store)) {
+                return $this;
+            }
         }
+        $this->messageManager->addWarningMessage($this->getGeneralCronIsNotConfiguredMessage());
+
 
         return $this;
     }

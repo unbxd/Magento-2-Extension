@@ -28,13 +28,11 @@ class Manually extends General
      */
     public function afterSave()
     {
-        if ($this->getIsCronIsEnabled() && ($this->getCronType() == CronType::MANUALLY)) {
             $this->updateConfigValues(
                 self::CRON_GENERAL_STRING_PATH,
                 self::CRON_GENERAL_MODEL_PATH,
                 $this->getValue()
             );
-        }
 
         return parent::afterSave();
     }

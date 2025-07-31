@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Model\Config\Backend\Cron\FullFeed;
 
 use Unbxd\ProductFeed\Model\Config\Backend\Cron\FullFeed;
@@ -28,13 +30,12 @@ class Manually extends FullFeed
      */
     public function afterSave()
     {
-        if ($this->getIsCronIsEnabled() && ($this->getCronType() == CronType::MANUALLY)) {
-            $this->updateConfigValues(
-                self::CRON_FULL_STRING_PATH,
-                self::CRON_FULL_MODEL_PATH,
-                $this->getValue()
-            );
-        }
+        $this->updateConfigValues(
+            self::CRON_FULL_STRING_PATH,
+            self::CRON_FULL_MODEL_PATH,
+            $this->getValue()
+        );
+
 
         return parent::afterSave();
     }

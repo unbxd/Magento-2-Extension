@@ -909,7 +909,7 @@ class Data extends AbstractHelper
      */
     public function getGeneralCronSchedule($store = null)
     {
-        if ($this->isGeneralCronEnabled($store) && $this->getGeneralCronType($store)) {
+        if ($this->getGeneralCronType($store)) {
             return $this->scopeConfig->getValue(
                 CronGeneral::CRON_GENERAL_STRING_PATH,
                 ScopeInterface::SCOPE_STORE,

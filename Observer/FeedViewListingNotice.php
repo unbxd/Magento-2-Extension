@@ -27,10 +27,12 @@ class FeedViewListingNotice extends AbstractObserver implements ObserverInterfac
      */
     public function execute(Observer $observer)
     {
-        
-        if (!$this->helperData->isGeneralCronConfigured()) {
-            $this->messageManager->addWarningMessage($this->getGeneralCronIsNotConfiguredMessage());
+        foreach ($this->storeManager->getStores() as $store) {
+            if ($this->helperData->isGeneralCronConfigured($store)) {
+                return $this;
+            }
         }
+        $this->messageManager->addWarningMessage($this->getGeneralCronIsNotConfiguredMessage());
 
         return $this;
     }
