@@ -1,4 +1,6 @@
-# Version 2.0.40
+# Version 2.0.41
+## 2.0.41 - July 31, 2025
+- Updated console warning based on the correct scope.
 ## 2.0.40 - July 30, 2025
 - Patched config lookup to be at store scope where applicable.
 ## 2.0.39 - July 30, 2025
