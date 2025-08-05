@@ -366,8 +366,10 @@ class Manager
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
                     'feedId' => sprintf('_%s_%s', $this->feedViewId, $partCount)
                 ],
+                $type,
                 true,
                 true
+                
             )
             ->sendFeed($store, true)
             ->stopProfiler();
@@ -422,7 +424,8 @@ class Manager
                 [
                     'store' => sprintf('%s%s', FeedFileManager::STORE_PARAMETER, $store),
                     'feedId' => sprintf('_%s', $this->feedViewId)
-                ]
+                ],
+                $type
             )
             ->sendFeed($store)
             ->postProcessActions($store)
@@ -440,7 +443,7 @@ class Manager
      * @return $this
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function serializeAndWriteFeed($fileParameters = [], $batchUpdate = false, $useNewFileInstance = false)
+    public function serializeAndWriteFeed($fileParameters = [],$feedType = FeedConfig::FEED_TYPE_FULL, $batchUpdate = false, $useNewFileInstance = false)
     {
         if ($this->configHelper->getEnableSerialization()) {
             if (!empty($fileParameters) || $useNewFileInstance) {
@@ -478,7 +481,7 @@ class Manager
                     if ($firstItemInJSON) {
                         $this->jsonStreamWriter->nextItem($fileManager);
                     }
-                    $this->jsonStreamWriter->setAttribute(FeedConfig::OPERATION_TYPE_ADD, $fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_ITEMS_FIELD_KEY, $fileManager)->openArray($fileManager);
+                    $this->jsonStreamWriter->setAttribute(($feedType == FeedConfig::FEED_TYPE_INCREMENTAL ? FeedConfig::OPERATION_TYPE_UPDATE : FeedConfig::OPERATION_TYPE_ADD), $fileManager)->openJsonObject($fileManager)->setAttribute(FeedConfig::CATALOG_ITEMS_FIELD_KEY, $fileManager)->openArray($fileManager);
                     foreach ($feed["catalog"]["add"]["items"] as $index => $value) {
                         if ($index == 0) {
                             $this->jsonStreamWriter->pushFirstItem($value, $fileManager);
@@ -940,6 +943,7 @@ class Manager
         $this->startProfiler()
             ->serializeAndWriteFeed(
                 $fileParameters,
+                null,
                 true,
                 true
             )
