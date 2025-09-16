@@ -1,4 +1,6 @@
-# Version 2.0.41
+# Version 2.0.42
+## 2.0.42 - Sep 16, 2025
+- Removed code which are obsolete 
 ## 2.0.41 - July 31, 2025
 - Updated console warning based on the correct scope.
 ## 2.0.40 - July 30, 2025
