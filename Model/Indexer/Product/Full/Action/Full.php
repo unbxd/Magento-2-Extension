@@ -283,7 +283,6 @@ class Full
             if (!empty($index)) {
                 $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
             }
-            $feedManager->batchExecute([["entity_id" => 50,"status" => 2]],30,FeedConfig::FEED_TYPE_FULL, $storeId);
             if(!$this->helperData->isSFTPFullEnabled($storeId)){
                 $feedManager->endMultiUpload($storeId);
             }else{
