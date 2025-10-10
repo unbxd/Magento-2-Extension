@@ -834,23 +834,21 @@ class DataHandler
                 // child product doesn't exist in index
                 $this->logger->info("Child Product doesn't exist " . $id);
                 continue;
-            } else if ($variantCount && $variantCount > 0 && $variantCount <= $indexCount) {
-                $variants[] = $index[$id];
-                $this->logger->info("Skip Child Product as variant limit exceeded " . $id);
-                continue;
             }
-            $variants[] = $index[$id];
+            //$variants[] = $index[$id];
             if (!isset($index[$id][Config::getPreparedKey()]) && (!in_array($id, $this->relatedEntityPreparedDataList))) {
                 $this->prepareFields($index[$id], $store);
             }
             $childData = $this->formatChildFields($index[$id], $id);
             if (!empty($childData)) {
-                $variants[] = $index[$id];
-                $parentData[Config::CHILD_PRODUCTS_FIELD_KEY][] = $childData;
+                $variants[] =  $childData;
+                if (!$variantCount || ($variantCount > 0 && $variantCount >= $indexCount)) {
+                    $parentData[Config::CHILD_PRODUCTS_FIELD_KEY][] = $childData;
+                }
                 $indexCount++;
             }
         }
-        if(!empty($variants)){
+        if (!empty($variants)) {
             $this->populateVariantPriceRange($parentData, $variants);
         }
 
@@ -894,11 +892,12 @@ class DataHandler
         }
     }
 
+
     private function populateVariantPriceRange(array &$parentData, array $variants)
     {
 
-        //$originalPriceAttribute = Config::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($this->convertToCamelCase("original_price"));
-        $originalPriceAttribute = $this->convertToCamelCase("original_price");
+        $originalPriceAttribute = Config::CHILD_PRODUCT_FIELD_PREFIX . ucfirst($this->convertToCamelCase("original_price"));
+        //$originalPriceAttribute = $this->convertToCamelCase("original_price");
         $minAttribute = $this->convertToCamelCase("min_was_price");
         $maxAttribute = $this->convertToCamelCase("max_was_price");
         if (!empty($variants)) {
