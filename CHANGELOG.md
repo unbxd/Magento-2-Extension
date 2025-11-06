@@ -1,4 +1,6 @@
-# Version 2.0.43
+# Version 2.0.44
+## 2.0.44 - Nov ?, 2025
+- Updated adhoc incremental to build and index to the respective store id
 ## 2.0.43 - Oct 10, 2025
 - Updated price to be numerals
 ## 2.0.42 - Sep 16, 2025

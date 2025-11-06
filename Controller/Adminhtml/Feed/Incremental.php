@@ -58,7 +58,7 @@ class Incremental extends FeedActionIndex
                 }
 
                 try {
-                    $this->feedManager->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL);
+                    $this->feedManager->execute($index, FeedConfig::FEED_TYPE_INCREMENTAL,$this->getCurrentStoreId());
                     $responseContent = [
                         'message' => __("Incremental indexing submitted Succesfully")
                     ];
@@ -98,8 +98,7 @@ class Incremental extends FeedActionIndex
             $this->messageManager->addSuccess(__($message));
         } else {
             $message = sprintf(
-                FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_ERROR . ' %s',
-                $this->getStore()->getId(),
+                FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_INDEXING . ' %s',
                 $viewDetailsLink
             );
             $this->messageManager->addError(__($message));
