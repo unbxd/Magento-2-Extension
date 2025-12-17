@@ -101,7 +101,7 @@ class Incremental extends FeedActionIndex
                 FeedConfig::FEED_MESSAGE_BY_RESPONSE_TYPE_INDEXING . ' %s',
                 $viewDetailsLink
             );
-            $this->messageManager->addError(__($message));
+            $this->messageManager->addSuccess(__($message));
         }
 
         return $this;

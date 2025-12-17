@@ -286,6 +286,7 @@ class DataHandler
     {
         $this->prepareData($index, $store);
         $this->buildFeed($store);
+        
         return $this->getFullFeed();
     }
 
@@ -513,7 +514,6 @@ class DataHandler
                     } else if (!empty($data[Config::FIELD_KEY_VISIBILITY]) && ((is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == $this->getVisibilityTypeLabel(1) || (is_array($data[Config::FIELD_KEY_VISIBILITY]) ? $data[Config::FIELD_KEY_VISIBILITY][0] : $data[Config::FIELD_KEY_VISIBILITY]) == 1)) {
                         continue;
                     }
-
                     // prepare data fields for needed requirements
                     if ((!array_key_exists('action', $data) || trim($data['action']) != Config::OPERATION_TYPE_DELETE) && !isset($data[Config::getPreparedKey()])) {
                         $this->prepareFields($data, $store);
@@ -1040,7 +1040,7 @@ class DataHandler
                     // not multivalued fields can't contain more than one value.
                     // for fields which should not have multiple values, multiply values occur for some types
                     // of products as a result of combining parent and child values (bundle, grouped).
-                    $resultValue = (string) $resultValue[0];
+                    $resultValue =  $resultValue[0];
                 }
             }
             $data[$pureKey] = $resultValue;

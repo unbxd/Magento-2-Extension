@@ -252,8 +252,10 @@ abstract class AbstractAttribute
         if ($canIndex && $attribute->getBackendModel()) {
             foreach ($this->indexedBackendModels as $indexedBackendModel) {
                 $canIndex = is_a($attribute->getBackendModel(), $indexedBackendModel, true);
-                if ($canIndex) {
-                    return $canIndex;
+                
+                if ($canIndex || is_string($attribute->getBackendModel())
+    && str_starts_with($attribute->getBackendModel(), 'Magento\\Catalog\\Model\\Product\\Attribute\\Backend\\')) {
+                    return true;
                 }
             }
         }

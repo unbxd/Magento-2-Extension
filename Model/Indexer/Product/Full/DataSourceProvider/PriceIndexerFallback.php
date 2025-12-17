@@ -108,10 +108,10 @@ class PriceIndexerFallback implements DataSourceProviderInterface
                 $recheckProductsIds = array_intersect($productIds, $pendingProductIds);
                 $this->appendParentProductForRecheck($recheckProductsIds, $indexData);
                 $recheckProductsIds =array_unique($recheckProductsIds);
-                $recheckProductString = print_r($recheckProductsIds, true);
-                $pendingProductString = print_r($pendingProductIds, true);
-                $this->logger->debug("The following products are awaiting price changes ::" . $pendingProductString);
-                $this->logger->debug("The following products will be evaulavted for price changes ::" . $recheckProductString);
+                #$recheckProductString = print_r($recheckProductsIds, true);
+                #$pendingProductString = print_r($pendingProductIds, true);
+                $this->logger->debug("The count of products pending price indexing ::" . sizeof($pendingProductIds));
+                $this->logger->debug("The count of products will be evaulavted for price changes ::" . sizeof($recheckProductsIds));
                 $indexedFields = array('price', 'original_price');
                 foreach ($recheckProductsIds as $productId) {
                     $this->appendPriceData($indexData,$productId,$storeId);
