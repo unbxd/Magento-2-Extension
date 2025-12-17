@@ -1,6 +1,9 @@
 # Version 2.0.44
-## 2.0.44 - Nov ?, 2025
+## 2.0.44 - Dec 17, 2025
 - Updated adhoc incremental to build and index to the respective store id
+- Handle new backend model in attribute introduced in 2.4.8 for url_key
+- reduced the log noise in price fall back handler
+- Skipped forceful conversion of object data to string within data handler when not multi values.
 ## 2.0.43 - Oct 10, 2025
 - Updated price to be numerals
 ## 2.0.42 - Sep 16, 2025
