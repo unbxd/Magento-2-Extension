@@ -1,4 +1,6 @@
-# Version 2.0.44
+# Version 2.0.45
+## 2.0.45 - Jan 27, 2026
+- Updated the attribute lookup to only fetch value if the product is listed on the store.
 ## 2.0.44 - Dec 17, 2025
 - Updated adhoc incremental to build and index to the respective store id
 - Handle new backend model in attribute introduced in 2.4.8 for url_key
