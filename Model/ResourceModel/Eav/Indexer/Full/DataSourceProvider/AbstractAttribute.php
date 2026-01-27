@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2020 Unbxd Inc.
  */
@@ -9,6 +10,7 @@
  * @email andyworkbase@gmail.com
  * @team MageCloud
  */
+
 namespace Unbxd\ProductFeed\Model\ResourceModel\Eav\Indexer\Full\DataSourceProvider;
 
 use Magento\Framework\App\ResourceConnection;
@@ -80,6 +82,8 @@ class AbstractAttribute extends Indexer
     public function getAttributesRawData($storeId, array $entityIds, $tableName, array $attributeIds)
     {
         $select = $this->connection->select();
+        $store = $this->storeManager->getStore($storeId);
+        $website = $store->getWebsiteId();
 
         // the field modelizing the link between entity table and attribute values table, either row_id or entity_id.
         $linkField = $this->getEntityMetaData($this->getEntityTypeId())->getLinkField();
@@ -101,6 +105,16 @@ class AbstractAttribute extends Indexer
         $select->from(
             ['entity' => $this->getEntityMetaData($this->getEntityTypeId())->getEntityTable()],
             [$entityIdField]
+        )
+            // ✅ Website assignment check
+            ->joinInner(
+                ['cpw' => $this->connection->getTableName('catalog_product_website')],
+                sprintf(
+                    'cpw.product_id = entity.%s AND cpw.website_id = %d',
+                    $entityIdField,
+                    $website
+                ),
+                []
             )
             ->joinInner(
                 ['t_default' => $tableName],
@@ -124,17 +138,17 @@ class AbstractAttribute extends Indexer
         $select->from(
             ['entity' => $this->getEntityMetaData($this->getEntityTypeId())->getEntityTable()],
             [$entityIdField]
-            )->joinInner(
-                ['t_store' => $tableName],
-                new \Zend_Db_Expr("entity.{$linkField} = t_store.{$linkField}"),
-                ['attribute_id','value']
-            )->joinLeft(['t_default' => $tableName], $joinStoreValuesCondition, [])
+        )->joinInner(
+            ['t_store' => $tableName],
+            new \Zend_Db_Expr("entity.{$linkField} = t_store.{$linkField}"),
+            ['attribute_id', 'value']
+        )->joinLeft(['t_default' => $tableName], $joinStoreValuesCondition, [])
             ->where('t_store.store_id = ?', $storeId)
             ->where('t_default.store_id is null')
             ->where('t_store.attribute_id IN (?)', $attributeIds)
             ->where("entity.{$entityIdField} IN (?)", $entityIds);
         $valueInStoreScope =  $this->connection->fetchAll($select);
-        return array_merge($valueInDefaultStore,$valueInStoreScope);
+        return array_merge($valueInDefaultStore, $valueInStoreScope);
     }
 
     /**
