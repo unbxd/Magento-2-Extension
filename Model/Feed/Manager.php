@@ -920,6 +920,7 @@ class Manager
     {
 
         if(!$this->feedHelper->isSFTPEndFileEnabled()){
+            $this->postProcessActions();
             return;
         }
         $this->logger->error('Start to Upload end file.');
@@ -953,7 +954,7 @@ class Manager
             $this->cleanupFeedFiles();
         }
         unset($this->feed);
-
+        $this->postProcessActions();
         $this->logger->error('End file uploaded.');
         
     }
