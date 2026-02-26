@@ -1,4 +1,6 @@
 # Version 2.0.45
+## 2.0.45 - Feb 26, 2026
+- Updated the sftp full indexing to close the feed view job
 ## 2.0.45 - Jan 27, 2026
 - Updated the attribute lookup to only fetch value if the product is listed on the store.
 ## 2.0.44 - Dec 17, 2025
