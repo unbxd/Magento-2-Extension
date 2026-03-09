@@ -79,6 +79,7 @@ class Data extends AbstractHelper
      */
     const XML_PATH_CATALOG_INDEXING_MVIEW_SIZE = 'unbxd_catalog/indexing/mview_size';
     const XML_PATH_CATALOG_INDEXING_QUEUE_ENABLED = 'unbxd_catalog/indexing/enabled_queue';
+    const XML_PATH_CATALOG_INDEXING_DELTA_LIMIT = 'unbxd_catalog/indexing/delta_limit_percent';
     const XML_PATH_CATALOG_INDEXING_PARTIAL_INCREMENTAL_ENABLED = 'unbxd_catalog/indexing/incremental_partial_update';
     const XML_PATH_CATALOG_MULTI_PART_UPLOAD_ENABLED = 'unbxd_catalog/indexing/multi_part_upload';
     const XML_PATH_CATALOG_MULTI_SEND_ENDFILE_SFTP= 'unbxd_catalog/indexing/send_sftp_endfile';
@@ -457,6 +458,20 @@ class Data extends AbstractHelper
     public function isAuthorizationCredentialsSetup($store = null)
     {
         return (bool) ($this->getSiteKey($store) && $this->getSecretKey($store) && $this->getApiKey($store));
+        
+    }
+
+    /**
+     * @param null $store
+     * @return int
+     */
+    public function getDeltaLimitPercent($store = null)
+    {
+        return (int)($this->scopeConfig->getValue(
+            self::XML_PATH_CATALOG_INDEXING_DELTA_LIMIT,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        ) ?? 40);
     }
 
     /**

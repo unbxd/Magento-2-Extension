@@ -916,7 +916,9 @@ class Manager
         }
     }
 
-    public function endMultiSftpUpload($store)
+    
+
+    public function endMultiSftpUpload($store, $incremental = false)
     {
 
         if(!$this->feedHelper->isSFTPEndFileEnabled()){
@@ -950,10 +952,15 @@ class Manager
             )
             ->sendFeed($store, true)
             ->stopProfiler();
+        unset($this->feed);
+        if($incremental){
+            $this->logger->error('End file uploaded.');
+            return;
+        }
         if ($this->feedHelper->isCleanupFileOnCompletion()) {
             $this->cleanupFeedFiles();
         }
-        unset($this->feed);
+        
         $this->postProcessActions();
         $this->logger->error('End file uploaded.');
         

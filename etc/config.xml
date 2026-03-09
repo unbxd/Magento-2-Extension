@@ -61,6 +61,7 @@
                 <multi_store_enabled>0</multi_store_enabled>
                 <enabled_queue>1</enabled_queue>
                 <mview_size>2500000</mview_size>
+                <delta_limit_percent>40</delta_limit_percent>
                 <incremental_partial_update>0</incremental_partial_update>
                 <multi_part_upload>1</multi_part_upload>
                 <send_sftp_endfile>0</send_sftp_endfile>

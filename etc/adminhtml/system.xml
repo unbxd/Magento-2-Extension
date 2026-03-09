@@ -265,6 +265,11 @@
                     <tooltip>Enabling this option will submit zero records endfile which can be used as a marker to indicate the completion of the feed.</tooltip>
                     <comment><![CDATA[Enabling this option will submit zero records endfile which can be used as a marker to indicate the completion of the feed.]]></comment>
                 </field>
+                <field id="delta_limit_percent" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Threshold % to run a full skipping increment feed</label>
+                    <validate>validate-number</validate>
+                    <comment><![CDATA[Percentage of products queued up in delta compared to full catalog size, when crossed the plugin would run a full feed skipping incremental.(ex: enter whole numbers like 50 for 50%)]]></comment>
+                </field>
                 <field id="batch_size" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Batch Size to query DB(product#)</label>
                     <validate>validate-number</validate>

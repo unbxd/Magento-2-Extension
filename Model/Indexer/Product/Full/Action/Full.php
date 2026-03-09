@@ -279,15 +279,14 @@ class Full
             $index += $batchIndex;
             $this->logger->info("Processed Data Source Provider ::" . get_class($dataSource) . " with memory of " . memory_get_usage());
         }
-        if (!$incremental && $this->helperData->isMultiPartUploadEnabled($storeId) && $feedManager) {
+        if (!$incremental && $this->helperData->isMultiPartUploadEnabled($storeId) && $feedManager && !$this->helperData->isSFTPFullEnabled($storeId)) {
             if (!empty($index)) {
                 $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
             }
-            if(!$this->helperData->isSFTPFullEnabled($storeId)){
                 $feedManager->endMultiUpload($storeId);
-            }else{
-                $feedManager->endMultiSftpUpload($storeId);
-            }
+        }
+        if($this->helperData->isSFTPFullEnabled($storeId)){
+            $feedManager->endMultiSftpUpload($storeId,$incremental);
         }
         $index["fields"] = $fields;
         return $index;

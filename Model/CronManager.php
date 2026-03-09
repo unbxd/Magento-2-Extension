@@ -436,6 +436,7 @@ class CronManager
             if (!$this->isProcessAvailable($storeId)) {
                 continue;
             }
+            $this->substituteFullFeedForDeltaIfNeeded($storeId);
             if ($this->isFullJobForStorePending($storeId)) {
                 $this->removeAllButOneFullJobForStore($storeId);
                 $this->processFullJobForStore($storeId);
@@ -485,6 +486,42 @@ class CronManager
         }
     }
 
+    private function substituteFullFeedForDeltaIfNeeded($storeId)
+    {
+        try{
+        $jobsList = $this->getPendingJobsForStore($storeId, false, 999);
+        if ($jobsList->getSize() == 0) {
+            $this->logger->info(sprintf('No incremental job for store with #%d', $storeId));
+            return;
+        }
+        $productCount = count($this->productHelper->getAllProductsIds($storeId));
+        $limit = round($productCount * ($this->helperData->getDeltaLimitPercent() / 100));
+
+        $jobData = [];
+        foreach ($jobsList as $job) {
+            $jobData = array_merge($jobData, $this->queueHandler->convertStringToIds($job->getAffectedEntities()));
+        }
+        $jobUniqueData = array_unique($jobData);
+        if (count($jobUniqueData) > $limit) {
+            $queue = $this->indexingQueueFactory->create();
+            $queue->setStoreId($storeId)
+                ->setStatus(IndexingQueue::STATUS_PENDING)
+                ->setExecutionTime(0)
+                ->setAffectedEntities(IndexingQueue::REINDEX_FULL_LABEL)
+                ->setNumberOfEntities($productCount)
+                ->setActionType(IndexingQueue::TYPE_REINDEX_FULL);
+
+            try {
+                $this->indexingQueueRepository->save($queue);
+            } catch (\Exception $e) {
+                $this->logger->info(sprintf('Error saving full feed when delta is higher'));
+            }
+        }
+        }catch(\Exception $e){
+            $this->logger->info(sprintf('Error evaluvating delta in place of full'));
+        }
+    }
+
     private function processIncrementalJobForStore($storeId)
     {
         $jobsList = $this->getPendingJobsForStore($storeId, false, 999);
@@ -499,22 +536,22 @@ class CronManager
             $jobs[] = $job;
             if (count($jobData) >= 2000) {
                 $jobUniqueData = array_unique($jobData);
-                if(count($jobUniqueData) > 2000){
+                if (count($jobUniqueData) > 2000) {
                     $jobData = array_slice($jobUniqueData, 2000);
-                    $jobUniqueData = array_slice($jobUniqueData, 0, 2000);   
+                    $jobUniqueData = array_slice($jobUniqueData, 0, 2000);
                 }
-                $this->executeIncrementalJobForStoreInternal($storeId,$jobUniqueData,$jobs);
+                $this->executeIncrementalJobForStoreInternal($storeId, $jobUniqueData, $jobs);
                 $jobs = [];
             }
         }
-        if(count($jobData) > 0){
-            $this->executeIncrementalJobForStoreInternal($storeId,array_unique($jobData),$jobs);
+        if (count($jobData) > 0) {
+            $this->executeIncrementalJobForStoreInternal($storeId, array_unique($jobData), $jobs);
         }
     }
 
     private function executeIncrementalJobForStoreInternal($storeId, $jobData, $jobs)
     {
-        
+
 
         $isReindexSuccess = false;
         $error = false;
