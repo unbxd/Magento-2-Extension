@@ -1,5 +1,7 @@
-# Version 2.0.45
-## 2.0.45 - Feb 26, 2026
+# Version 2.0.47
+## 2.0.47 - Mar 9, 2026
+- Percentage of products queued up in delta compared to full catalog size, when crossed the plugin would run a full feed skipping incremental.
+## 2.0.46 - Feb 26, 2026
 - Updated the sftp full indexing to close the feed view job
 ## 2.0.45 - Jan 27, 2026
 - Updated the attribute lookup to only fetch value if the product is listed on the store.
