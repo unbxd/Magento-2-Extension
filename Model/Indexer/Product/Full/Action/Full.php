@@ -285,9 +285,6 @@ class Full
             }
                 $feedManager->endMultiUpload($storeId);
         }
-        if($this->helperData->isSFTPFullEnabled($storeId)){
-            $feedManager->endMultiSftpUpload($storeId,$incremental);
-        }
         $index["fields"] = $fields;
         return $index;
     }

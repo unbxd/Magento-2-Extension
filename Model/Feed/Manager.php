@@ -954,7 +954,7 @@ class Manager
             ->stopProfiler();
         unset($this->feed);
         if($incremental){
-            $this->logger->error('End file uploaded.');
+            $this->logger->info('End file uploaded.');
             return;
         }
         if ($this->feedHelper->isCleanupFileOnCompletion()) {
@@ -962,7 +962,7 @@ class Manager
         }
         
         $this->postProcessActions();
-        $this->logger->error('End file uploaded.');
+        $this->logger->info('End file uploaded.');
         
     }
 
