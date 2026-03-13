@@ -1,4 +1,6 @@
-# Version 2.0.47
+# Version 2.0.48
+## 2.0.48 - Mar 13, 2026
+- Disable end file update for sftp
 ## 2.0.47 - Mar 9, 2026
 - Percentage of products queued up in delta compared to full catalog size, when crossed the plugin would run a full feed skipping incremental.
 ## 2.0.46 - Feb 26, 2026
