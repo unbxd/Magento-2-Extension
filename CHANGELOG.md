@@ -1,4 +1,6 @@
-# Version 2.0.48
+# Version 2.0.49
+## 2.0.49 - Mar 16, 2026
+- Enable end feed file update for full sftp
 ## 2.0.48 - Mar 13, 2026
 - Disable end file update for sftp
 ## 2.0.47 - Mar 9, 2026
