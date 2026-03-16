@@ -229,7 +229,7 @@ class Full
             $feedManager->startMultiUpload($storeId);
         }
         foreach ($this->getBatchItems($initIndexData, $batchSize) as $batchIndex) {
-            $this->logger->info("Product count in this batch ::". count($batchIndex) );
+            $this->logger->info("Product count in this batch ::" . count($batchIndex));
             if (!empty($batchIndex)) {
                 if ($incremental && $this->helperData->isPartialIncrementalEnabled($storeId)) {
                     foreach ($this->dataSourceProvider->getIncrementList() as $dataSource) {
@@ -265,12 +265,12 @@ class Full
                 }
             }
         }
-        if(!empty($this->dataSourceProvider->getContentList())){
+        if (!empty($this->dataSourceProvider->getContentList())) {
             $processCount += $batchSize;
         }
         foreach ($this->dataSourceProvider->getContentList() as $dataSource) {
             /** Unbxd\ProductFeed\Model\Indexer\Product\Full\ContentDataSourceProviderInterface $dataSource */
-            $batchIndex = $dataSource->getData($storeId,$incremental);
+            $batchIndex = $dataSource->getData($storeId, $incremental);
             if (isset($batchIndex["fields"])) {
                 $fields = array_merge($fields, $batchIndex["fields"]);
                 unset($batchIndex["fields"]);
@@ -279,11 +279,16 @@ class Full
             $index += $batchIndex;
             $this->logger->info("Processed Data Source Provider ::" . get_class($dataSource) . " with memory of " . memory_get_usage());
         }
-        if (!$incremental && $this->helperData->isMultiPartUploadEnabled($storeId) && $feedManager && !$this->helperData->isSFTPFullEnabled($storeId)) {
+        if (!$incremental && $this->helperData->isMultiPartUploadEnabled($storeId) && $feedManager) {
             if (!empty($index)) {
                 $feedManager->batchExecute($index, $processCount, $incremental ? FeedConfig::FEED_TYPE_INCREMENTAL : FeedConfig::FEED_TYPE_FULL, $storeId);
             }
+            if ($this->helperData->isSFTPFullEnabled($storeId)) {
+                $feedManager->endMultiSftpUpload($storeId, $incremental);
+            }else{
                 $feedManager->endMultiUpload($storeId);
+            }
+            
         }
         $index["fields"] = $fields;
         return $index;
