@@ -531,6 +531,7 @@ class CronManager
         }
         $jobData = [];
         $jobs = [];
+        $fileSent = false;
         foreach ($jobsList as $job) {
             $jobData = array_merge($jobData, $this->queueHandler->convertStringToIds($job->getAffectedEntities()));
             $jobs[] = $job;
@@ -542,10 +543,16 @@ class CronManager
                 }
                 $this->executeIncrementalJobForStoreInternal($storeId, $jobUniqueData, $jobs);
                 $jobs = [];
+                $fileSent = true;
             }
         }
         if (count($jobData) > 0) {
             $this->executeIncrementalJobForStoreInternal($storeId, array_unique($jobData), $jobs);
+            $fileSent = true;
+        }
+        if($fileSent && $this->feedHelper->isSFTPIncrementalEnabled($storeId)){
+                $feedManager = $this->feedManagerFactory->create();
+                $feedManager->endMultiSftpUpload($storeId,true);
         }
     }
 
@@ -747,7 +754,7 @@ class CronManager
                         sprintf('Error clearing change log version: %s Trace: %s', $error, $e->getTraceAsString())
                     );
                 }
-                if (!$this->helperData->isMultiPartUploadEnabled()) {
+                if (!$this->helperData->isMultiPartUploadEnabled($storeId)) {
                     $type = $isFullReindex ? FeedConfig::FEED_TYPE_FULL : FeedConfig::FEED_TYPE_INCREMENTAL;
 
                     $feedViewId = $feedManager->execute(

@@ -921,12 +921,16 @@ class Manager
     public function endMultiSftpUpload($store, $incremental = false)
     {
 
-        if(!$this->feedHelper->isSFTPEndFileEnabled()){
+        if(!$this->feedHelper->isSFTPEndFileEnabled($store)){
             $this->postProcessActions();
             return;
         }
         $this->logger->error('Start to Upload end file.');
-           
+        if($incremental){
+            $this->type = FeedConfig::FEED_TYPE_INCREMENTAL;
+        }else{
+            $this->type = FeedConfig::FEED_TYPE_FULL;
+        }
         if (!$this->logger->isTimerStarted()) {
             $this->logger->startTimer();
         }

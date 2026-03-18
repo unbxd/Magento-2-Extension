@@ -336,7 +336,7 @@ class Connector
 
         if ($type == FeedConfig::FEED_TYPE_FULL) {
             $apiEndpoint = $this->helperData->getFullFeedApiEndpoint($store);
-            if($this->helperData->isMultiPartUploadEnabled()){
+            if($this->helperData->isMultiPartUploadEnabled($store)){
                 $apiEndpoint = $apiEndpoint."/write".$queryParameter;
             }
             $this->setApiUrl(sprintf($apiEndpoint, $siteKey));
