@@ -1,4 +1,6 @@
-# Version 2.0.49
+# Version 2.0.50
+## 2.0.50 - May 1, 2026
+- Update the support for php 8.4
 ## 2.0.49 - Mar 16, 2026
 - Enable end feed file update for full sftp
 ## 2.0.48 - Mar 13, 2026
