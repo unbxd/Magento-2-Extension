@@ -202,7 +202,7 @@ class PriceIndexerFallback implements DataSourceProviderInterface
     {
         $minAmount = null;
         foreach ($this->getConfigurableOptionsProvider()->getProducts($parentProduct) as $product) {
-            $childPriceAmount = $product->getPriceInfo()->getPrice("regular_price")->getAmount();
+            $childPriceAmount = $product->getPriceInfo()->getPrice("final_price")->getAmount();
             if (!$minAmount || ($childPriceAmount->getValue() < $minAmount->getValue())) {
                 $minAmount = $childPriceAmount;
             }
