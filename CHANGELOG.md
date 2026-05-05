@@ -1,4 +1,6 @@
-# Version 2.0.50
+# Version 2.0.51
+## 2.0.51 - May 5, 2026
+- Update the support for php 8.5
 ## 2.0.50 - May 1, 2026
 - Update the support for php 8.4
 ## 2.0.49 - Mar 16, 2026
