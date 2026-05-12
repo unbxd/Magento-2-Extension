@@ -1,4 +1,6 @@
-# Version 2.0.51
+# Version 2.0.52
+## 2.0.52 - May 12, 2026
+- patched deprecated action to implicitily marking arguments as null
 ## 2.0.51 - May 5, 2026
 - Update the support for php 8.5
 ## 2.0.50 - May 1, 2026
