@@ -278,7 +278,7 @@ class Handler extends \Magento\Framework\DataObject
      * @param DataObject|null $filter
      * @return array|IndexingQueueInterface[]
      */
-    public function getAffectedProducts($useFilter = false, DataObject $filter = null)
+    public function getAffectedProducts($useFilter = false, ?DataObject $filter = null)
     {
         if ($useFilter) {
             if ($filter && (!$filter instanceof DataObject)) {
