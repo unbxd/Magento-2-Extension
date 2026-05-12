@@ -79,7 +79,7 @@ class Module extends AbstractHelper
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Framework\Module\Dir\Reader $moduleReader,
         \Magento\Framework\Filesystem\Driver\File $fileSystem,
-        Serializer $serializer = null
+        ?Serializer $serializer = null
     ) {
         parent::__construct($context);
         $this->componentRegistrar = $componentRegistrar;

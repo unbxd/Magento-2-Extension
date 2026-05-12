@@ -61,7 +61,7 @@ class LogViewer extends Template
         Template\Context $context,
         LoggerInterface $logger,
         array $data = [],
-        Serializer $serializer = null
+        ?Serializer $serializer = null
     ) {
         parent::__construct($context, $data);
         $this->formKey = $context->getFormKey();

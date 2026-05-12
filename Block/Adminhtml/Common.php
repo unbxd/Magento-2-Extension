@@ -56,7 +56,7 @@ class Common extends Template
         HelperData $helperData,
         RequestInterface $request,
         array $data = [],
-        Serializer $serializer = null
+        ?Serializer $serializer = null
     ) {
         parent::__construct($context, $data);
         $this->formKey = $context->getFormKey();
