@@ -1,4 +1,6 @@
-# Version 2.0.53
+# Version 2.0.54
+## 2.0.54 - May 15, 2026
+- Symphony patches
 ## 2.0.53 - May 12, 2026
 - patched deprecated action to implicitily marking arguments as null
 ## 2.0.52 - May 12, 2026
