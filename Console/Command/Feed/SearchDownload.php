@@ -68,7 +68,7 @@ class SearchDownload extends Command
         }
         return $this->state;
     }
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this->getState()->setAreaCode(\Magento\Framework\App\Area::AREA_GLOBAL);

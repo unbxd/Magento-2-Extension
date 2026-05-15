@@ -68,7 +68,7 @@ class IncrementalFromDate extends AbstractCommand
      * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initAreaCode($output);
 
