@@ -291,12 +291,12 @@ abstract class AbstractFieldset extends Template implements RendererInterface
     }
 
     /**
-     * @param string $type
+     * @param string|null $type
      * @return mixed|string
      */
     public static function getUnbxdReferenceUrl($type = null)
     {
-        return isset(self::$unbxdReferenceUrls[$type])
+        return ($type != null && isset(self::$unbxdReferenceUrls[$type]))
             ? self::$unbxdReferenceUrls[$type]
             : self::$unbxdReferenceUrls['base'];
     }
