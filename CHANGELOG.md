@@ -1,4 +1,6 @@
-# Version 2.0.54
+# Version 2.0.55
+## 2.0.55 - May 18, 2026
+- Handle Admin pages
 ## 2.0.54 - May 15, 2026
 - Symphony patches
 ## 2.0.53 - May 12, 2026
