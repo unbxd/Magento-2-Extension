@@ -31,6 +31,7 @@ use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Api\SimpleDataObjectConverter;
+use Magento\Framework\Phrase;
 
 /**
  * Class DataHandler
@@ -1041,6 +1042,9 @@ class DataHandler
                     // for fields which should not have multiple values, multiply values occur for some types
                     // of products as a result of combining parent and child values (bundle, grouped).
                     $resultValue =  $resultValue[0];
+                    if ($resultValue instanceof Phrase) {
+                        $resultValue = (string) $resultValue;
+                    }
                 }
             }
             $data[$pureKey] = $resultValue;
