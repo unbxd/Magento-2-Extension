@@ -1,4 +1,7 @@
-# Version 2.0.55
+# Version 2.0.56
+## 2.0.56 - May 21, 2026
+- Handle phrase objects for attributes using sources
+- Updated storefront properties attributes
 ## 2.0.55 - May 18, 2026
 - Handle Admin pages
 ## 2.0.54 - May 15, 2026
