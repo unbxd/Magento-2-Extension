@@ -58,7 +58,7 @@ class UnbxdFieldType implements ArrayInterface
     public function toArray()
     {
         $options = [
-            null => __('Choose an override datatype'),
+            '' => __('Choose an override datatype'),
             self::TEXT => __('Text'),
             self::LONGTEXT => __('Long Text'),
             self::DECIMAL => __('Decimal'),
