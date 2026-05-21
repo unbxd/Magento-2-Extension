@@ -1,4 +1,6 @@
-# Version 2.0.50
+# Version 2.0.50.1
+## 2.0.50.1 - May 21, 2026
+- extended support for phrase object
 ## 2.0.50 - May 1, 2026
 - Update the support for php 8.4
 ## 2.0.49 - Mar 16, 2026
