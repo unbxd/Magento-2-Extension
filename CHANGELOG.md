@@ -1,4 +1,6 @@
-# Version 2.0.45
+# Version 2.0.45.1
+## 2.0.45.1 - Jun 2, 2026
+- Fix to handle phrase objects returned for status attribute in serialisation
 ## 2.0.45 - Jan 27, 2026
 - Updated the attribute lookup to only fetch value if the product is listed on the store.
 ## 2.0.44 - Dec 17, 2025
