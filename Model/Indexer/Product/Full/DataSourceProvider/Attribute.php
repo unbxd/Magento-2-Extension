@@ -207,7 +207,7 @@ class Attribute extends AbstractAttribute implements DataSourceProviderInterface
 
         foreach ($addedChildAttributesData as $attributeCode => $value) {
             $optionTextPrefix = sprintf('%s_', AttributeHelper::OPTION_TEXT_PREFIX);
-            $pureKey = str_replace($optionTextPrefix, '', $attributeCode);
+            $pureKey = preg_replace('/_store_\d+$/', '', str_replace($optionTextPrefix, '', $attributeCode));
             if (is_array($value) && !in_array($attributeCode, $this->skipChildProductValuesForAttribute) && !in_array($pureKey, $this->skipChildProductValuesForAttribute)) {
                 if (!isset($parentData[$attributeCode])) {
                     $parentData[$attributeCode] = [];
