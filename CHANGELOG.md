@@ -1,4 +1,6 @@
-# Version 2.0.50.1
+# Version 2.0.50.2
+## 2.0.50.2 - Jun 25, 2026
+- Updated child roll up configuration for multi store attributes as well
 ## 2.0.50.1 - May 21, 2026
 - extended support for phrase object
 ## 2.0.50 - May 1, 2026
