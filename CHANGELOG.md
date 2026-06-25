@@ -1,4 +1,6 @@
-# Version 2.0.56
+# Version 2.0.57
+## 2.0.57 - Jun 25, 2026
+- Updated child roll up configuration for multi store attributes as well
 ## 2.0.56 - May 21, 2026
 - Handle phrase objects for attributes using sources
 - Updated storefront properties attributes
